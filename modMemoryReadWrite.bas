@@ -476,7 +476,7 @@ Public Function Memory_ReadByte(ByVal address As Long, ByVal process_Hwnd As Lon
 End Function
 Public Function Memory_ReadLong(ByVal address As Long, ByVal process_Hwnd As Long, _
  Optional absoluteAddress As Boolean = False) As Long
-  
+  'warning: absoluteAddress is ignored and treated as True if useDynamicOffset="no" / useDynamicOffsetBool=False
    ' Declare some variables we need
    Dim pid As Long         ' Used to hold the Process Id
    Dim phandle As Long     ' Holds the Process Handle
