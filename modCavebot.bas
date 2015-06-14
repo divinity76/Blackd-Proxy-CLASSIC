@@ -6599,7 +6599,10 @@ Public Function DropLootToGround(idConnection As Integer) As Long
   tileID = GetTheLong(sourceB1, sourceB2)
   
   b3 = res1.amount
-  If TibiaVersionLong >= 860 Then
+  If TibiaVersionLong >= 860 Or TibiaVersionLong = 760 Then
+  'Todo: in 7.6, without this, it will say "drop 0 items to ground". Some OTs will accept it, and some OTs will not. 
+  'The client, doing it manually, will say "drop 1 item". Is this really specific to 760 and >=860? what about 7.72? 
+  'someone should investigate every supported version between 760 and 860. (my theory is that this is a bug simply not discovered before 860)
     If (b3 = &H0) Then
         b3 = &H1
     End If
