@@ -57,7 +57,92 @@ End Sub
 Private Sub Form_Load()
     Dim strMsg As String
     Me.lblText = "What is new?"
-    strMsg = "Blackd Proxy 35.1" & vbCrLf & _
+    strMsg = "Blackd Proxy 37.1" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Hopefully fixed an user interface bug (buttons were displayed blank for some users)."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 37.0" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.90"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 36.9" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed a bug with a new packet related with Tibia coins at Tibia 10.82"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 36.8" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed a bug with a new packet related with Tibia coins at Tibia 10.81"
+      
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 36.7" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.81"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 36.6" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.80" & vbCrLf & _
+     " - Small fixes for Tibia 7.6 OT servers."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 36.5" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.79" & vbCrLf & _
+     " - Small fix for a bug with Tibia 7.6 OT servers."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 36.4" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.78"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 36.3" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.77"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 36.2" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed another bug with OT servers of Tibia 10.76"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 36.1" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed a bug with OT servers of Tibia 10.76"
+
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 36.0" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed a bug at death event in Tibia 10.76" & vbCrLf & _
+     " - Fixed a bug with the anti idle feature of our trainer"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 35.9" & vbCrLf & _
+     "----------------------------" & vbCrLf & _
+     " - Fixed bug that happened when a cavebot script reached the end."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 35.8" & vbCrLf & _
+     "----------------------------" & vbCrLf & _
+     " - Fixed login bug in OT servers 10.74+"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 35.7" & vbCrLf & _
+     "----------------------------" & vbCrLf & _
+     " - Updated parser for new packets at Tibia 10.76"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 35.6" & vbCrLf & _
+     "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.76"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 35.5" & vbCrLf & _
+     "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.75" & vbCrLf & _
+     " - Many small optimizations."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 35.4" & vbCrLf & _
+     "----------------------------" & vbCrLf & _
+     " - Fixed a problem reading dlls while executing code directly from sources."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 35.3" & vbCrLf & _
+     "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.74" & vbCrLf & _
+     " - Cavebot form will now display the current line being executed."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 35.2" & vbCrLf & _
+     "----------------------------" & vbCrLf & _
+     " - Fixed a bug with mc caveboting. Sorry for taking so much time."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 35.1" & vbCrLf & _
      "----------------------------" & vbCrLf & _
      " - Minimum changes to work in all Tibia versions up to 10.73" & vbCrLf & _
      " - Several minor bug fixes." & vbCrLf & _

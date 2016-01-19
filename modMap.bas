@@ -34,8 +34,8 @@ Public addConfigPaths As String ' list of new config paths here
 Public addConfigVersions As String ' relative versions
 Public addConfigVersionsLongs As String 'relative version longs
 
-Public Const ProxyVersion = "35.1" ' Proxy version ' string version
-Public Const myNumericVersion = 35100 ' numeric version
+Public Const ProxyVersion = "37.1" ' Proxy version ' string version
+Public Const myNumericVersion = 37100 ' numeric version
 Public Const myAuthProtocol = 2 ' authetication protocol
 Public Const TrialVersion = False ' true=trial version
 
@@ -2861,10 +2861,17 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       expectMore = False
     Case &H17
       ' new since Tibia 9.8 - new pending state
+   
       CheatsPaused(idConnection) = True
       IDstring(idConnection) = GoodHex(packet(pos + 1)) & GoodHex(packet(pos + 2)) & GoodHex(packet(pos + 3)) & GoodHex(packet(pos + 4))
       myID(idConnection) = FourBytesDouble(packet(pos + 1), packet(pos + 2), packet(pos + 3), packet(pos + 4))
-      If TibiaVersionLong >= 1058 Then
+      If TibiaVersionLong >= 1080 Then
+      ' tibia 10.80+
+      ' 17 FA D5 7B 02 32 00 03 0F 15 0D 80 03 A9 FC 03 80 03 7E D5 B6 7F 00 01 01 24 00 68 74 74 70 3A 2F 2F 73 74 61 74 69 63 2E 74 69 62 69 61 2E 63 6F 6D 2F 69 6D 61 67 65 73 2F 73 74 6F 72 65 19 00 0A
+        pos = pos + 25
+        lonN = GetTheLong(packet(pos), packet(pos + 1))
+        pos = pos + 5 + lonN
+      ElseIf TibiaVersionLong >= 1058 Then
       ' tibia 10.58+
       ' 17 FA D5 7B 02 32 00 03 0F 15 0D 80 03 A9 FC 03 80 03 7E D5 B6 7F 00 01 01 0A
          pos = pos + 26
@@ -2890,6 +2897,9 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
        pos = pos + 1
        If TibiaVersionLong >= 870 Then
         pos = pos + 1 '  1 new byte since Tibia 8.7
+       End If
+       If TibiaVersionLong >= 1076 Then ' maybe before 10.76 too - unconfirmed
+         pos = pos + 1 '  1 new byte since Tibia 10.76
        End If
        If (cavebotEnabled(idConnection) = True) Or (RuneMakerOptions(idConnection).activated = True) Or (RuneMakerOptions(idConnection).autoEat = True) Then
          AfterLoginLogoutReason(idConnection) = "YOU DIED!" & vbLf & "Auto reconnection canceled to avoid potential disasters."
@@ -3696,11 +3706,15 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       ' close container
       somethingChangedInBps(idConnection) = True
       pauseStacking(idConnection) = 0
-      tempID = CLng(packet(pos + 1)) 'ID?
-      Backpack(idConnection, tempID).open = False
-      Backpack(idConnection, tempID).name = ""
-      Backpack(idConnection, tempID).cap = 0
-      Backpack(idConnection, tempID).used = 0
+      tempID = CLng(packet(pos + 1)) 'ID
+      If (tempID <= HIGHEST_BP_ID) Then
+        Backpack(idConnection, tempID).open = False
+        Backpack(idConnection, tempID).name = ""
+        Backpack(idConnection, tempID).cap = 0
+        Backpack(idConnection, tempID).used = 0
+      Else
+        Debug.Print "BUG: bad parsing of 6F packet. Errors probably happened before this point."
+      End If
       ' SendMessageToClient idConnection, "You closed a backpack ID : " & CStr(lonN), "GM BlackdProxy"
       pos = pos + 2
     Case &H70
@@ -5747,9 +5761,12 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       
 
       
-
       templ2 = 0
-      If TibiaVersionLong >= 872 Then
+      If TibiaVersionLong >= 1055 Then
+        If tempb1 = &H12 Then
+            templ2 = 1
+        End If
+      ElseIf TibiaVersionLong >= 872 Then
         If tempb1 = &H11 Then
             templ2 = 1
         End If
@@ -5767,10 +5784,14 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         End If
       End If
       
+      'Debug.Print GoodHex(tempb1) & ": message =" & mobName
+      
       If (templ2 = 1) Then
+               
+        
         If ((TrainerOptions(idConnection).misc_dance_14min = 1) And _
             (CheatsPaused(idConnection) = False)) Then
-         ' Debug.Print "REAL serverLogoutMessage=" & mobName
+
           If mobName = serverLogoutMessage Then
            ' Debug.Print "DANCE OK"
             aRes = randomNumberBetween(0, 3)
@@ -6179,9 +6200,19 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       doingTrade2(idConnection) = False
     Case &HF2
       ' Tibia 8.7 +
-      ' report statement result
-      templ1 = GetTheLong(packet(pos + 1), packet(pos + 2))
-      pos = pos + 3 + templ1
+      ' report statement result?
+      If TibiaVersionLong >= 1080 Then
+        ' Tibia 10.80+
+        ' tibia coins?
+        ' F2 00
+        ' F2 01 DF 01 FA 00 00 00 FA 00 00 00
+        templ1 = CLng(packet(pos + 1))
+        pos = pos + 2
+        pos = pos + (templ1 * 10)
+      Else
+        templ1 = GetTheLong(packet(pos + 1), packet(pos + 2))
+        pos = pos + 3 + templ1
+      End If
     Case &HF3
       ' Tibia 8.72
       ' unknown
@@ -6189,6 +6220,31 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       ' F3 00 00 09 00 4D 69 6E 75 6E 69 6E 68 61 00
       templ1 = GetTheLong(packet(pos + 3), packet(pos + 4))
       pos = pos + 6 + templ1
+    Case &HF5
+      ' new since Tibia 10.76
+      ' List of equipable items found in your char
+      ' F5
+      ' 11 00 - item count: 17, then items are listed below:
+      ' 01 00 00 01 00
+      ' 02 00 00 01 00
+      ' 03 00 00 01 00
+      ' 04 00 00 01 00
+      ' 05 00 00 01 00
+      ' 06 00 00 01 00
+      ' 07 00 00 01 00
+      ' 08 00 00 01 00
+      ' 09 00 00 01 00
+      ' 0A 00 00 01 00
+      ' 0B 00 00 01 00
+      ' 25 0B 00 01 00
+      ' D7 0B 00 05 00
+      ' 51 0D 00 01 00
+      ' E0 0D 00 01 00
+      ' 5E 1E 00 01 00
+      ' D7 3E 00 01 00
+      templ1 = GetTheLong(packet(pos + 1), packet(pos + 2))
+      pos = pos + 3 + (templ1 * 5)
+      
     Case &HF6 ' TIBIA 9.4 - OPENING AUCTION HOUSE
       '            F6 00 00 00 00 01 00 00 00
       '            F6 10 27 00 00 01 00 06 00 0A 01 01 00 1F 0D 01 00 2C 0D 01 00 2F 0D 01 00 51 0D 01 00 5E 1E 01 00

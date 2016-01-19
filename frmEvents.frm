@@ -909,6 +909,7 @@ Private Sub Form_Load()
 cmbEventType.Clear
 cmbEventType.AddItem "0 - MSG THAT CONTAINS..."
 cmbEventType.AddItem "1 - EXACT MESSAGE"
+cmbEventType.AddItem "2 - Like Regex.."
 cmbEventType.Text = "0 - MSG THAT CONTAINS..."
 ReloadFiles
   With lstVar
@@ -948,6 +949,7 @@ ReloadFiles
     .AddItem "$hex-lastattackedid$"
     .AddItem "$nameofhex-id:AB CD EF 00$"
     .AddItem "$hex-idofname:name$"
+    .AddItem "$httpget:http://example.org/what.php?foo=bar&baz=blabla$"
     .AddItem "$numbertohex1:171$"
     .AddItem "$numbertohex2:52651$"
     .AddItem "$hex1tonumber:AB$"

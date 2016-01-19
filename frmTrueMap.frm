@@ -604,10 +604,15 @@ End Sub
 Public Sub SetButtonColours()
  Dim z As Long
  Dim i As Long
+ 
  If mapIDselected = 0 Then
    z = 7
  Else
    z = myZ(mapIDselected)
+ End If
+ If (z < 0) Or (z > 15) Then
+  Debug.Print "BUG: error at SetButtonColours - z=" & CStr(z)
+  Exit Sub
  End If
  If z <= 7 Then
    For i = 0 To 7

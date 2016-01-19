@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Blackd Proxy"
-#define MyAppVersion "35.1"
+#define MyAppVersion "37.1"
 #define MyAppPublisher "blackdtools.com"
 #define MyAppURL "http://blackdtools.com"
 #define MyAppExeName "Tibia.exe"
@@ -208,6 +208,16 @@ Source: "config1070\*"; DestDir: "{app}\config1070"; Flags: ignoreversion recurs
 Source: "config1071\*"; DestDir: "{app}\config1071"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "config1072\*"; DestDir: "{app}\config1072"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "config1073\*"; DestDir: "{app}\config1073"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1074\*"; DestDir: "{app}\config1074"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1075\*"; DestDir: "{app}\config1075"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1076\*"; DestDir: "{app}\config1076"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1077\*"; DestDir: "{app}\config1077"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1078\*"; DestDir: "{app}\config1078"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1079\*"; DestDir: "{app}\config1079"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1080\*"; DestDir: "{app}\config1080"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1081\*"; DestDir: "{app}\config1081"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1082\*"; DestDir: "{app}\config1082"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1090\*"; DestDir: "{app}\config1090"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "events\*"; DestDir: "{app}\events"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "fonts\*"; DestDir: "{app}\fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "ips\*"; DestDir: "{app}\ips"; Flags: ignoreversion recursesubdirs createallsubdirs

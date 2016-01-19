@@ -244,6 +244,17 @@ Public tibiaModuleRegionSize As Long
 Public OffsetsCache() As TypeOffsetInfo
 Private NextOffset As Long
 Private OffsetsCacheSize As Long
+
+Private Function GetDllErrorDescription(ByVal lngCode As Long) As String
+
+Dim sError As String * 500
+Dim lErrMsg As Long
+
+lErrMsg = FormatMessage(&H1000, ByVal 0&, lngCode, 0, sError, Len(sError), 0)
+GetDllErrorDescription = Trim$(sError)
+
+End Function
+
 Public Function ResetOffsetCache(ByVal parOffsetsCacheSize As Long)
     Dim i As Long
     OffsetsCacheSize = parOffsetsCacheSize
@@ -424,6 +435,64 @@ Public Function getProcessOffset(ByVal hProcess As Long, ByVal pid As Long) As L
 goterr:
     getProcessOffset = 0
 End Function
+Public Function Memory_ReadCString(ByVal address As Long, ByVal process_Hwnd As Long, Optional absoluteAddress As Boolean = False, Optional EOLCharacter As Byte = &H0) As String
+' Declare some variables we need
+    Dim pid As Long         ' Used to hold the Process Id
+    Dim phandle As Long     ' Holds the Process Handle
+    Dim ByteBuf As Byte   ' Byte
+    Dim res As String
+    Dim offset As Long
+    Dim i As Long
+    Dim BytesRead As Long
+    On Error GoTo goterr
+
+    ' First get a handle to the "game" window
+    If (process_Hwnd = 0) Then Exit Function
+
+    ' We can now get the pid
+    GetWindowThreadProcessId process_Hwnd, pid
+
+
+
+    ' Use the pid to get a Process Handle
+    'phandle = OpenProcess(PROCESS_VM_READ, False, pid)
+
+    phandle = OpenProcess(PROCESS_READ_WRITE_QUERY, False, pid)    ' more powerfull
+    If (phandle = 0) Then
+        Debug.Print "Error " & CStr(Err.LastDllError) & ": " & GetDllErrorDescription(Err.LastDllError)
+        Exit Function
+    End If
+
+    '1
+    'offset = 0
+    If ((useDynamicOffsetBool = True) And (absoluteAddress = False)) Then
+        offset = getProcessOffset(phandle, process_Hwnd)
+        address = address + offset
+    End If
+    ' Read string
+    i = 0
+    While True
+        BytesRead = ReadProcessMemory(phandle, address + i, ByteBuf, 1, 0&)
+        If BytesRead <> 1 Then
+            'handle error??...
+            GoTo exitwhile    ' dunno how to Exit While in vb6...
+        End If
+        If ByteBuf = EOLCharacter Then
+            GoTo exitwhile    ' dunno how to Exit While in vb6...
+        End If
+        res = res + Chr(ByteBuf)
+        i = i + 1
+    Wend
+exitwhile:
+    ' Close the Process Handle
+    CloseHandle phandle
+    Memory_ReadCString = res
+    Exit Function
+goterr:
+    '???
+    CloseHandle phandle
+    Memory_ReadCString = res
+End Function
 
 Public Function Memory_ReadByte(ByVal address As Long, ByVal process_Hwnd As Long, _
  Optional absoluteAddress As Boolean = False) As Byte
@@ -513,7 +582,92 @@ Public Function Memory_ReadLong(ByVal address As Long, ByVal process_Hwnd As Lon
    CloseHandle phandle
   
 End Function
+Public Function Memory_Analyze1(ByVal StartAddress As Long, ByVal BytesToRead As Long, ByVal Stringify As Boolean, _
+                                ByVal StringMinLen As Long, ByVal process_Hwnd As Long, Optional absoluteAddress As Boolean = False) As String
+' Declare some variables we need
+    Dim pid As Long         ' Used to hold the Process Id
+    Dim phandle As Long     ' Holds the Process Handle
+    Dim ByteBuf As Byte   ' Byte
+    Dim res As String
+    Dim offset As Long
+    Dim i As Long
+    Dim LastBytesRead As Long
+    Dim tmpStr As String
 
+    On Error GoTo goterr
+
+    ' First get a handle to the "game" window
+    If (process_Hwnd = 0) Then Exit Function
+
+    ' We can now get the pid
+    GetWindowThreadProcessId process_Hwnd, pid
+
+
+
+    ' Use the pid to get a Process Handle
+    'phandle = OpenProcess(PROCESS_VM_READ, False, pid)
+
+    phandle = OpenProcess(PROCESS_READ_WRITE_QUERY, False, pid)    ' more powerfull
+    If (phandle = 0) Then
+        Debug.Print "Error " & CStr(Err.LastDllError) & ": " & GetDllErrorDescription(Err.LastDllError)
+        Exit Function
+    End If
+
+    '1
+    'offset = 0
+    If ((useDynamicOffsetBool = True) And (absoluteAddress = False)) Then
+        offset = getProcessOffset(phandle, process_Hwnd)
+        StartAddress = StartAddress + offset
+    End If
+    ' Read string
+
+    For i = 1 To BytesToRead Step 1
+        LastBytesRead = ReadProcessMemory(phandle, StartAddress + i - 1, ByteBuf, 1, 0&)
+        If LastBytesRead <> 1 Then
+            GoTo goterr
+            'err.raise?
+        End If
+        '&H20 to &H7E - http://www.asciitable.com/
+        If Stringify And ByteBuf >= &H20 And ByteBuf <= &H7E Then
+            tmpStr = tmpStr & Chr(ByteBuf)
+        Else
+            If Stringify And Len(tmpStr) >= StringMinLen Then
+                res = res & " " & tmpStr & " " & GoodHex(ByteBuf)
+                tmpStr = ""
+            Else
+                If Stringify And Len(tmpStr) > 0 Then
+                    res = res & " " & Hexarize(tmpStr) & GoodHex(ByteBuf)    ' Hexarize ends with " "
+                    tmpStr = ""
+                Else
+                    res = res & " " & GoodHex(ByteBuf)
+                End If
+            End If
+        End If
+    Next i
+exitwhile:
+    If Stringify And Len(tmpStr) >= StringMinLen Then
+        res = res & " " & tmpStr
+        tmpStr = ""
+    Else
+        If Stringify And Len(tmpStr) > 0 Then
+            res = res & " " & RTrim(Hexarize(tmpStr))
+            tmpStr = ""
+        End If
+    End If
+
+
+    ' Close the Process Handle
+    CloseHandle phandle
+    Memory_Analyze1 = res
+    Exit Function
+goterr:
+    '???
+    Memory_Analyze1 = res & "... after reading " & CStr(i - 1) & " bytes, got an error reading at memory location (decimal) " & CStr(StartAddress + i - 1) & " :  Err.Number: " & _
+                      CStr(Err.Number) & " Err.Description: " & Err.Description & " Err.LastDllError: " & CStr(Err.LastDllError)
+    If phandle <> 0 Then
+        CloseHandle phandle
+    End If
+End Function
 Public Function Memory_BlackdAddressToFinalAdddress(ByVal address As Long, ByVal process_Hwnd As Long)
    Dim pid As Long         ' Used to hold the Process Id
    Dim phandle As Long     ' Holds the Process Handle
