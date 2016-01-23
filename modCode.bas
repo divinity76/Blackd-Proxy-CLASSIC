@@ -1102,6 +1102,31 @@ Public Function Hexarize(strinput As String) As String
   Hexarize = res
 End Function
 
+' url encodes a string
+'warning: unicode is untested
+'creds: http://www.vbforums.com/showthread.php?334645-Winsock-Making-HTTP-POST-GET-Requests
+Function URLEncode(ByVal str As String) As String
+        Dim intLen As Integer
+        Dim X As Integer
+        Dim curChar As Long
+                Dim newStr As String
+                intLen = Len(str)
+        newStr = ""
+                        For X = 1 To intLen
+            curChar = Asc(Mid$(str, X, 1))
+            
+            If (curChar < 48 Or curChar > 57) And _
+                (curChar < 65 Or curChar > 90) And _
+                (curChar < 97 Or curChar > 122) Then
+                                newStr = newStr & "%" & Hex(curChar)
+            Else
+                newStr = newStr & Chr(curChar)
+            End If
+        Next X
+        
+        URLEncode = newStr
+End Function
+
 Public Function Hexarize2(strinput As String) As String
   Dim strByte As String
   Dim res As String
@@ -7181,7 +7206,7 @@ Public Sub UpdateExpVars(idConnection As Integer)
   Dim sRes As String
   Dim dblSol As Double
   Dim dblSol2 As Double
-  On Error GoTo goterr
+  On Error Resume Next
   sRes = ""
   var_expleft(idConnection) = "?"
   var_nextlevel(idConnection) = "?"
@@ -7496,6 +7521,8 @@ While pos <= lastp
           theTranslation = IDofName(idConnection, Right$(varn, (Len(varn) - 13)), 0)
         ElseIf (Left$(varn, 13) = "nameofhex-id:") Then
           theTranslation = NameOfHexID(idConnection, Right$(varn, (Len(varn) - 13)))
+        ElseIf (Left$(varn, 10) = "urlencode:") Then
+          theTranslation = URLEncode(Right$(varn, (Len(varn) - 10)))
         ElseIf (Left$(varn, 13) = "hex-tibiastr:") Then
           theTranslation = Hexarize2(Right$(varn, (Len(varn) - 13)))
         ElseIf (Left$(varn, 8) = "httpget:") Then
@@ -8761,7 +8788,8 @@ Public Function MoveItemToEquip(idConnection As Integer, b1 As Byte, b2 As Byte,
 '    cPacket(13) = equip
 '    cPacket(14) = &H0
 '    cPacket(15) = &H0
-    If TibiaVersionLong >= 860 Then ' o 861?
+    If TibiaVersionLong >= 860 Or TibiaVersionLong = 760 Then ' o 861?
+    'fix for 7.6 OT servers
         If (resF.amount = 0) Then
           b16 = 1
         Else

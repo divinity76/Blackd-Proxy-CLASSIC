@@ -2010,7 +2010,6 @@ Private Sub cmdLoadCopyPaste_Click()
     Dim pieces() As String
     Dim strLine As String
     Dim strtext As String
-    Dim seguir As Boolean
     If cavebotIDselected > 0 Then
         lblInfo.Caption = "Waiting for copy/paste..."
         ClosedBoard = False
@@ -2031,16 +2030,7 @@ Private Sub cmdLoadCopyPaste_Click()
                 i = 0
                 For ai = 0 To UBound(pieces)
                   strLine = pieces(ai)
-                  seguir = True
-                  While seguir = True
-                   If Len(strLine) < 1 Then
-                     seguir = False
-                   ElseIf Right$(strLine, 1) <> " " Then
-                     seguir = False
-                   Else
-                     strLine = Left(strLine, (Len(strLine) - 1))
-                   End If
-                  Wend
+                  strLine = LTrim$(strLine)
                   If Len(strLine) >= 1 Then
                     AddIDLine cavebotIDselected, i, strLine
                     i = i + 1
@@ -2071,7 +2061,7 @@ Private Sub cmdLoadScript_Click()
   Dim strLine As String
   Dim filename As String
   Dim i As Long
-  Dim seguir As Boolean
+
   Dim sp As Boolean
   #If FinalMode Then
     On Error GoTo goterr
@@ -2081,7 +2071,7 @@ Private Sub cmdLoadScript_Click()
   If cavebotIDselected > 0 Then
     cavebotScript(cavebotIDselected).RemoveAll
     cavebotLenght(cavebotIDselected) = 0
-    filename = App.path & "\" & txtFile.Text
+    filename = App.path & "\cavebot\" & txtFile.Text
     If fso.FileExists(filename) = True Then
     
       fn = FreeFile
@@ -2094,16 +2084,7 @@ Private Sub cmdLoadScript_Click()
       Else
       While Not EOF(fn)
         Line Input #fn, strLine
-        seguir = True
-        While seguir = True
-         If Len(strLine) < 1 Then
-           seguir = False
-         ElseIf Right$(strLine, 1) <> " " Then
-           seguir = False
-         Else
-           strLine = Left(strLine, (Len(strLine) - 1))
-         End If
-        Wend
+        strLine = LTrim$(strLine)
         If Len(strLine) >= 1 Then
           AddIDLine cavebotIDselected, i, strLine
           i = i + 1
@@ -2211,7 +2192,7 @@ Private Sub cmdSaveScript_Click()
   If cavebotIDselected > 0 Then
     limI = cavebotLenght(cavebotIDselected) - 1
     fn = FreeFile
-    Open App.path & "\" & txtFile.Text For Output As #fn
+    Open App.path & "\cavebot\" & txtFile.Text For Output As #fn
     For i = 0 To limI
       Print #fn, GetStringFromIDLine(cavebotIDselected, i)
     Next i
@@ -2397,7 +2378,7 @@ Public Sub ReloadFiles()
   Dim f As scripting.Folder
   Dim f1 As scripting.File
   Set fs = New scripting.FileSystemObject
-  Set f = fs.GetFolder(App.path)
+  Set f = fs.GetFolder(App.path & "\cavebot")
   txtFile.Clear
   For Each f1 In f.Files
     If LCase(Right(f1.name, 3)) = "txt" Then
