@@ -960,6 +960,7 @@ ReloadFiles
     .AddItem "$pksonrelativefloor:0$"
     .AddItem "$gmsonrelativefloor:0$"
     .AddItem "$pksandgmsonrelativefloor:0$"
+    .AddItem "$meleetargetsonrelativefloor:0$"
     .AddItem "$statusbit:8$"
     .AddItem "$_customvariable$"
     .AddItem "$__customglobalvariable$"
