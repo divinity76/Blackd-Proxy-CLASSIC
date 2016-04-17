@@ -316,6 +316,9 @@ Public Function isMelee(idConnection As Integer, ByRef str As String) As Boolean
   Else
     isMelee = cavebotMelees(idConnection).Exists(LCase(str))
   End If
+  if frmRunemaker.IsFriend(LCase(str)) Then
+    isMelee = False
+  End If
 End Function
 
 
