@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Blackd Proxy"
-#define MyAppVersion "37.1"
+#define MyAppVersion "40.8"
 #define MyAppPublisher "blackdtools.com"
 #define MyAppURL "http://blackdtools.com"
 #define MyAppExeName "Tibia.exe"
@@ -62,13 +62,9 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 Source: "Tibia.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "012_goblins_femur_hills.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "021_darashia_rotworms.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "just_looter.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "config.ini"; DestDir: "{app}"; Flags: ignoreversion
 Source: "crackd.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "danger.wav"; DestDir: "{app}"; Flags: ignoreversion
-Source: "default.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ding.wav"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dx7vb.dll"; DestDir: "{app}"; Flags: 
 Source: "errors.txt"; DestDir: "{app}"; Flags: ignoreversion
@@ -77,8 +73,19 @@ Source: "MSFLXGRD.oca"; DestDir: "{app}"; Flags:
 Source: "msflxgrd.ocx"; DestDir: "{app}"; Flags: 
 Source: "MSWINSCK.oca"; DestDir: "{app}"; Flags: 
 Source: "mswinsck.ocx"; DestDir: "{app}"; Flags: 
+
+Source: "JwldButn2b.oca"; DestDir: "{app}"; Flags: 
+Source: "JwldButn2b.ocx"; DestDir: "{app}"; Flags: 
+Source: "JwldButn2b.oca"; DestDir: {sys}; Flags: onlyifdoesntexist
+Source: "JwldButn2b.oca"; DestDir: {sys}; Flags: onlyifdoesntexist
+Source: "JwldButn2b.ocx"; DestDir: {sys}; Flags: onlyifdoesntexist regserver 32bit
+Source: "JwldButn2b.ocx"; DestDir: {sys}; Flags: onlyifdoesntexist regserver 64bit; Check: IsWin64
+
+
+
 Source: "mswsock.dll"; DestDir: "{app}"; Flags: 
 Source: "player.wav"; DestDir: "{app}"; Flags: ignoreversion
+Source: "newsound1.wav"; DestDir: "{app}"; Flags: ignoreversion
 Source: "readme.rtf"; DestDir: "{app}"; Flags: ignoreversion
 Source: "richtx32.ocx"; DestDir: "{app}"; Flags: 
 Source: "settings.ini"; DestDir: "{app}"; Flags: ignoreversion
@@ -98,6 +105,7 @@ Source: "mswsock.dll"; DestDir: "{sys}"; Flags: restartreplace uninsneveruninsta
 Source: "richtx32.ocx"; DestDir: "{sys}"; Flags: restartreplace uninsneveruninstall sharedfile regserver 
 ; end custom additional VB6 files ]]]
 Source: "autoload\*"; DestDir: "{app}\autoload"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "cavebot\*"; DestDir: "{app}\cavebot"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "conds\*"; DestDir: "{app}\conds"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "config760\*"; DestDir: "{app}\config760"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "config770\*"; DestDir: "{app}\config770"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -218,6 +226,13 @@ Source: "config1080\*"; DestDir: "{app}\config1080"; Flags: ignoreversion recurs
 Source: "config1081\*"; DestDir: "{app}\config1081"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "config1082\*"; DestDir: "{app}\config1082"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "config1090\*"; DestDir: "{app}\config1090"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1091\*"; DestDir: "{app}\config1091"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1092\*"; DestDir: "{app}\config1092"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1093\*"; DestDir: "{app}\config1093"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1094\*"; DestDir: "{app}\config1094"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1095\*"; DestDir: "{app}\config1095"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1096\*"; DestDir: "{app}\config1096"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1097\*"; DestDir: "{app}\config1097"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "events\*"; DestDir: "{app}\events"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "fonts\*"; DestDir: "{app}\fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "ips\*"; DestDir: "{app}\ips"; Flags: ignoreversion recursesubdirs createallsubdirs

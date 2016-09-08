@@ -1,45 +1,50 @@
 VERSION 5.00
 Begin VB.Form frmNews 
-   BackColor       =   &H00000000&
+   BackColor       =   &H00FFFFFF&
+   BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "News"
-   ClientHeight    =   4800
-   ClientLeft      =   60
-   ClientTop       =   510
-   ClientWidth     =   8235
+   ClientHeight    =   4905
+   ClientLeft      =   -15
+   ClientTop       =   375
+   ClientWidth     =   5520
    ForeColor       =   &H00FFFFFF&
    Icon            =   "frmNews.frx":0000
    LinkTopic       =   "Form1"
-   ScaleHeight     =   4800
-   ScaleWidth      =   8235
+   MaxButton       =   0   'False
+   MinButton       =   0   'False
+   ScaleHeight     =   4905
+   ScaleWidth      =   5520
+   ShowInTaskbar   =   0   'False
    StartUpPosition =   2  'CenterScreen
    Begin VB.TextBox txtBoard 
-      Height          =   3495
-      Left            =   120
+      Height          =   4575
+      Left            =   0
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   1
-      Top             =   720
-      Width           =   8055
+      Top             =   360
+      Width           =   5535
    End
    Begin VB.CommandButton cmdOk 
       BackColor       =   &H00C0FFFF&
       Caption         =   "OK"
       Height          =   375
-      Left            =   3240
+      Left            =   3720
       Style           =   1  'Graphical
       TabIndex        =   0
       Top             =   4320
+      Visible         =   0   'False
       Width           =   1815
    End
    Begin VB.Label lblText 
-      BackColor       =   &H00000000&
+      BackColor       =   &H00FFFFFF&
       Caption         =   "What is new in Blackd Proxy?"
-      ForeColor       =   &H00FFFFFF&
-      Height          =   495
+      ForeColor       =   &H00000000&
+      Height          =   255
       Left            =   120
       TabIndex        =   2
       Top             =   120
-      Width           =   8055
+      Width           =   2175
    End
 End
 Attribute VB_Name = "frmNews"
@@ -57,7 +62,109 @@ End Sub
 Private Sub Form_Load()
     Dim strMsg As String
     Me.lblText = "What is new?"
-    strMsg = "Blackd Proxy 37.1" & vbCrLf & _
+    strMsg = "Blackd Proxy 40.8" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed login system for OT servers 10.91+"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 40.7" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.97"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 40.6" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.96"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 40.5" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.95"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 40.4" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed a bug with mana with Tibia 10.94" & vbCrLf & _
+     " - Bot will now show you the folder of errors.txt when a critical error happens."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 40.3" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.94"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 40.2" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixes a small bug at loading."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 40.1" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixes several bugs reported by users." & vbCrLf & _
+     " - Added button to initialize with classic Menu if user choose to."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 40.0" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Mayor bot update. This merges versions Classic and NG. User can choose its favourite user interface through a switch." & vbCrLf & _
+     " - New Healer, now its just select combo list for mana/heal pots" & vbCrLf & _
+     " - Heal method Hotkeys/Warmode now use runes with closed backpack (7.72-)" & vbCrLf & _
+     " - Auto change gold/platinum checkbox" & vbCrLf & _
+     " - MW timer checkbox" & vbCrLf & _
+     " - Added Housing step to safety, runemaker step into house if monster/npc/player not in kill/friend list appear on screen" & vbCrLf & _
+     " - Added Tibia Title, shows character name on Tibia title" & vbCrLf & _
+     " - Revamped Aimbot" & vbCrLf & _
+     " - Added Persistent, so player can execute exiva or say message every X ms" & vbCrLf & _
+     " - Classname changer on Advanced, so its possible to recognize some of custom tibia client (untested). Classname on .txt does not recognize most common custom classname (ÙbiaClient)" & vbCrLf & _
+     " - Revamped CaveBot form, stills with all button you can show/hide advanced button and added Items ID list" & vbCrLf & _
+     " - Added some new exiva comands (exiva sdmax, etc) and hotkeys list inside Hotkeys form" & vbCrLf & _
+     " - Revamped Broadcast, Trainer, Advanced, Proxy forms."
+
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 38.0" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.93" & vbCrLf & _
+     " - fixed a cavebot bug where it would get stuck on trying to move floor up in some situations" & vbCrLf & _
+     " - new cavebot function: MoveToCreature name (works even between floors)" & vbCrLf & _
+     " - GMs on friendlist will no longer be considered a danger" & vbCrLf & _
+     " - ALL MCs Cast Rune command now works even without specying a name (will copy the target of the character that issued it)" & vbCrLf & _
+     " - cavebot will move up & down floors faster when antibanmode is disabled."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 37.9" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.92"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 37.8" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed a rare case of bot crash with summoned creatures at Tibia 10.90+"
+
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 37.7" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed bot crash when opening the new window to purchase extra services ingame." & vbCrLf & _
+     " - Recovered Trainer ability to pick any item from ground to backpacks by entering 00 00 as ITEM ID"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 37.6" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed a potential rare problem withen picking items from a full inbox."
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 37.5" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Reverted the cavebot function that follows/attack monsters." & vbCrLf & _
+     " - Fixed a bug with looting"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 37.4" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Fixed some initial problems with Tibia 10.91"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 37.3" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.91" & vbCrLf & _
+     " - new variable: $meleetargetsonrelativefloor:0$ contains the number of nearby cavebot targets" & vbCrLf & _
+     " - when `show colour effects` is active, magic field and wild growth walls will now display number of seconds left until it disapears" & vbCrLf & _
+     " - fixed (detectable) cavebot bug where attack packet would be spammed in some situations" & vbCrLf & _
+     " - better calculation of exp/h in high exp OT servers (lvl 65k+) " & vbCrLf & _
+     " - copy & paste textboard in cavebot now contains the current script " & vbCrLf & _
+     " - Many bug fixes for Tibia 7.6 ots"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 37.2" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Many bug fixes." & vbCrLf & _
+     " - Added command to add everything as cavebot target: SetMeleeKill *" & vbCrLf & _
+     " - Moved cavebot files to folder \cavebot" & vbCrLf & _
+     " - Added Event options to capture SYSTEM messages and RAID messages in newest Tibia version"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 37.1" & vbCrLf & _
     "----------------------------" & vbCrLf & _
      " - Hopefully fixed an user interface bug (buttons were displayed blank for some users)."
      
@@ -1137,17 +1244,18 @@ Private Sub Form_Load()
 End Sub
 
 Private Sub Form_Resize()
-  If frmNews.WindowState <> vbMinimized Then
-    If frmNews.ScaleHeight < 3000 Then
-      frmNews.Height = 3000
-    End If
-    If frmNews.ScaleWidth < 5800 Then
-      frmNews.Width = 5800
-    End If
-    txtBoard.Height = frmNews.ScaleHeight - 1300
-    txtBoard.Width = frmNews.ScaleWidth - 200
-    cmdOk.Top = frmNews.ScaleHeight - 480
-  End If
+'custom ng
+  'If frmNews.WindowState <> vbMinimized Then
+  '  If frmNews.ScaleHeight < 3000 Then
+  '    frmNews.Height = 3000
+  '  End If
+  '  If frmNews.ScaleWidth < 5800 Then
+  '    frmNews.Width = 5800
+  '  End If
+  '  txtBoard.Height = frmNews.ScaleHeight - 1300
+  '  txtBoard.Width = frmNews.ScaleWidth - 200
+  '  cmdOk.Top = frmNews.ScaleHeight - 480
+  'End If
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)

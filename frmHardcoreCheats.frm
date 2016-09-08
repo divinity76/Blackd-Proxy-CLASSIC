@@ -32,7 +32,6 @@ Begin VB.Form frmHardcoreCheats
       Left            =   5760
       TabIndex        =   72
       Top             =   4920
-      Value           =   1  'Checked
       Width           =   4215
    End
    Begin VB.Frame frmNewCheats 
@@ -62,7 +61,6 @@ Begin VB.Form frmHardcoreCheats
          Left            =   120
          TabIndex        =   70
          Top             =   600
-         Value           =   -1  'True
          Width           =   4815
       End
       Begin VB.OptionButton chkTotalWaste 
@@ -73,6 +71,7 @@ Begin VB.Form frmHardcoreCheats
          Left            =   120
          TabIndex        =   69
          Top             =   960
+         Value           =   -1  'True
          Width           =   4815
       End
    End
@@ -160,7 +159,6 @@ Begin VB.Form frmHardcoreCheats
       Left            =   5760
       TabIndex        =   50
       Top             =   4440
-      Value           =   1  'Checked
       Width           =   2655
    End
    Begin VB.CheckBox chkCaptionExp 
@@ -229,7 +227,6 @@ Begin VB.Form frmHardcoreCheats
       Left            =   5760
       TabIndex        =   43
       Top             =   3960
-      Value           =   1  'Checked
       Width           =   1935
    End
    Begin VB.TextBox pushID 
@@ -328,7 +325,6 @@ Begin VB.Form frmHardcoreCheats
       Left            =   240
       TabIndex        =   26
       Top             =   1320
-      Value           =   1  'Checked
       Width           =   2775
    End
    Begin VB.CommandButton cmdOpenBackpacks 
@@ -855,8 +851,12 @@ Private Sub chkAutoUpdateMap_Click()
   timerAutoUpdater.enabled = False
 End Sub
 
+Private Sub chkEnhancedCheats_Click()
 
+frmHealing.chkClassic.Value = False
+frmHealing.chkTotalWaste.Value = False
 
+End Sub
 
 Private Sub chkLockOnMyFloor_Click()
   If chkLockOnMyFloor.Value = 1 And cmbCharacter.ListIndex = mapIDselected And mapIDselected > 0 Then
@@ -965,8 +965,10 @@ Private Sub cmdReset_Click()
   chkApplyCheats.Value = 1
   chkReveal.Value = 1
   chkLight.Value = 1
-  chkAutoHeal.Value = 1
-  frmMenu.Form_Unload False
+  chkAutoHeal.Value = 0
+  'custom ng error compile
+  'frmMenu.Form_Unload False
+  End
 End Sub
 
 Private Sub cmdUpdateMap_Click()
@@ -1031,21 +1033,13 @@ Private Sub Form_Unload(Cancel As Integer)
   Cancel = BlockUnload
 End Sub
 
-
-
-
-
-
-
-
-
 Private Sub pushID_Change()
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   PUSHDELAYTIMES = CLng(pushID.Text)
   Exit Sub
-goterr:
+gotErr:
   PUSHDELAYTIMES = 9
   pushID.Text = 9
 End Sub
@@ -1083,6 +1077,88 @@ Private Sub timerAutoUpdater_Timer()
   End If
 End Sub
 
+
+
+Private Sub CountdownXYZ()
+'
+If (Me.chkColorEffects <> 1) Then
+Exit Sub
+End If
+
+Dim i As Integer
+Dim ii As Integer
+Dim SecondsLeft As Long
+Dim CurrTicks As Long
+CurrTicks = GetTickCount()
+
+  For i = 1 To HighestConnectionID
+    For ii = 1 To MAXCLIENTS
+      If (XYZCountdowns(i, ii).s = 0) Then
+        'this 1 has expired.
+      Else
+      
+        SecondsLeft = XYZCountdowns(i, ii).s - (GetTickCount() / 1000) ' s contains expiry timestamp
+        If (SecondsLeft < 0) Then
+        XYZCountdowns(i, ii).s = 0 '0 means expired.
+          'XYZCountdowns(i).Remove (ii)
+        Else
+'        Debug.Print XYZCountdowns(i, ii).X
+'        Debug.Print XYZCountdowns(i, ii).y
+'        Debug.Print XYZCountdowns(i, ii).z
+'        Debug.Print XYZCountdowns(i, ii).s
+'         Debug.Print SecondsLeft
+            If (TibiaVersionLong >= 1090) Then
+           'This Protocol is confirmed for: 1090->1090
+           'Todo: check older versions
+           'recieved packet:
+           'AA 00 00 00 00 07 00 42 72 61 64 77 65 6E 20 00 24 1A 82 D3 7B 07 06 00 4D 75 6E 63 68 2E 6B 19 82 D3 7B 07 01 F9 0D FF 04
+           'shrinking packet, removing useless ??? info:
+           'AA 00 00 00 00 00 00  20 00 24 1A 82 D3 7B 07 06 00 4D 75 6E 63 68 2E 6B 19 82 D3 7B 07 01 F9 0D FF 04
+           ' building custom packet:
+           'AA 00 00 00 00 00 00 20 00 24 $numbertohex2:{$myx$}$ $numbertohex2:{$myy$}$ $numbertohex1:{$myz$}$ $hex-tibiastr:the quick brown fox$
+           modCode.sendString i, "AA 00 00 00 00 00 00 20 00 24 " & FiveChrLon(XYZCountdowns(i, ii).X) & " " & FiveChrLon(XYZCountdowns(i, ii).y) & " " & GoodHex(CByte(XYZCountdowns(i, ii).z)) & " " & Hexarize2(CStr(SecondsLeft)), False, True
+            Else
+           'This protocol is confirmed for: 760->860
+           'Todo: check newer versions.
+'exiva < 84 7F 04 D2 01 07 66 05 00 31 30 30 30 30
+'        ^t XX XX YY YY ZZ CO TibiaStr
+'         modCode.sendString i, "84 7F 04 D2 01 07 66 05 00 31 30 30 30 30", False, True
+' Dim str As String
+ ' str = "84 " & FiveChrLon(XYZCountdowns(i, ii).X) & " " & FiveChrLon(XYZCountdowns(i, ii).y) & " " & GoodHex(CByte(XYZCountdowns(i, ii).z)) & " 66 " & Hexarize2(CStr(SecondsLeft))
+'Debug.Print str
+         modCode.sendString i, "84 " & FiveChrLon(XYZCountdowns(i, ii).X) & " " & FiveChrLon(XYZCountdowns(i, ii).y) & " " & GoodHex(CByte(XYZCountdowns(i, ii).z)) & " 66 " & Hexarize2(CStr(SecondsLeft)), False, True
+          End If
+
+
+         End If
+      End If
+    Next
+  Next
+
+End Sub
+
+Public Function AddXYZCounter(idConnection As Integer, X As Long, y As Long, z As Long, Seconds As Long) As Boolean
+Dim Timestamp As Long
+Dim i As Long
+Dim pos As TypeMatrixPosition
+Dim res As Boolean
+  pos.X = X
+  pos.y = y
+  pos.z = z
+  Timestamp = (GetTickCount() / 1000) + Seconds
+  pos.s = Timestamp
+  res = False
+  For i = 1 To MAXCLIENTS
+  If (XYZCountdowns(idConnection, i).s = 0) Then
+    res = True
+    XYZCountdowns(idConnection, i) = pos
+    Exit For
+    End If
+  Next
+  AddXYZCounter = res ' if false, means that we are already counting the max number of walls :/ should fix limit
+End Function
+
+
 Private Sub timerLight_Timer()
   Dim i As Integer
   'Dim cPacket() As Byte
@@ -1106,6 +1182,7 @@ Private Sub timerLight_Timer()
   For i = 1 To HighestConnectionID
       errorD = i
   If (GameConnected(i) = True) And (sentWelcome(i) = True) And (GotPacketWarning(i) = False) Then
+  CountdownXYZ
     If ReconnectionStage(i) = 3 Then
       If frmBackpacks.totalbpsOpen(i) < CLng(txtRelogBackpacks.Text) Then
         aRes = openBP(i)
@@ -1345,13 +1422,13 @@ End Sub
 
 Private Function GetOneTitle(idConnection As Integer) As String
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   'UpdateExpVars idConnection
   var_lf(idConnection) = ". "
   GetOneTitle = parseVars(idConnection, tibiaTittleFormat.Text)
   Exit Function
-goterr:
+gotErr:
   GetOneTitle = "Tibia"
 End Function
 
@@ -1359,7 +1436,7 @@ Private Sub UpdateTibiaTitles()
   Dim i As Integer
   Dim Message As String
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   If frmStealth.chkStealthExp = 1 Then
     If stealthIDselected <> 0 Then
@@ -1379,7 +1456,7 @@ Private Sub UpdateTibiaTitles()
     End If
   Next i
   End If
-goterr:
+gotErr:
   ' just end...
 End Sub
 

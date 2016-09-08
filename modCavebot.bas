@@ -235,7 +235,7 @@ End Function
 
 
 Public Sub SafeLoadSpecialGMnames(ByVal filename As String)
-    On Error GoTo goterr
+    On Error GoTo gotErr
   Dim fso As scripting.FileSystemObject
   Dim fn As Integer
   Dim strLine As String
@@ -256,7 +256,7 @@ Public Sub SafeLoadSpecialGMnames(ByVal filename As String)
       Close #fn
     End If
     Exit Sub
-goterr:
+gotErr:
     Exit Sub
 End Sub
 
@@ -310,13 +310,14 @@ Public Sub RemoveAllMelee(idConnection As Integer)
 End Sub
 Public Function isMelee(idConnection As Integer, ByRef str As String) As Boolean
   ' get the name from an ID
-  Dim res As Boolean
-  If cavebotMelees(idConnection).Exists(LCase(str)) = True Then
-    isMelee = True
+  If cavebotMelees(idConnection).Exists("*") = True Then
+ ' inversed
+    isMelee = Not cavebotMelees(idConnection).Exists(LCase(str))
   Else
-    isMelee = False
+    isMelee = cavebotMelees(idConnection).Exists(LCase(str))
   End If
 End Function
+
 
 
 Public Function AddIgnoredcreature(idConnection As Integer, dblID As Double) As Long
@@ -405,6 +406,9 @@ Public Function isHmm(idConnection As Integer, ByRef str As String) As Boolean
   Else
     isHmm = False
   End If
+  If cavebotHMMs(idConnection).Exists("*") = True Then
+    isHmm = Not isHmm ' inversed
+  End If
 End Function
 
 
@@ -453,7 +457,9 @@ Public Function getShotType(idConnection As Integer, ByRef str As String) As Lon
   Dim res As Boolean
   If shotTypeDict(idConnection).Exists(LCase(str)) = True Then
     getShotType = shotTypeDict(idConnection).item(LCase(str))
-  Else
+  ElseIf shotTypeDict(idConnection).Exists("*") = True Then
+    getShotType = shotTypeDict(idConnection).item("*")
+    Else
     getShotType = tileID_HMM
   End If
 End Function
@@ -530,7 +536,7 @@ Public Sub RemoveIDLine(idConnection As Integer, ByRef lineID As Long)
 End Sub
 Public Function GetStringFromIDLine(idConnection As Integer, ByRef lineID As Long) As String
   ' get the name from an ID
-  On Error GoTo goterr
+  On Error GoTo gotErr
   Dim res As Boolean
   If cavebotScript(idConnection).Exists(lineID + 1) = True Then
     GetStringFromIDLine = cavebotScript(idConnection).item(lineID + 1)
@@ -538,7 +544,7 @@ Public Function GetStringFromIDLine(idConnection As Integer, ByRef lineID As Lon
     GetStringFromIDLine = "?"
   End If
   Exit Function
-goterr:
+gotErr:
   LogOnFile "errors.txt", "Error atGetStringFromIDLine (" & _
    CStr(idConnection) & ", " & CStr(lineID) & ") , Err number : " & CStr(Err.Number) & _
    " ; Err description : " & Err.Description
@@ -761,7 +767,7 @@ Public Function ParseString(ByRef entireLine As String, ByRef frompos As Long, t
   Dim newChar As String
   Dim res As String
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   pos = frompos
   res = ""
@@ -781,7 +787,7 @@ Public Function ParseString(ByRef entireLine As String, ByRef frompos As Long, t
   frompos = pos
   ParseString = res
   Exit Function
-goterr:
+gotErr:
    frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during ParseString. Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
    ParseString = ""
 End Function
@@ -791,7 +797,7 @@ Private Sub SkipBlanks(ByRef entireLine As String, ByRef frompos As Long, toEnd 
   Dim pos As Long
   Dim newChar As String
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   pos = frompos
   Do
@@ -808,7 +814,7 @@ Private Sub SkipBlanks(ByRef entireLine As String, ByRef frompos As Long, toEnd 
   Loop
   frompos = pos
   Exit Sub
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SkipBlanks. Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
 
 End Sub
@@ -818,7 +824,7 @@ Public Function MyBattleListPosition(Sid) As Long
   Dim id As Double
   Dim res As Long
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   res = -1
   For c1 = 0 To LAST_BATTLELISTPOS
@@ -830,7 +836,7 @@ Public Function MyBattleListPosition(Sid) As Long
   Next c1
   MyBattleListPosition = res
   Exit Function
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during MyBattleListPosition. Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
   MyBattleListPosition = -1
 End Function
@@ -863,7 +869,7 @@ Public Sub PerformMove(Sid As Integer, parx As Long, pary As Long, parz As Long)
   Dim awesomeStatus As Integer
   Dim tmpByte As Byte
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   status = 1
   completed = False
@@ -1360,12 +1366,12 @@ If (iterac > 20) Then ' if there is no result after 20 iterations, then somethin
 End If
 Loop Until (completed = True)
   Exit Sub
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during PerformMove. Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
 End Sub
 
 Public Function ProcessRawCondition(ByVal part1 As String, ByVal opstr As String, ByVal part2 As String) As Boolean
-  On Error GoTo goterr
+  On Error GoTo gotErr
   Dim res As Boolean
   res = False
   Select Case opstr
@@ -1406,7 +1412,7 @@ Public Function ProcessRawCondition(ByVal part1 As String, ByVal opstr As String
   End Select
   ProcessRawCondition = res
   Exit Function
-goterr:
+gotErr:
   ProcessRawCondition = False
 End Function
 Public Function ProcessCondition(Sid As Integer, currLine As String, pos As Long, lenCurrLine As Long, Optional justReturnLine As Boolean = False) As Long
@@ -1417,7 +1423,7 @@ Public Function ProcessCondition(Sid As Integer, currLine As String, pos As Long
   Dim res As Boolean
   Dim aRes As Long
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   res = False
   part1 = ParseString(currLine, pos, lenCurrLine, "(")
@@ -1466,7 +1472,7 @@ Public Function ProcessCondition(Sid As Integer, currLine As String, pos As Long
   End If
   ProcessCondition = 0
   Exit Function
-goterr:
+gotErr:
   ProcessCondition = -1
 End Function
 Public Sub ProcessScriptLine(Sid As Integer)
@@ -1496,7 +1502,7 @@ Public Sub ProcessScriptLine(Sid As Integer)
   Dim tmpHP As Long
   Dim stringParts() As String
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   fastM = False
   mytime = GetTickCount()
@@ -1754,7 +1760,50 @@ fastSet:
           End If
         End If
     End If
-
+  Case "movetocreature"
+  Dim foundCreature As Boolean
+  
+    param1 = ParseString(currLine, pos, lenCurrLine, ",")
+    foundCreature = modCode.FindCreatureByName(param1, Sid, val1, val2, val3)
+    
+    
+    continueP = True
+    If DoingNewLoot(Sid) = False Then
+            If AnythingLootable(Sid) = True Then
+                continueP = False
+            End If
+    
+    End If
+    If continueP = True And foundCreature = True Then
+    
+        If (myX(Sid) > val1 - 2) And (myX(Sid) < val1 + 2) And _
+           (myY(Sid) > val2 - 2) And (myY(Sid) < val2 + 2) And _
+           (myZ(Sid) = val3) Then
+          ' move completed
+          If DoingNewLoot(Sid) = False Then
+            'exeLine(Sid) = exeLine(Sid) + 1
+            updateExeLine Sid, 1, True
+          
+          Else
+            
+            'aRes = GiveGMmessage(Sid, "Reached loot point", "Development")
+            SmartLootCorpse Sid
+            DoingNewLoot(Sid) = False
+            DoEvents
+          End If
+        Else
+          
+          ' keep moving
+          If ignoreNext(Sid) = -1 Then
+            If DoingNewLoot(Sid) = True Then
+                 DoingNewLoot(Sid) = False ' on trap, cancel order of moving to corpse
+            End If
+            ignoreNext(Sid) = 0
+          Else
+            PerformMove Sid, val1, val2, val3
+          End If
+        End If
+    End If
   Case "gotoscriptline"
     param1 = ParseString(currLine, pos, lenCurrLine, ",")
     val1 = CLng(param1)
@@ -2285,7 +2334,7 @@ fastSet:
     GoTo fastSet
   End If
   Exit Sub
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "# ID" & Sid & " lost connection at ProcessScriptLine #"
   frmMain.DoCloseActions Sid
   DoEvents
@@ -2347,16 +2396,16 @@ Public Function RightNumberOfClicks(idConnection As Integer) As String
     RightNumberOfClicks = res
 End Function
 Public Sub WriteRedSquare(ByVal idConnection As Integer, ByVal targetID As Long)
-    On Error GoTo goterr
+    On Error GoTo gotErr
     If RedSquare <> &H0 Then
         Memory_WriteLong RedSquare, targetID, ProcessID(idConnection)
     End If
     Exit Sub
-goterr:
+gotErr:
     Exit Sub
 End Sub
 Public Function ReadRedSquare(ByVal idConnection As Integer) As Long
-    On Error GoTo goterr
+    On Error GoTo gotErr
     Dim clicks As Long
     If RedSquare = &H0 Then
         ReadRedSquare = -2
@@ -2367,10 +2416,92 @@ Public Function ReadRedSquare(ByVal idConnection As Integer) As Long
         ReadRedSquare = clicks
     End If
     Exit Function
-goterr:
+gotErr:
     ReadRedSquare = -1
     Exit Function
 End Function
+
+' Maybe safer, but people say it makes cavebot slow and unable to follow monsters correctly while attacking them.
+' I will revert this one for now.
+
+'Public Function MeleeAttack(idConnection As Integer, targetID As Double, Optional forceSend As Boolean = False) As Long
+'  ' attack ID in melee
+'  Dim aRes As Long
+'  Dim sCheat As String
+'  Dim cPacket() As Byte
+'  Dim inRes As Integer
+'  Dim safeRes As String
+'  Dim currentRedSquare As Long
+'  Dim tempID As Long
+'  Dim templ1 As Long
+'
+'  #If FinalMode Then
+'  On Error GoTo goterr
+'  #End If
+'  If (GameConnected(idConnection) = True) And (sentFirstPacket(idConnection) = True) Then
+'    '05 00 A1 7B 8A 02 40
+'    'DEBUGG
+'    'aRes = SendLogSystemMessageToClient(idconnection, "DEBUG > Attacking " & CStr(targetID))
+'    'DoEvents
+'    If isIgnoredcreature(idConnection, targetID) = True Then ' stop!
+'        currTargetID(idConnection) = 0
+'    End If
+'    currTargetID(idConnection) = targetID
+'
+'    currentRedSquare = ReadRedSquare(idConnection) ' will always return -2 in old versions
+'    If currentRedSquare = 0 Then
+'        TurnsWithRedSquareZero(idConnection) = TurnsWithRedSquareZero(idConnection) + 1
+'    Else
+'        TurnsWithRedSquareZero(idConnection) = 0
+'    End If
+'    If (currentRedSquare <> 0) Or (TurnsWithRedSquareZero(idConnection) >= 3) Then
+'        If currentRedSquare <> -1 Then
+'            If (currTargetID(idConnection)) <> 0 Or (forceSend = True) Then
+'                If ((currentRedSquare <> currTargetID(idConnection)) Or (forceSend = 0)) Then ' new since Blackd Proxy 24.0
+'
+'
+'                    If TrainerOptions(idConnection).misc_stoplowhp = 1 Then
+'                        If targetID <> 0 Then
+'                            If tempID = currTargetID(idConnection) Then
+'                                If (templ1 < TrainerOptions(idConnection).stoplowhpHP) Then
+'                                    ' should not attack this target
+'                                    MeleeAttack = -1
+'                                    Exit Function
+'                                End If
+'                            End If
+'                        End If
+'                    End If
+'                    If (currTargetID(idConnection) <> currentRedSquare) Then 'don't resend attack packet if we are already attacking this creature (the client will always notice if attack has been canceled, so currentRedSquare should always be up to date, i believe.. )
+'                    If TibiaVersionLong >= 860 Then
+'                        safeRes = RightNumberOfClicks(idConnection)
+'                        If safeRes = "" Then
+'                                ' error happened, unsafe to attack
+'                                MeleeAttack = -1
+'                                Exit Function
+'                        End If
+'                        sCheat = "09 00 A1 " & SpaceID(targetID) & safeRes
+'                    Else
+'
+'                        sCheat = "05 00 A1 " & SpaceID(targetID)
+'                    End If
+'
+'                       WriteRedSquare idConnection, currTargetID(idConnection) ' new since in tibia 8.62
+'                       inRes = GetCheatPacket(cPacket, sCheat)
+'                       frmMain.UnifiedSendToServerGame idConnection, cPacket, True
+'                    End If
+'                    DoEvents
+'                End If
+'            End If
+'        End If
+'    End If
+'  End If
+'  MeleeAttack = 0
+'  Exit Function
+'goterr:
+'  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Got error at MeleeAttack : " & Err.Description
+'  frmMain.DoCloseActions idConnection
+'  MeleeAttack = -1
+'End Function
 Public Function MeleeAttack(idConnection As Integer, targetID As Double, Optional forceSend As Boolean = False) As Long
   ' attack ID in melee
   Dim aRes As Long
@@ -2383,7 +2514,7 @@ Public Function MeleeAttack(idConnection As Integer, targetID As Double, Optiona
   Dim templ1 As Long
   
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   If (GameConnected(idConnection) = True) And (sentFirstPacket(idConnection) = True) Then
     '05 00 A1 7B 8A 02 40
@@ -2443,12 +2574,11 @@ Public Function MeleeAttack(idConnection As Integer, targetID As Double, Optiona
   End If
   MeleeAttack = 0
   Exit Function
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Got error at MeleeAttack : " & Err.Description
   frmMain.DoCloseActions idConnection
   MeleeAttack = -1
 End Function
-
 Public Function CavebotRuneAttack(idConnection As Integer, targetID As Double, runeB1 As Byte, runeB2 As Byte) As Long
   Dim aRes As Long
   Dim lTarget As String
@@ -2544,7 +2674,7 @@ Public Sub PerformUseItem(idConnection As Integer, X As Long, y As Long, z As Lo
   Dim inRes As Integer
   Dim tileID As Long
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   xdif = X - myX(idConnection)
   ydif = y - myY(idConnection)
@@ -2554,6 +2684,55 @@ Public Sub PerformUseItem(idConnection As Integer, X As Long, y As Long, z As Lo
     Exit Sub
   End If
   SOPT = 1
+  If (TibiaVersionLong = 760) Then
+  ' This is an ugly hack,
+  'but until someone figure out the correct way to calculate the last 2 bytes in 760,
+  ' this is better than the cavebot getting stuck all the time
+  ' seems  the last 2 bytes depend on items, players standing on top, and
+  ' a special case for "tiles containg splash" (blood, water, wine, etc, this is the "SS +1")
+    For SS = 0 To 10
+    tileID = GetTheLong(Matrix(ydif, xdif, z, idConnection).s(SS).t1, Matrix(ydif, xdif, z, idConnection).s(SS).t2)
+    If (DatTiles(tileID).usable2 = True Or DatTiles(tileID).floorChangeDOWN = True Or DatTiles(tileID).floorChangeUP = True Or DatTiles(tileID).noFloorChange = False) Then
+     SOPT = SS
+     
+  b1 = Matrix(ydif, xdif, z, idConnection).s(SOPT).t1
+  b2 = Matrix(ydif, xdif, z, idConnection).s(SOPT).t2
+  sCheat = "0A 00 82 " & FiveChrLon(X) & " " & FiveChrLon(y) & " " & GoodHex(CByte(z)) & _
+   " " & GoodHex(b1) & " " & GoodHex(b2) & " " & GoodHex(SS) & " 00"
+   ' debug
+ 'frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & sCheat
+  inRes = GetCheatPacket(cPacket, sCheat)
+  frmMain.UnifiedSendToServerGame idConnection, cPacket, True
+  
+  sCheat = "0A 00 82 " & FiveChrLon(X) & " " & FiveChrLon(y) & " " & GoodHex(CByte(z)) & _
+   " " & GoodHex(b1) & " " & GoodHex(b2) & " " & GoodHex(SS + 1) & " 00"
+   ' debug
+ 'frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & sCheat
+  inRes = GetCheatPacket(cPacket, sCheat)
+  frmMain.UnifiedSendToServerGame idConnection, cPacket, True
+     
+     
+  sCheat = "0A 00 82 " & FiveChrLon(X) & " " & FiveChrLon(y) & " " & GoodHex(CByte(z)) & _
+   " " & GoodHex(b1) & " " & GoodHex(b2) & " " & GoodHex(SS) & " 02"
+   ' debug
+ 'frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & sCheat
+  inRes = GetCheatPacket(cPacket, sCheat)
+  frmMain.UnifiedSendToServerGame idConnection, cPacket, True
+     
+     
+  sCheat = "0A 00 82 " & FiveChrLon(X) & " " & FiveChrLon(y) & " " & GoodHex(CByte(z)) & _
+   " " & GoodHex(b1) & " " & GoodHex(b2) & " " & GoodHex(SS + 1) & " 02"
+   ' debug
+ 'frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & sCheat
+  inRes = GetCheatPacket(cPacket, sCheat)
+  frmMain.UnifiedSendToServerGame idConnection, cPacket, True
+     
+     
+     End If
+    Next SS
+    DoEvents '?
+    Exit Sub
+  End If
   For SS = 1 To 10
     tileID = GetTheLong(Matrix(ydif, xdif, z, idConnection).s(SS).t1, Matrix(ydif, xdif, z, idConnection).s(SS).t2)
     If DatTiles(tileID).alwaysOnTop = True Then
@@ -2573,7 +2752,7 @@ Public Sub PerformUseItem(idConnection As Integer, X As Long, y As Long, z As Lo
   frmMain.UnifiedSendToServerGame idConnection, cPacket, True
   DoEvents
   Exit Sub
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Got error at PerformUseItem"
 End Sub
 Public Sub WriteNoSafeToAttack(ByRef idMap As TypeIDmap, X As Long, y As Long)
@@ -2584,7 +2763,7 @@ End Sub
 
 Public Function DoSpecialCavebot(idConnection As Integer, xt As Long, yt As Long, zt As Long, dblID As Double) As Long
     #If FinalMode Then
-      On Error GoTo goterr
+      On Error GoTo gotErr
     #End If
     Dim myMap As TypeAstarMatrix
     Dim idMap As TypeIDmap
@@ -2847,7 +3026,7 @@ Public Function DoSpecialCavebot(idConnection As Integer, xt As Long, yt As Long
     End If
     DoSpecialCavebot = 0
     Exit Function
-goterr:
+gotErr:
     DoSpecialCavebot = 0
 End Function
 Public Sub LoadCurrentFloorIntoMatrix(idConnection As Integer, ByRef myMap As TypeAstarMatrix, ByRef idMap As TypeIDmap, skipThisPart As Boolean, ByRef cond2 As Boolean)
@@ -3118,7 +3297,7 @@ Public Function ProcessAttacks(idConnection As Integer) As Long
   Dim strNameOfMob As String
   Dim okeval2 As Boolean
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   foundCurrentID = False
   mapLoaded = False
@@ -3440,7 +3619,7 @@ foundOne:
   End If
   ProcessAttacks = 1
   Exit Function
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Got error at ProcessAttacks"
   SelfDefenseID(idConnection) = 0
   ProcessAttacks = 0
@@ -3458,7 +3637,7 @@ Public Sub ProcessFindDown(idConnection As Integer, X As Integer, y As Integer, 
   Dim tmpID As Double
   Dim s As Byte
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   pMatrix.walkable(X, y) = pMatrix.walkable(X, y) Or pMatrix.walkable(X + 1, y + 1) Or pMatrix.walkable(X, y + 1) _
    Or pMatrix.walkable(X + 1, y) Or pMatrix.walkable(X - 1, y - 1) Or pMatrix.walkable(X, y - 1) _
@@ -3495,7 +3674,7 @@ Public Sub ProcessFindDown(idConnection As Integer, X As Integer, y As Integer, 
     Next s
   End If
   Exit Sub
-goterr:
+gotErr:
     frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Got error at ProcessFindDown"
 End Sub
 
@@ -3893,11 +4072,15 @@ Public Function PerformMoveDown(Sid As Integer, X As Long, y As Long, z As Long)
   'myres.result=5 req_random_move
   'myres.result>&H60 req_force_move
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   xdif = X - myX(Sid)
   ydif = y - myY(Sid)
-  aRes = CLng(Int((2 * Rnd) + 1)) 'randomize this if
+  If modCode.Antibanmode > 0 Then
+   aRes = CLng(Int((2 * Rnd) + 1)) 'randomize this if
+  Else
+   aRes = 1
+  End If
   If ((xdif < -7) Or (xdif > 8) Or (ydif < -5) Or (ydif > 6)) And (aRes = 1) Then
     'out of range: first move near
     myres.X = X
@@ -4303,7 +4486,7 @@ Public Function PerformMoveDown(Sid As Integer, X As Long, y As Long, z As Long)
   myres.result = 1 ' move
   PerformMoveDown = myres
   Exit Function
-goterr:
+gotErr:
   myres.X = 0
   myres.y = 0
   myres.z = 0
@@ -4318,7 +4501,7 @@ Public Sub ProcessFindUp(idConnection As Integer, X As Integer, y As Integer, By
   Dim tmpID As Double
   Dim s As Byte
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   pMatrix.walkable(X, y) = pMatrix.walkable(X, y) Or pMatrix.walkable(X + 1, y + 1) Or pMatrix.walkable(X, y + 1) _
    Or pMatrix.walkable(X + 1, y) Or pMatrix.walkable(X - 1, y - 1) Or pMatrix.walkable(X, y - 1) _
@@ -4355,7 +4538,7 @@ Public Sub ProcessFindUp(idConnection As Integer, X As Integer, y As Integer, By
     Next s
   End If
   Exit Sub
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Got error at ProcessFindUp"
 
 End Sub
@@ -4367,6 +4550,7 @@ Public Function PerformMoveUp(Sid As Integer, X As Long, y As Long, z As Long) A
   Dim yt As Long
   Dim xdif As Long
   Dim ydif As Long
+  Dim absoluteDif As Long
   Dim aRes As Long
   Dim myres As TypeChangeFloorResult
   'myres.result=0 req_wait
@@ -4383,12 +4567,18 @@ Public Function PerformMoveUp(Sid As Integer, X As Long, y As Long, z As Long) A
   'aRes = PerformUseMyItem(sid, LowByteOfLong(tileID_Rope), HighByteOfLong(tileID_Rope), fResult.x, fResult.y, myZ(sid))
   
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   xdif = X - myX(Sid)
   ydif = y - myY(Sid)
-  aRes = CLng(Int((2 * Rnd) + 1)) 'randomize this if
-  If ((xdif < -7) Or (xdif > 8) Or (ydif < -5) Or (ydif > 6)) And (aRes = 1) Then
+  absoluteDif = Abs(xdif) + Abs(ydif)
+  If modCode.Antibanmode > 0 Then
+   aRes = CLng(Int((2 * Rnd) + 1)) 'randomize this if
+  Else
+   aRes = 1
+  End If
+  'If ((xdif < -7) Or (xdif > 8) Or (ydif < -5) Or (ydif > 6)) And (aRes = 1) Then
+  If absoluteDif > 2 And aRes = 1 Then
     'out of range: first move near
     myres.X = X
     myres.y = y
@@ -4792,7 +4982,7 @@ Public Function PerformMoveUp(Sid As Integer, X As Long, y As Long, z As Long) A
   myres.result = 1 ' move
   PerformMoveUp = myres
   Exit Function
-goterr:
+gotErr:
   myres.X = 0
   myres.y = 0
   myres.z = 0
@@ -4840,7 +5030,7 @@ Public Function UseItemHere(idConnection As Integer, b1 As Byte, b2 As Byte, X A
     stackS = ts
     tileSTR = FiveChrLon(tileID)
   
-    If ((frmHardcoreCheats.chkTotalWaste.Value = True) And (TibiaVersionLong >= 773) And (shouldBeVisible = False)) Then
+    If (frmHardcoreCheats.chkTotalWaste.Value = True) Then 'And (TibiaVersionLong >= 773) And (shouldBeVisible = False)) Then
         GoTo justdoit
     End If
     If mySlot(idConnection, SLOT_AMMUNITION).t1 = b1 And _
@@ -4861,7 +5051,7 @@ Public Function UseItemHere(idConnection As Integer, b1 As Byte, b2 As Byte, X A
        SafeCastCheatString "UseItemHere2", idConnection, sCheat
     Else
 justdoit:
-      If ((((frmHardcoreCheats.chkEnhancedCheats.Value = True) Or (frmHardcoreCheats.chkTotalWaste.Value = True)) And (TibiaVersionLong >= 773))) And (shouldBeVisible = False) Then
+      If ((frmHardcoreCheats.chkEnhancedCheats.Value = True) Or (frmHardcoreCheats.chkTotalWaste.Value = True)) Then 'And (TibiaVersionLong >= 773))) And (shouldBeVisible = False) Then
           ' NEW
          sCheat = "83 FF FF 00 00 00 " & GoodHex(b1) & " " & GoodHex(b2) & " 00 " & GetHexStrFromPosition(X, y, z) & " " & tileSTR & " " & GoodHex(stackS)
 
@@ -4973,7 +5163,7 @@ Public Function PerformUseMyItem(idConnection As Integer, b1 As Byte, b2 As Byte
             Next ts
         End If
     End If
-    If ((frmHardcoreCheats.chkTotalWaste.Value = True) And (TibiaVersionLong >= 773) And (shouldBeVisible = False)) Then
+    If (frmHardcoreCheats.chkTotalWaste.Value = True) Then 'And (TibiaVersionLong >= 773) And (shouldBeVisible = False)) Then
         GoTo justdoit
     End If
     If mySlot(idConnection, SLOT_AMMUNITION).t1 = b1 And _
@@ -4991,7 +5181,7 @@ Public Function PerformUseMyItem(idConnection As Integer, b1 As Byte, b2 As Byte
       SafeCastCheatString "PerformUseMyItem2", idConnection, sCheat
     Else
 justdoit:
-      If ((((frmHardcoreCheats.chkEnhancedCheats.Value = True) Or (frmHardcoreCheats.chkTotalWaste.Value = True)) And (TibiaVersionLong >= 773))) And (shouldBeVisible = False) Then
+      If ((frmHardcoreCheats.chkEnhancedCheats.Value = True) Or (frmHardcoreCheats.chkTotalWaste.Value = True)) Then ' And (TibiaVersionLong >= 773))) And (shouldBeVisible = False) Then
           ' NEW
          sCheat = "83 FF FF 00 00 00 " & GoodHex(b1) & " " & GoodHex(b2) & " 00 " & GetHexStrFromPosition(X, y, z) & " " & tileSTR & " " & GoodHex(stackS)
 
@@ -5079,6 +5269,8 @@ Public Function LootGoodItems(idConnection As Integer) As Long
              " 00 " & GoodHex(CByte(j)) & " " & FiveChrLon(tileID) & " " & _
              GoodHex(CByte(j)) & " FF FF " & GoodHex(&H40 + res1.bpID) & " 00 " & GoodHex(res1.slotID) & _
              " " & GoodHex(amount)
+             'Debug.Print "LOOTING PACKET = " & sCheat
+             
             SafeCastCheatString "LootGoodItems1", idConnection, sCheat
             LootGoodItems = 0
             Exit Function
@@ -5120,12 +5312,19 @@ Public Function OpenCorpse(idConnection As Integer) As Long
   Dim bpID As Byte
   Dim sCheat As String
   Dim cPacket() As Byte
+  Dim topStack As Long
+  Dim sPos As Long
+  Dim tileID As Long
+  Dim xdif As Long
+  Dim ydif As Long
   'aRes = SendLogSystemMessageToClient(idConnection, "Detected new corpse at " & _
    myLastCorpseX(idConnection) & " , " & myLastCorpseY(idConnection) & " , " & _
    myLastCorpseZ(idConnection) & " , " & myLastCorpseS(idConnection) & " : " & _
    FiveChrLon(myLastCorpseTileID(idConnection)))
  ' DoEvents
   '0A 00 82 37 7D A7 7D 09 59 0F 02 00
+  xdif = myLastCorpseX(idConnection) - myX(idConnection)
+  ydif = myLastCorpseY(idConnection) - myY(idConnection)
   bpID = frmBackpacks.GetFirstFreeBpID(idConnection)
   If (myLastCorpseZ(idConnection) <> myZ(idConnection)) Then
     If publicDebugMode = True Then
@@ -5145,9 +5344,26 @@ Public Function OpenCorpse(idConnection As Integer) As Long
        " at bpID " & GoodHex(bpID))
       DoEvents
     End If
-    sCheat = "0A 00 82 " & FiveChrLon(myLastCorpseX(idConnection)) & " " & _
-     FiveChrLon(myLastCorpseY(idConnection)) & " " & GoodHex(CByte(myLastCorpseZ(idConnection))) & _
-     FiveChrLon(myLastCorpseTileID(idConnection)) & " " & GoodHex(CByte(myLastCorpseS(idConnection))) & " " & GoodHex(bpID) & " "
+    If (TibiaVersionLong = 760) Then
+    'fix for tibia 7.6.
+        For sPos = 1 To 10
+            tileID = GetTheLong(Matrix(ydif, xdif, myZ(idConnection), idConnection).s(sPos).t1, Matrix(ydif, xdif, myZ(idConnection), idConnection).s(sPos).t2)
+            'Debug.Print DatTiles(tileID).iscontainer
+            If DatTiles(tileID).iscontainer = True Then
+            'first stacks are reserved for grounds or permament items
+            'topStack is 02 in most of cases and then are the items that lies beneath topItem
+                topStack = sPos
+                Exit For
+            End If
+        Next sPos
+        sCheat = "0A 00 82 " & FiveChrLon(myLastCorpseX(idConnection)) & " " & _
+        FiveChrLon(myLastCorpseY(idConnection)) & " " & GoodHex(CByte(myLastCorpseZ(idConnection))) & _
+        FiveChrLon(tileID) & " " & GoodHex(CByte(topStack)) & " " & GoodHex(bpID) & " "
+    Else
+        sCheat = "0A 00 82 " & FiveChrLon(myLastCorpseX(idConnection)) & " " & _
+        FiveChrLon(myLastCorpseY(idConnection)) & " " & GoodHex(CByte(myLastCorpseZ(idConnection))) & _
+        FiveChrLon(myLastCorpseTileID(idConnection)) & " " & GoodHex(CByte(myLastCorpseS(idConnection))) & " " & GoodHex(bpID) & " "
+    End If
     GetCheatPacket cPacket, sCheat
     frmMain.UnifiedSendToServerGame idConnection, cPacket, True
     DoEvents
@@ -5182,7 +5398,7 @@ Public Sub ExecuteBuffer(idConnection As Integer)
   Dim inRes As Integer
   Dim continue As Boolean
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   If ReadyBuffer(idConnection) = True Then
   orders = RequiredMoveBuffer(idConnection)
@@ -5216,7 +5432,7 @@ Public Sub ExecuteBuffer(idConnection As Integer)
   End If
   End If
   Exit Sub
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & " Got connection lose while doing ExecuteBuffer"
   DoEvents
 End Sub
@@ -5397,7 +5613,7 @@ Public Function FindBestPath(ByVal idConnection As Integer, ByVal goalX As Long,
   Dim inRes As Integer
   Dim continue As Boolean
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   ChaotizeXYrel idConnection, goalX, goalY, myZ(idConnection)
     
@@ -5510,7 +5726,7 @@ Public Function FindBestPath(ByVal idConnection As Integer, ByVal goalX As Long,
     FindBestPath = 0
   End If
   Exit Function
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & " Got connection lose while doing FindBestPath"
   DoEvents
   FindBestPath = -1
@@ -5540,7 +5756,7 @@ Public Function FindBestPathV2(ByVal idConnection As Integer, ByVal goalX As Lon
   Dim tryingX As Long
   Dim tryingY As Long
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   ChaotizeXYrel idConnection, goalX, goalY, myZ(idConnection)
   
@@ -5742,7 +5958,7 @@ continue:
     Exit Function
   End If
   Exit Function
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & " Got connection lose while doing FindBestPathV2"
   DoEvents
   FindBestPathV2 = -1
@@ -5769,7 +5985,7 @@ Public Function ExistsPath(idConnection As Integer, goalX As Long, goalY As Long
   Dim inRes As Integer
   Dim continue As Boolean
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   startX = 0
   startY = 0
@@ -5917,7 +6133,7 @@ Public Function ExistsPath(idConnection As Integer, goalX As Long, goalY As Long
     Exit Function
   End If
   Exit Function
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & " Got connection lose while doing ExistsPath"
   DoEvents
   ExistsPath = -1
@@ -5947,7 +6163,7 @@ Public Function FindAnyLongPath(idConnection As Integer, goalX As Long, goalY As
   Dim difx As Long
   Dim dify As Long
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   startX = 0
   startY = 0
@@ -6116,7 +6332,7 @@ Public Function FindAnyLongPath(idConnection As Integer, goalX As Long, goalY As
     FindAnyLongPath = 0
   End If
   Exit Function
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & " Got connection lose while doing FindAnyLongPath"
   DoEvents
   FindAnyLongPath = -1
@@ -6152,7 +6368,7 @@ Public Function GetNearestDepot(idConnection As Integer) As Long
   Dim sMinusOne As Byte
   Dim PrevTileID As Long
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   startX = 0
   startY = 0
@@ -6336,7 +6552,7 @@ Public Function GetNearestDepot(idConnection As Integer) As Long
     GetNearestDepot = 0
     Exit Function
   End If
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & " Got connection lose while doing GetNearestDepot"
   DoEvents
   GetNearestDepot = -1
@@ -6348,7 +6564,7 @@ Public Sub OpenTheDepot(idConnection As Integer)
   Dim sCheat As String
   Dim cPacket() As Byte
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   '0A 00 82 37 7D A7 7D 09 59 0F 02 00
   bpID = frmBackpacks.GetFirstFreeBpID(idConnection)
@@ -6362,7 +6578,7 @@ Public Sub OpenTheDepot(idConnection As Integer)
     DoEvents
   End If
   Exit Sub
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & " Got connection lose while doing OpenTheDepot"
 End Sub
 
@@ -6405,7 +6621,7 @@ Public Function DropLoot(idConnection As Integer) As Long
   Dim inRes As Integer
   Dim amount As Byte
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   DropDelayerTurn(idConnection) = DropDelayerTurn(idConnection) + 1
   If (DropDelayerTurn(idConnection) < DropDelayerConst) Then
@@ -6514,7 +6730,7 @@ Public Function DropLoot(idConnection As Integer) As Long
       Exit Function
     End If
   End If
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & " Got connection lose while doing DropLoot"
   DropLoot = -1
   Exit Function
@@ -6542,7 +6758,7 @@ Public Function DropLootToGround(idConnection As Integer) As Long
   Dim amount As Byte
   Dim b3 As Byte
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   DropDelayerTurn(idConnection) = DropDelayerTurn(idConnection) + 1
   If (DropDelayerTurn(idConnection) < DropDelayerConst) Then
@@ -6618,13 +6834,13 @@ Public Function DropLootToGround(idConnection As Integer) As Long
   SafeCastCheatString "DropLootToGround1", idConnection, sCheat
   DropLootToGround = 0
   Exit Function
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & " Got connection lose while doing DropLoot"
   DropLootToGround = -1
   Exit Function
 End Function
 Public Function DropItemOnGroundBytes(ByVal idConnection As Integer, ByVal b1 As Byte, ByVal b2 As Byte, maxamount As Byte) As Long
-    On Error GoTo goterr
+    On Error GoTo gotErr
     Dim foundAsource As Boolean
     Dim res1 As TypeSearchItemResult2
     Dim i As Long
@@ -6662,7 +6878,7 @@ Public Function DropItemOnGroundBytes(ByVal idConnection As Integer, ByVal b1 As
     SafeCastCheatString "DropItemOnGroundBytes1", idConnection, sCheat
     DropItemOnGroundBytes = 0
     Exit Function
-goterr:
+gotErr:
     If publicDebugMode = True Then
       aRes = SendLogSystemMessageToClient(idConnection, "[Debug] DropItemOnGround failed (code " & CStr(Err.Number) & ": " & Err.Description & ")")
       DoEvents
@@ -6671,7 +6887,7 @@ goterr:
     Exit Function
 End Function
 Public Function DropItemOnGround(ByVal idConnection As Integer, ByVal strTile As String) As Long
-    On Error GoTo goterr
+    On Error GoTo gotErr
     Dim b1 As Byte
     Dim b2 As Byte
     Dim b3 As Byte
@@ -6684,7 +6900,7 @@ Public Function DropItemOnGround(ByVal idConnection As Integer, ByVal strTile As
        DropItemOnGround = DropItemOnGroundBytes(idConnection, b1, b2, b3)
        Exit Function
     End If
-goterr:
+gotErr:
     If publicDebugMode = True Then
       aRes = SendLogSystemMessageToClient(idConnection, "[Debug] DropItemOnGround failed (bad format)")
       DoEvents
@@ -6716,7 +6932,7 @@ Public Function PrintDictionary(idConnection As Integer) As Long
   Dim showStr As String
   Dim showStr2 As String
   #If FinalMode Then
-  On Error GoTo goterr
+  On Error GoTo gotErr
   #End If
   aRes = SendLogSystemMessageToClient(idConnection, "Listing all creatures on memory:")
   DoEvents
@@ -6733,7 +6949,7 @@ Public Function PrintDictionary(idConnection As Integer) As Long
   Next
   PrintDictionary = 0
   Exit Function
-goterr:
+gotErr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "# ID" & idConnection & " lost connection at PrintDictionary #"
   frmMain.DoCloseActions idConnection
   DoEvents
@@ -6795,6 +7011,24 @@ Public Sub RepositionScript(idConnection As Integer, firstLine As Long, lastLine
         End If
       Else
         ' floor change: not valid jump
+      End If
+    ElseIf mainCommand = "movetocreature" Then
+      Dim foundCreature As Boolean
+      
+      param1 = ParseString(currLine, pos, lenCurrLine, ",")
+      foundCreature = modCode.FindCreatureByName(param1, idConnection, val1, val2, val3)
+            
+      If foundCreature = True And val3 = myZ(idConnection) Then
+        tmpDist = ManhattanDistance(myX(idConnection), myY(idConnection), val1, val2)
+        If evLine = exeLine(idConnection) Then
+          tmpDist = tmpDist - 1 ' give a small priority to keep in current script line
+        End If
+        If tmpDist < bestDist Then ' this point is closer to current position
+          bestLine = evLine
+          bestDist = tmpDist
+        End If
+      Else
+        ' can't find creature, or floor change: not valid jump
       End If
     Else
       Exit For ' not a move command: can't reposition the script. it would give unpredictable results

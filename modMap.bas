@@ -1,6 +1,7 @@
 Attribute VB_Name = "modMap"
 #Const FinalMode = 1
 #Const MapDebug = 0
+#Const DEBUG_SHOP = 0
 Option Explicit
 
 
@@ -34,8 +35,8 @@ Public addConfigPaths As String ' list of new config paths here
 Public addConfigVersions As String ' relative versions
 Public addConfigVersionsLongs As String 'relative version longs
 
-Public Const ProxyVersion = "37.1" ' Proxy version ' string version
-Public Const myNumericVersion = 37100 ' numeric version
+Public Const ProxyVersion = "40.8" ' Proxy version ' string version
+Public Const myNumericVersion = 40800 ' numeric version
 Public Const myAuthProtocol = 2 ' authetication protocol
 Public Const TrialVersion = False ' true=trial version
 
@@ -141,7 +142,7 @@ Public Type TypeStackTileInfo '1 entire square of map info
   s(0 To 10) As TypeTileInfo
 End Type
 ' API for fast moves of memory in blocks
-Private Declare Sub RtlMoveMemory Lib "Kernel32" ( _
+Private Declare Sub RtlMoveMemory Lib "kernel32" ( _
     lpDest As Any, _
     lpSource As Any, _
     ByVal ByValcbCopy As Long)
@@ -283,6 +284,8 @@ Public tmpStack As TypeStackTileInfo ' for map update speed optimization
 Public PlayTheDangerSound As Boolean
 Public PlayMsgSound As Boolean
 Public PlayMsgSound2 As Boolean
+'custom ng
+Public PlayPMSound As Boolean
 
 ' some more trial vars:
 Public TrialMode As Integer  '1=some days / 2 = month
@@ -362,6 +365,9 @@ Public Sub CheckIfGM(idConnection As Integer, ByRef str As String, zpos As Long,
   lCaseStr = LCase(str)
   gotGM = False
   condEnter = False
+  If (forceGm = False And frmRunemaker.IsFriend(lCaseStr)) Then
+  Exit Sub ' friends are not dangers.
+  End If
   If (cavebotEnabled(idConnection) = True) Or (RuneMakerOptions(idConnection).activated = True) Or (RuneMakerOptions(idConnection).autoEat = True) Then
     If DangerGM(idConnection) = False Then
         If forceGm = False Then
@@ -2756,10 +2762,12 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
   Dim tempb4 As Byte
   Dim templ1 As Long
   Dim templ2 As Long
+  Dim templ3 As Long
   Dim outfitType As Long
   Dim strDebug As String
   Dim lonCap As Long
   Dim lonNumItems As Long
+  Dim lonNumItems2 As Long
   Dim aRes As Long
   Dim lonO As Long
   Dim msg As String
@@ -2812,6 +2820,8 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
   ' 10.35: 0F 64 6A 83 78 78 78 78 78 82 8D 9F A2 92 B4 93 92 90 1E A0 A1
   
   ' 10.38: 0F 64 6A 83 78 78 78 78 78 78 78 82 8D 9F A2 92 D2 B4 9E 93 92 90 AC A0 A1
+  ' 10.97: 0F 64 6A 83 78 78 82 9F 9C A2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 D2 B4 B4 9E 0F A8 B8 B7 1E 8D 90 92 93 92 F5 A0 A1
+  
   Do
     lastGoodPos = pos
     mobName = ""
@@ -2866,6 +2876,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       CheatsPaused(idConnection) = True
       IDstring(idConnection) = GoodHex(packet(pos + 1)) & GoodHex(packet(pos + 2)) & GoodHex(packet(pos + 3)) & GoodHex(packet(pos + 4))
       myID(idConnection) = FourBytesDouble(packet(pos + 1), packet(pos + 2), packet(pos + 3), packet(pos + 4))
+      
       If TibiaVersionLong >= 1080 Then
       ' tibia 10.80+
       ' 17 FA D5 7B 02 32 00 03 0F 15 0D 80 03 A9 FC 03 80 03 7E D5 B6 7F 00 01 01 24 00 68 74 74 70 3A 2F 2F 73 74 61 74 69 63 2E 74 69 62 69 61 2E 63 6F 6D 2F 69 6D 61 67 65 73 2F 73 74 6F 72 65 19 00 0A
@@ -2879,6 +2890,9 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       Else
        pos = pos + 24
       End If
+    Case &H19 ' tibia 10.97 - ???
+      ' 19 00 01
+      pos = pos + 3
     Case &H1D ' tibia 9.5
       ' server ping ??
       If publicDebugMode = True Then
@@ -3019,11 +3033,19 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       End If
 
       tileID = GetTheLong(packet(pos), packet(pos + 1))
+<<<<<<< HEAD
       If (tileID = 2129) Then ' 2129 = magic wall
+=======
+      If (tileID = 2129 Or tileID = 2128) Then 'magic wall. 2129 in 760, 2128 in 1090
+>>>>>>> refs/remotes/blackdtools/master
        frmHardcoreCheats.AddXYZCounter idConnection, initX, initY, initZ, 20
       ElseIf (tileID = 2130) Then ' 2130 = wild growth
        frmHardcoreCheats.AddXYZCounter idConnection, initX, initY, initZ, 45
       End If
+<<<<<<< HEAD
+=======
+
+>>>>>>> refs/remotes/blackdtools/master
 
          
       Select Case tileID
@@ -3812,15 +3834,41 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       templ1 = packet(pos + 1)
       If ((TibiaVersionLong >= 991) Or ((TibiaVersionLong >= 984) And (TibiaVersionLong < 990))) Then
         ' slot id
-        templ2 = GetTheLong(packet(pos + 2), packet(pos + 3))
+        templ2 = GetTheLong(packet(pos + 2), packet(pos + 3)) ' fixed!
+        tileID = GetTheLong(packet(pos + 4), packet(pos + 5))
+        
         ' and 2 extra bytes , usually 00 00
-        pos = pos + 6
+        If tileID > 0 Then
+          ' Handles a special case: Removing an item from a full inbox (several pages)
+          If DatTiles(tileID).haveExtraByte = True Then
+              If DatTiles(tileID).haveExtraByte2 = True Then
+                frmBackpacks.RemoveItem idConnection, templ1, templ2, packet(pos + 4), packet(pos + 5), packet(pos + 7), packet(pos + 8)
+                pos = pos + 3
+              Else
+                frmBackpacks.RemoveItem idConnection, templ1, templ2, packet(pos + 4), packet(pos + 5), packet(pos + 7), &H0
+                pos = pos + 2
+              End If
+            Else
+              If DatTiles(tileID).haveExtraByte2 = True Then
+                frmBackpacks.RemoveItem idConnection, templ1, templ2, packet(pos + 4), packet(pos + 5), &H0, packet(pos + 7)
+                pos = pos + 2
+              Else
+                frmBackpacks.RemoveItem idConnection, templ1, templ2, packet(pos + 4), packet(pos + 5), &H0, &H0
+                pos = pos + 1
+              End If
+            End If
+            pos = pos + 6
+        Else
+           pos = pos + 6
+           frmBackpacks.RemoveItem idConnection, templ1, templ2
+        End If
       Else
         templ2 = packet(pos + 2)
         pos = pos + 3
+          frmBackpacks.RemoveItem idConnection, templ1, templ2
       End If
-      frmBackpacks.RemoveItem idConnection, templ1, templ2
-     
+      'Debug.Print frmMain.showAsStr(packet, True)
+      'Debug.Print GoodHex(packet(pos))
     Case &H78
       ' inventory slot get something
       tileID = GetTheLong(packet(pos + 2), packet(pos + 3))
@@ -4176,6 +4224,12 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       ' more effects - happens at summoned monks, for example
       ' 94 13 44 A7 02 02 00
       pos = pos + 7
+    Case &H95
+      ' more effects - packet found at ot server 10.90 when demons summon fire elementals
+      ' 95 77 09 30 40 01 83 31 7D 44 79 09 25
+      ' packet is probably only 95 77 09 30 40 01
+      ' NOTE: UNTESTED
+      pos = pos + 6
     Case &H96
       ' open book
       ' tibia 10.01 : 96 2A FF 74 02 B1 0D FF CF 07 00 00 00 00 00 00
@@ -4229,15 +4283,21 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       Else
         pos = pos + 3
       End If
-      
     Case &H9E
-      ' 9E 05 00 01 02 03 04 00
-      ' 9E 05 0B 00 01 02 03 01
-      ' 9E 01 0E 01
-      lonN = CLng(packet(pos + 1))
       ' new since Tibia 10.38
       ' "Premium features" window
-      pos = pos + 3 + lonN
+      If TibiaVersionLong >= 1097 Then
+        ' tibia 10.97:
+        ' 9E 06 00 01 02 03 04 0F
+        ' 9E 06 00 01 02 03 04 0F
+        pos = pos + 7
+      Else
+        ' 9E 05 00 01 02 03 04 00
+        ' 9E 05 0B 00 01 02 03 01
+        ' 9E 01 0E 01
+        lonN = CLng(packet(pos + 1))
+        pos = pos + 3 + lonN
+      End If
     Case &H9F
       ' 9F 00 01 01 00 0A
       ' 9.5   9F 00 04 2B 00 01 02 04 05 06 07 08 09 0A 0B 0C 0E 11 14 19 1A 1B 1D 1E 1F 20 26 27 2A 2C 32 4B 4C 4D 4E 51 53 54 58 59 5B 5E 70 71 72 79 92 94
@@ -4255,11 +4315,53 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       ' full stats update : hp,mana,exp,etc
       ' necesita ser revisado
       oldHP = myHP(idConnection)
-      If (TibiaVersionLong >= 1054) Then
+      If (TibiaVersionLong >= 1097) Then
+        ' A0 31 01 31 01 24 0D 01 00 58 15 01 00 87 F6 06 00 00 00 00 00 20 00 07 64 00 00 00 25 00 00 00 96 00 89 02 2A 03 1D 1D 52 64 D8 09 8D 00 00 00 D0 02 00 00 00
+          '  01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52
+        
+      
+       lonN = GetTheLong(packet(pos + 1), packet(pos + 2)) ' current hp
+        If lonN <> myHP(idConnection) Then
+          myres.gotHPupdate = True
+          myHP(idConnection) = lonN
+        End If
+        myMaxHP(idConnection) = GetTheLong(packet(pos + 3), packet(pos + 4)) ' max hp
+        lonN = GetTheLong(packet(pos + 34), packet(pos + 35)) 'PLAYER_MANA
+        If lonN <> myMana(idConnection) Then
+          myres.gotManaupdate = True
+          myMana(idConnection) = lonN
+        End If
+        myCap(idConnection) = FourBytesLong(packet(pos + 5), packet(pos + 6), packet(pos + 7), packet(pos + 8)) ' cap x 100
+        myExp(idConnection) = FourBytesLong(packet(pos + 13), packet(pos + 14), packet(pos + 15), packet(pos + 16))
+       
+        lonN = GetTheLong(packet(pos + 21), packet(pos + 22)) ' PLAYER_LEVEL
+        If lonN > myLevel(idConnection) Then
+          If sentWelcome(idConnection) = True Then
+            If frmHardcoreCheats.chkAutoGratz.Value = 1 Then
+              SendLogSystemMessageToClient idConnection, "BlackdProxy: Gratz!"
+              DoEvents
+            End If
+          End If
+        End If
+        myLevel(idConnection) = lonN
+          myMaxMana(idConnection) = GetTheLong(packet(pos + 36), packet(pos + 37))
+          myMagLevel(idConnection) = CLng(packet(pos + 33))
+    
+          lonN = CLng(packet(pos + 40)) ' PLAYER_MAGIC_LEVEL_PER
+          myNewStat(idConnection) = lonN
+          
+          lonN = CLng(packet(pos + 41)) ' soulpoints
+          If lonN <> mySoulpoints(idConnection) Then
+            myres.gotSoulupdate = True
+          End If
+          mySoulpoints(idConnection) = lonN
+          myStamina(idConnection) = GetTheLong(packet(pos + 42), packet(pos + 43))
+          pos = pos + 53
+      ElseIf (TibiaVersionLong >= 1054) Then
 '      If ((TibiaVersionLong >= 1053) And (tibiaclassname = "TibiaClientPreview")) Then
         ' tibia 10.53 preview
         ' A0 39 00 96 00 F8 7A 00 00 40 9C 00 00 5C 00 00 00 00 00 00 00 01 00 5C 04 0F 27 00 80 05 00 05 00 00 00 00 64 D8 09 6E 00 00 00 D0 02
-          '  01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38
+          '  01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44
         
         
         
@@ -4274,11 +4376,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
           myHP(idConnection) = lonN
         End If
         myMaxHP(idConnection) = GetTheLong(packet(pos + 3), packet(pos + 4)) ' max hp
-        lonN = GetTheLong(packet(pos + 24), packet(pos + 25)) 'PLAYER_MANA
-        If lonN <> myMana(idConnection) Then
-          myres.gotManaupdate = True
-          myMana(idConnection) = lonN
-        End If
+
         myCap(idConnection) = FourBytesLong(packet(pos + 5), packet(pos + 6), packet(pos + 7), packet(pos + 8)) ' cap x 100
         myExp(idConnection) = FourBytesLong(packet(pos + 13), packet(pos + 14), packet(pos + 15), packet(pos + 16))
        
@@ -4619,41 +4717,44 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       ' my skills
       pos = pos + 15
       If TibiaVersionLong >= 872 Then
-'    WriteByte(0xA1);
-'    WriteByte(*PLAYER_FIST);
-'    WriteByte(*PLAYER_FIST_PER);
-'    WriteByte(0); // unknown - flash client
-'    WriteByte(*PLAYER_CLUB);
-'    WriteByte(*PLAYER_CLUB_PER);
-'    WriteByte(0); // unknown - flash client
-'    WriteByte(*PLAYER_SWORD);
-'    WriteByte(*PLAYER_SWORD_PER);
-'    WriteByte(0); // unknown - flash client
-'    WriteByte(*PLAYER_AXE);
-'    WriteByte(*PLAYER_AXE_PER);
-'    WriteByte(0); // unknown - flash client
-'    WriteByte(*PLAYER_DIST);
-'    WriteByte(*PLAYER_DIST_PER);
-'    WriteByte(0); // unknown - flash client
-'    WriteByte(*PLAYER_SHIELD);
-'    WriteByte(*PLAYER_SHIELD_PER);
-'    WriteByte(0); // unknown - flash client
-'    WriteByte(*PLAYER_FISH);
-'    WriteByte(*PLAYER_FISH_PER);
-'    WriteByte(0); // unknown - flash client
-
+        '    WriteByte(0xA1);
+        '    WriteByte(*PLAYER_FIST);
+        '    WriteByte(*PLAYER_FIST_PER);
+        '    WriteByte(0); // unknown - flash client
+        '    WriteByte(*PLAYER_CLUB);
+        '    WriteByte(*PLAYER_CLUB_PER);
+        '    WriteByte(0); // unknown - flash client
+        '    WriteByte(*PLAYER_SWORD);
+        '    WriteByte(*PLAYER_SWORD_PER);
+        '    WriteByte(0); // unknown - flash client
+        '    WriteByte(*PLAYER_AXE);
+        '    WriteByte(*PLAYER_AXE_PER);
+        '    WriteByte(0); // unknown - flash client
+        '    WriteByte(*PLAYER_DIST);
+        '    WriteByte(*PLAYER_DIST_PER);
+        '    WriteByte(0); // unknown - flash client
+        '    WriteByte(*PLAYER_SHIELD);
+        '    WriteByte(*PLAYER_SHIELD_PER);
+        '    WriteByte(0); // unknown - flash client
+        '    WriteByte(*PLAYER_FISH);
+        '    WriteByte(*PLAYER_FISH_PER);
+        '    WriteByte(0); // unknown - flash client
         pos = pos + 7
       End If
-      
-      
-    If TibiaVersionLong >= 1035 Then
-' new skills ??
+      If TibiaVersionLong >= 1035 Then
+        ' new skills since 10.35
         pos = pos + 14
       End If
-
-    'Case &H20
-      ' unknown, 1 byte, usually 20 0D
-    '  pos = pos + 2
+      If TibiaVersionLong >= 1094 Then
+        ' 6 new skills since 10.94. 4 bytes for each value
+        ' Critical Chance
+        ' Critical Damage
+        ' Life Leech Chance
+        ' Life Leech
+        ' Mana Leech Chance
+        ' Mana Leech
+        pos = pos + 24
+      End If
     Case &HA2
       ' add 1 status (lock,skull,etc)
       ' A2 00 40 - pz
@@ -4711,7 +4812,10 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
       ' new since Tibia 9.9 - pvp modes?
       ' example: A7 01 01 01 00
       pos = pos + 5
-
+    Case &HA8
+     ' new since Tibia 10.97 - ??
+     ' example: A8 00
+     pos = pos + 2
     Case &HAA
  
  
@@ -4746,7 +4850,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         End If
         pos = pos + 2 'skip level
       End If
-      subType = CLng(packet(pos))
+      subType = packet(pos)
       Select Case subType
 '      Case newchatmessage_H22
 '        ' new since Tibia 8.72 ' eat food
@@ -4795,6 +4899,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         If (GotPacketWarning(idConnection) = False) And (RuneMakerOptions(idConnection).msgSound = True) And _
          (itsMe = False) And (CheatsPaused(idConnection) = False) Then
           PlayMsgSound = True
+          'PlayPMSound = True
         End If
         
         Case verynewchatmessage_HB
@@ -4822,6 +4927,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         If (GotPacketWarning(idConnection) = False) And (RuneMakerOptions(idConnection).msgSound = True) And _
          (itsMe = False) And (CheatsPaused(idConnection) = False) Then
           PlayMsgSound = True
+          'PlayPMSound = True
         End If
         
         
@@ -4849,6 +4955,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         If (GotPacketWarning(idConnection) = False) And (RuneMakerOptions(idConnection).msgSound = True) And _
          (itsMe = False) And (CheatsPaused(idConnection) = False) Then
           PlayMsgSound = True
+          'PlayPMSound = True
         End If
 
       Case oldmessage_H14
@@ -4868,6 +4975,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         If (GotPacketWarning(idConnection) = False) And (RuneMakerOptions(idConnection).msgSound = True) And _
          (itsMe = False) And (CheatsPaused(idConnection) = False) Then
           PlayMsgSound = True
+          'PlayPMSound = True
         End If
       Case oldmessage_H15
         ' say
@@ -4889,6 +4997,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         If (GotPacketWarning(idConnection) = False) And (RuneMakerOptions(idConnection).msgSound = True) And _
          (itsMe = False) And (CheatsPaused(idConnection) = False) Then
           PlayMsgSound = True
+          'PlayPMSound = True
         End If
       Case oldmessage_H0
         ' unknown
@@ -4910,6 +5019,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         If (GotPacketWarning(idConnection) = False) And (RuneMakerOptions(idConnection).msgSound = True) And _
          (itsMe = False) And (CheatsPaused(idConnection) = False) Then
           PlayMsgSound = True
+          'PlayPMSound = True
         End If
       Case oldmessage_H1
         ' say
@@ -4931,6 +5041,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         If (GotPacketWarning(idConnection) = False) And (RuneMakerOptions(idConnection).msgSound = True) And _
          (itsMe = False) And (CheatsPaused(idConnection) = False) Then
           PlayMsgSound = True
+          'PlayPMSound = True
         End If
       Case oldmessage_H2
         ' whisper
@@ -4952,6 +5063,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         If (GotPacketWarning(idConnection) = False) And (RuneMakerOptions(idConnection).msgSound = True) And _
          (itsMe = False) And (CheatsPaused(idConnection) = False) Then
           PlayMsgSound = True
+          'PlayPMSound = True
         End If
       Case oldmessage_H3
         ' yell
@@ -4973,6 +5085,7 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         If (GotPacketWarning(idConnection) = False) And (RuneMakerOptions(idConnection).msgSound = True) And _
          (itsMe = False) And (CheatsPaused(idConnection) = False) Then
           PlayMsgSound = True
+          'PlayPMSound = True
         End If
       Case oldmessage_H4
         ' tell
@@ -4994,7 +5107,9 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
         If (GotPacketWarning(idConnection) = False) And (RuneMakerOptions(idConnection).msgSound = True) And _
          (itsMe = False) And (CheatsPaused(idConnection) = False) Then
           PlayMsgSound = True
+          'custom ng sound
         End If
+        PlayPMSound = True
       Case oldmessage_H5
         ' channel
         lonN = GetTheLong(packet(pos + 3), packet(pos + 4))
@@ -5493,6 +5608,11 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
                 mobName = mobName & Chr(packet(pos))
                 pos = pos + 1
             Next itemCount
+            
+            var_lastsender(idConnection) = "SYSTEM"
+            var_lastmsg(idConnection) = mobName
+            ProcessEventMsg idConnection, &H0
+            
         Case &H17, &H18, &H1B
                 ' B4 17 C5 7E E1 7D 07 1A 00 00 00 1E 00 00 00 00 00 36 00 41 20 70 6F 69 73 6F 6E 20 73 70 69 64 65 72 20 6C 6F 73 65 73 20 32 36 20 68 69 74 70 6F 69 6E 74 73 20 64 75 65 20 74 6F 20 79 6F 75 72 20 61 74 74 61 63 6B 2E
                 ' B4 18 AD 7E 5B 7D 0F 19 00 00 00 B4 00 00 00 00 00 3B 00 59 6F 75 20 6C 6F 73 65 20 32 35 20 68 69 74 70 6F 69 6E 74 73 20 64 75 65 20 74 6F 20 61 6E 20 61 74 74 61 63 6B 20 62 79 20 61 20 6D 69 6E 6F 74 61 75 72 20 67 75 61 72 64 2E
@@ -5510,9 +5630,12 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
                     mobName = mobName & Chr(packet(pos))
                     pos = pos + 1
                 Next itemCount
+              
+                 var_lastsender(idConnection) = "SYSTEM"
+                 var_lastmsg(idConnection) = mobName
+                 ProcessEventMsg idConnection, &H0
                 
-                
-        Case &H19, &H1A, &H1C, &H1D
+        Case &H19, &H1A, &H1C, &H1D, &H2B
               ' B4 1D AE 7E 5C 7D 0F 32 00 00 00 D7 2D 00 41 20 6D 69 6E 6F 74 61 75 72 20 67 75 61 72 64 20 67 61 69 6E 65 64 20 35 30 20 65 78 70 65 72 69 65 6E 63 65 20 70 6F 69 6E 74 73 2E
             
               
@@ -5528,6 +5651,10 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
                 mobName = mobName & Chr(packet(pos))
                 pos = pos + 1
               Next itemCount
+              
+              var_lastsender(idConnection) = "SYSTEM"
+              var_lastmsg(idConnection) = mobName
+              ProcessEventMsg idConnection, &H0
      
         Case &H6, &H21, &H22
                    ' B4 21 37 27 26 00 47 75 69 6C 64 20 6D 65 73 73 61 67 65 3A 20 48 61 69 6C 20 54 69 62 69 61 6E 6F 73 20 56 69 63 69 61 64 6F 73 21
@@ -5542,7 +5669,13 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
                         mobName = mobName & Chr(packet(pos))
                         pos = pos + 1
                     Next itemCount
+                    
+                    var_lastsender(idConnection) = "SYSTEM"
+                    var_lastmsg(idConnection) = mobName
+                    ProcessEventMsg idConnection, &H0
+                    
         Case Else
+    
                          'Debug.Print frmMain.showAsStr3(packet, True, pos, 1000000)
                     pos = pos + 2
                     lonN = GetTheLong(packet(pos), packet(pos + 1))
@@ -5552,9 +5685,21 @@ Public Function LearnFromPacket(ByRef packet() As Byte, pos As Long, idConnectio
                         mobName = mobName & Chr(packet(pos))
                         pos = pos + 1
                     Next itemCount
+                   ' Debug.Print "Received packet type " & GoodHex(tempb1) & ": " & mobName
+                       
+                    If (tempb1 = &H13) Then
+                       var_lastsender(idConnection) = "RAID"
+                       var_lastmsg(idConnection) = mobName
+                       ProcessEventMsg idConnection, &H11
+                    Else
+                       var_lastsender(idConnection) = "SYSTEM"
+                       var_lastmsg(idConnection) = mobName
+                       ProcessEventMsg idConnection, &H0
+                   End If
               
         End Select
-
+      'Debug.Print ("messasage from '" & var_lastsender(idConnection) & "' : '" & var_lastmsg(idConnection) & "'")
+            
         If (tempb1 = &H15) Then
           lastIngameCheck(idConnection) = mobName
         End If
@@ -6472,6 +6617,205 @@ pos = pos + 4 + (15 * templ2)
         ' 01 00 00
         pos = pos + 2 + templ2
       End If
+    Case &HFB
+      ' tibia premium services shop (categories)
+      pos = pos + 10
+      templ2 = GetTheLong(packet(pos), packet(pos + 1))
+      pos = pos + 2
+      For templ1 = 1 To templ2
+           lonN = GetTheLong(packet(pos), packet(pos + 1))
+           pos = pos + 2
+           mobName = ""
+           For itemCount = 1 To lonN
+             mobName = mobName & Chr(packet(pos))
+             pos = pos + 1
+           Next itemCount
+           #If DEBUG_SHOP = 1 Then
+            Debug.Print "CATEGORY NAME> " & mobName
+           #End If
+           lonN = GetTheLong(packet(pos), packet(pos + 1))
+           pos = pos + 2
+           mobName = ""
+           For itemCount = 1 To lonN
+             mobName = mobName & Chr(packet(pos))
+             pos = pos + 1
+           Next itemCount
+           #If DEBUG_SHOP = 1 Then
+            Debug.Print "CATEGORY DESCRIPTION> " & mobName
+           #End If
+           #If DEBUG_SHOP = 1 Then
+            Debug.Print "COLOR> " & GoodHex(packet(pos))
+            Debug.Print "AVAILABLE> " & GoodHex(packet(pos + 1))
+           #End If
+           pos = pos + 2 ' 2 bytes
+           
+           lonN = GetTheLong(packet(pos), packet(pos + 1))
+           pos = pos + 2
+           mobName = ""
+           For itemCount = 1 To lonN
+             mobName = mobName & Chr(packet(pos))
+             pos = pos + 1
+           Next itemCount
+           #If DEBUG_SHOP = 1 Then
+             Debug.Print "ICON> " & mobName
+           #End If
+           lonN = GetTheLong(packet(pos), packet(pos + 1))
+           pos = pos + 2
+           mobName = ""
+           For itemCount = 1 To lonN
+             mobName = mobName & Chr(packet(pos))
+             pos = pos + 1
+           Next itemCount
+           #If DEBUG_SHOP = 1 Then
+             Debug.Print "UNKNOWN> " & mobName
+           #End If
+      Next templ1
+    Case &HFC
+       ' Tibia premium services shop (items)
+       ' Parser updated for Tibia 10.92
+      pos = pos + 1
+      lonN = GetTheLong(packet(pos), packet(pos + 1))
+      pos = pos + 2
+      mobName = ""
+      For itemCount = 1 To lonN
+        mobName = mobName & Chr(packet(pos))
+        pos = pos + 1
+      Next itemCount
+      #If DEBUG_SHOP = 1 Then
+        Debug.Print "SELECTED CATEGORY> " & mobName
+      #End If
+      templ2 = GetTheLong(packet(pos), packet(pos + 1))
+      pos = pos + 2
+      For templ1 = 1 To templ2
+           lonN = CLng(FourBytesDouble(packet(pos), packet(pos + 1), packet(pos + 2), packet(pos + 3)))
+           #If DEBUG_SHOP = 1 Then
+             Debug.Print "PRODUCT ID> " & lonN
+           #End If
+           pos = pos + 4
+           
+           lonN = GetTheLong(packet(pos), packet(pos + 1))
+           pos = pos + 2
+           mobName = ""
+           For itemCount = 1 To lonN
+             mobName = mobName & Chr(packet(pos))
+             pos = pos + 1
+           Next itemCount
+           #If DEBUG_SHOP = 1 Then
+             Debug.Print "PRODUCT NAME> " & mobName
+           #End If
+           lonN = GetTheLong(packet(pos), packet(pos + 1))
+           pos = pos + 2
+           mobName = ""
+           For itemCount = 1 To lonN
+             mobName = mobName & Chr(packet(pos))
+             pos = pos + 1
+           Next itemCount
+           #If DEBUG_SHOP = 1 Then
+             Debug.Print "DESCRIPTION> " & mobName
+           #End If
+           lonN = CLng(FourBytesDouble(packet(pos), packet(pos + 1), packet(pos + 2), packet(pos + 3)))
+           #If DEBUG_SHOP = 1 Then
+             Debug.Print "PRICE> " & lonN
+           #End If
+           pos = pos + 4
+           #If DEBUG_SHOP = 1 Then
+             Debug.Print "COLOR> " & GoodHex(packet(pos))
+             Debug.Print "AVAILABLE> " & GoodHex(packet(pos + 1))
+           #End If
+           templ2 = CLng(packet(pos + 1))
+           pos = pos + 2 ' skip 2 bytes
+           If templ2 = 1 Then ' there is an additional string message if the byte "AVAILABLE" equals exactly 1
+             lonN = GetTheLong(packet(pos), packet(pos + 1))
+             pos = pos + 2
+             mobName = ""
+             For itemCount = 1 To lonN
+               mobName = mobName & Chr(packet(pos))
+               pos = pos + 1
+             Next itemCount
+             #If DEBUG_SHOP = 1 Then
+               Debug.Print "MISSING REQUIREMENTS> " & mobName
+             #End If
+           End If
+           
+           templ2 = CLng(packet(pos))
+           pos = pos + 1
+           For lonNumItems = 1 To templ2
+             lonN = GetTheLong(packet(pos), packet(pos + 1))
+             pos = pos + 2
+             mobName = ""
+             For itemCount = 1 To lonN
+               mobName = mobName & Chr(packet(pos))
+               pos = pos + 1
+             Next itemCount
+           #If DEBUG_SHOP = 1 Then
+             Debug.Print "ICON" & CStr(lonNumItems) & "> " & mobName
+           #End If
+           Next lonNumItems
+           templ2 = GetTheLong(packet(pos), packet(pos + 1))
+           pos = pos + 2
+           For lonNumItems = 1 To templ2
+             lonN = GetTheLong(packet(pos), packet(pos + 1))
+             pos = pos + 2
+             mobName = ""
+             For itemCount = 1 To lonN
+               mobName = mobName & Chr(packet(pos))
+               pos = pos + 1
+             Next itemCount
+             #If DEBUG_SHOP = 1 Then
+               Debug.Print "PACK ITEM NAME> " & mobName
+             #End If
+             lonN = GetTheLong(packet(pos), packet(pos + 1))
+             pos = pos + 2
+             mobName = ""
+             For itemCount = 1 To lonN
+               mobName = mobName & Chr(packet(pos))
+               pos = pos + 1
+             Next itemCount
+             #If DEBUG_SHOP = 1 Then
+               Debug.Print "PACK ITEM DESCRIPTION> " & mobName
+             #End If
+             templ3 = CLng(packet(pos))
+             pos = pos + 1
+             For lonNumItems2 = 1 To templ3
+               lonN = GetTheLong(packet(pos), packet(pos + 1))
+               pos = pos + 2
+               mobName = ""
+               For itemCount = 1 To lonN
+                 mobName = mobName & Chr(packet(pos))
+                 pos = pos + 1
+               Next itemCount
+               #If DEBUG_SHOP = 1 Then
+                 Debug.Print "PACK ICON" & CStr(lonNumItems2) & "> " & mobName
+               #End If
+             Next lonNumItems2
+             lonN = GetTheLong(packet(pos), packet(pos + 1))
+             pos = pos + 2
+             For itemCount = 1 To lonN
+               mobName = mobName & Chr(packet(pos))
+               pos = pos + 1
+             Next itemCount
+             #If DEBUG_SHOP = 1 Then
+               Debug.Print "PACK ITEM FLAGS> " & mobName
+             #End If
+           Next lonNumItems
+         
+      Next templ1
+   Case &HFD
+      ' tibia premium services shop (history)
+      pos = pos + 4
+      templ1 = CLng(packet(pos))
+      pos = pos + 1
+      For templ1 = 1 To templ1
+         pos = pos + 9
+         lonN = GetTheLong(packet(pos), packet(pos + 1))
+         pos = pos + 2
+         mobName = ""
+         For itemCount = 1 To lonN
+           mobName = mobName & Chr(packet(pos))
+           pos = pos + 1
+         Next itemCount
+         'Debug.Print "ENTRY> " & mobName
+      Next templ1
     Case Else
       ' should not happen, unless protocol get updated
        ' LogOnFile "errors.txt", "WARNING IN PACKET" & frmMain.showAsStr2(packet, 0) & vbCrLf & "UNKNOWN PTYPE : " & GoodHex(pType)

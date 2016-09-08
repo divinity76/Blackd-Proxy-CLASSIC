@@ -107,6 +107,12 @@ Public Sub NotifyLoadProgress(Ammount As Double, reason As String)
   Else
     lblProgress.ForeColor = &HFF00&
   End If
+  
+  'custom ng sound
+  If Ammount = 100 Then
+  DirectX_PlaySound 4
+  End If
+  
   lblStep.Caption = "[" & reason & "]"
   Me.Refresh
   DoEvents
@@ -304,7 +310,7 @@ End Sub
 
 
 Private Function ShowConfigWizard() As Boolean
-  On Error GoTo goterr
+  On Error GoTo gotErr
   Dim res As Boolean
   Dim strInfo As String
   Dim i As Long
@@ -339,7 +345,7 @@ Private Function ShowConfigWizard() As Boolean
   End If
   ShowConfigWizard = res
   Exit Function
-goterr:
+gotErr:
   ShowConfigWizard = True
 End Function
 
@@ -372,7 +378,7 @@ Private Sub Form_Load()
     ChDrive App.path
     ChDir App.path
   End If
-  
+  shouldOpenErrorsTXTfolder = True
   MemoryProtectedMode = False
   ForceDisableEncryption = False
   WARNING_USING_OTSERVER_RSA = False
@@ -469,21 +475,15 @@ giveError:
 
 End Sub
 
-
-
-
-
-
-
-
-
-
-
-
 Private Sub Timer1_Timer()
   If LoadWasCompleted = True Then
     Timer1.enabled = False
-    frmMenu.Show
+    'custom ng startup
+    If frmOld.chkOldMenu.Value = 0 Then
+        frmMenu.Show
+    Else
+        frmOld.Show
+    End If
     'frmMenu.givePathMsg
     Unload Me
   ElseIf LoadingStarted = False Then
