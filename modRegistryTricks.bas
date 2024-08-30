@@ -75,7 +75,7 @@ Private Function GetCurrentDate()
    GetCurrentDate = FormatDateTime(Date, 1)
 End Function
 Public Function RemoveProgramFromInstallationList(lngGroup As Long, strRegistryPath As String, strToCompare As String, strName As String) As String
-  On Error GoTo gotErr
+  On Error GoTo goterr
         Dim strRes As String
         Dim hSubKey As Long
         Dim rc As Long
@@ -138,7 +138,7 @@ GetKeyError:
          RegCloseKey (hSubKey)
          RemoveProgramFromInstallationList = ""
          Exit Function
-gotErr:
+goterr:
          RemoveProgramFromInstallationList = "ERROR: at RemoveProgramFromInstallationList, code " & CStr(Err.Number) & " : " & Err.Description
 End Function
 
@@ -148,7 +148,7 @@ End Function
  'Delete this key.
 Private Function DeleteKey(ByVal section As Long, ByVal key_name _
     As String) As String
-    On Error GoTo gotErr
+    On Error GoTo goterr
 Dim pos As Integer
 Dim parent_key_name As String
 Dim parent_hKey As Long
@@ -194,18 +194,18 @@ Dim strRes As String
     End If
     DeleteKey = "OK"
     Exit Function
-gotErr:
+goterr:
     DeleteKey = "ERROR: at DeleteKey, code " & CStr(Err.Number) & " : " & Err.Description
 End Function
 
 ' Delete all the key's subkeys.
 Private Function DeleteSubkeys(ByVal section As Long, ByVal _
     key_name As String) As String
-    On Error GoTo gotErr
+    On Error GoTo goterr
 Dim hKey As Long
 Dim subkeys As Collection
 Dim subkey_num As Long
-Dim length As Long
+Dim Length As Long
 Dim subkey_name As String
 
     ' Open the key.
@@ -221,10 +221,10 @@ Dim subkey_name As String
     subkey_num = 0
     Do
         ' Enumerate subkeys until we get an error.
-        length = 256
-        subkey_name = Space$(length)
+        Length = 256
+        subkey_name = Space$(Length)
         If RegEnumKey(hKey, subkey_num, _
-            subkey_name, length) _
+            subkey_name, Length) _
                 <> ERROR_SUCCESS Then Exit Do
         subkey_num = subkey_num + 1
 
@@ -234,7 +234,7 @@ Dim subkey_name As String
     Loop
     
     ' Recursively delete the subkeys and their subkeys.
-    For subkey_num = 1 To subkeys.count
+    For subkey_num = 1 To subkeys.Count
         ' Delete the subkey's subkeys.
         DeleteSubkeys section, key_name & "\" & _
             subkeys(subkey_num)
@@ -247,7 +247,7 @@ Dim subkey_name As String
     RegCloseKey hKey
     DeleteSubkeys = "OK"
     Exit Function
-gotErr:
+goterr:
     DeleteSubkeys = "ERROR: at DeleteSubkeys, code " & CStr(Err.Number) & " : " & Err.Description
 End Function
 
@@ -261,7 +261,7 @@ Dim subkey_values As Collection
 Dim subkey_num As Integer
 Dim subkey_name As String
 Dim subkey_value As String
-Dim length As Long
+Dim Length As Long
 Dim hKey As Long
 Dim txt As String
 Dim subkey_txt As String
@@ -285,10 +285,10 @@ Dim subkey_txt As String
     subkey_num = 0
     Do
         ' Enumerate subkeys until we get an error.
-        length = 256
-        subkey_name = Space$(length)
+        Length = 256
+        subkey_name = Space$(Length)
         If RegEnumKey(hKey, subkey_num, _
-            subkey_name, length) _
+            subkey_name, Length) _
                 <> ERROR_SUCCESS Then Exit Do
         subkey_num = subkey_num + 1
         
@@ -297,16 +297,16 @@ Dim subkey_txt As String
         subkeys.Add subkey_name
     
         ' Get the subkey's value.
-        length = 256
-        subkey_value = Space$(length)
+        Length = 256
+        subkey_value = Space$(Length)
         If RegQueryValue(hKey, subkey_name, _
-            subkey_value, length) _
+            subkey_value, Length) _
             <> ERROR_SUCCESS _
         Then
             subkey_values.Add "Error"
         Else
             ' Remove the trailing null character.
-            subkey_value = Left$(subkey_value, length - 1)
+            subkey_value = Left$(subkey_value, Length - 1)
             subkey_values.Add subkey_value
         End If
     Loop
@@ -318,7 +318,7 @@ Dim subkey_txt As String
     End If
 
     ' Recursively get information on the keys.
-    For subkey_num = 1 To subkeys.count
+    For subkey_num = 1 To subkeys.Count
         subkey_txt = GetKeyInfo(section, key_name & "\" & _
             subkeys(subkey_num), indent + 2)
         txt = txt & Space(indent) & _
@@ -332,18 +332,18 @@ End Function
 
 
 Public Function BlackdFileCopy(strFrom As String, strTo As String) As String
-    On Error GoTo gotErr
-    Dim fs As scripting.FileSystemObject
-    Dim fol As scripting.Folder
-    Dim fil As scripting.Folder
-    Set fs = New scripting.FileSystemObject
+    On Error GoTo goterr
+    Dim fs As Scripting.FileSystemObject
+    Dim fol As Scripting.Folder
+    Dim fil As Scripting.Folder
+    Set fs = New Scripting.FileSystemObject
     If fs.FileExists(strTo) = True Then
         fs.DeleteFile strTo, True
     End If
     fs.CopyFile strFrom, strTo, True
     BlackdFileCopy = ""
     Exit Function
-gotErr:
+goterr:
         BlackdFileCopy = "ERROR: System was not able to do the copy" & vbCrLf & _
         "ERROR CODE: " & CStr(Err.Number) & vbCrLf & _
         "ERROR DESCRIPTION: " & Err.Description & vbCrLf & _
@@ -352,18 +352,18 @@ gotErr:
 End Function
 
 Public Function BlackdFileExistCheck(strTo As String) As Boolean
-    On Error GoTo gotErr
-    Dim fs As scripting.FileSystemObject
-    Dim fol As scripting.Folder
-    Dim fil As scripting.Folder
-    Set fs = New scripting.FileSystemObject
+    On Error GoTo goterr
+    Dim fs As Scripting.FileSystemObject
+    Dim fol As Scripting.Folder
+    Dim fil As Scripting.Folder
+    Set fs = New Scripting.FileSystemObject
     If fs.FileExists(strTo) = False Then
         BlackdFileExistCheck = False
     Else
          BlackdFileExistCheck = True
     End If
     Exit Function
-gotErr:
+goterr:
         MsgBox "ERROR: Filesystem critical error." & vbCrLf & _
         "ERROR CODE: " & CStr(Err.Number) & vbCrLf & _
         "ERROR DESCRIPTION: " & Err.Description, vbCritical + vbOKOnly, "ERROR"
@@ -429,12 +429,12 @@ Public Function RandomFileName() As String
 End Function
 
 Public Function CopyMyselfTo(strNewName As String) As String
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim blnok As Boolean
     Dim strbase As String
     Dim strFrom As String
     Dim strTo As String
-    strbase = App.path
+    strbase = App.Path
     If Right$(strbase, 1) <> "\" Then
         strbase = strbase & "\"
     End If
@@ -442,7 +442,7 @@ Public Function CopyMyselfTo(strNewName As String) As String
     strTo = strbase & strNewName
     CopyMyselfTo = BlackdFileCopy(strFrom, strTo)
     Exit Function
-gotErr:
+goterr:
     If Err.Number = 70 Then
         CopyMyselfTo = "WINDOWS VISTA: a part of the stealth process should be done manually! :" & vbCrLf & _
         "FOR YOUR SAFETY..." & vbCrLf & _

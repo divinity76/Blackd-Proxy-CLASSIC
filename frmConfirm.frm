@@ -68,6 +68,10 @@ End Sub
 
 Private Sub cmdYes_Click()
     confirmedExit = True
+    frmMain.WriteIni
+    If (TibiaVersionLong >= 1100) Then
+        RestoreAllCharlists
+    End If
     Unload frmMenu
     End
 End Sub

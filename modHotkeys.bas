@@ -14,7 +14,7 @@ Public lastHotkeyCol As Long
 Public lastHotkeyRow As Long
 Public espectingHotkey As Boolean
 
-Public DX As DirectX7
+Public dx As DirectX7
 Public DI As DirectInput
 Public DIV As DirectInputDevice
 Public DID As DirectInputEnumDevices
@@ -33,7 +33,7 @@ Public Function InitDI() As String
   HotkeysAreUsable = False
   If SoundIsUsable = True Then
   res = "Set DI = DX.DirectInputCreate"
-         Set DI = DX.DirectInputCreate
+         Set DI = dx.DirectInputCreate
   res = "Set DID = DI.GetDIEnumDevices(DIDEVTYPE_KEYBOARD, DIEDFL_ATTACHEDONLY)"
          Set DID = DI.GetDIEnumDevices(DIDEVTYPE_KEYBOARD, DIEDFL_ATTACHEDONLY)
   res = "Set DII = DID.GetItem(1)"
@@ -45,7 +45,7 @@ Public Function InitDI() As String
   res = "DIV.SetCommonDataFormat DIFORMAT_KEYBOARD"
          DIV.SetCommonDataFormat DIFORMAT_KEYBOARD
   res = "DIV.SetCooperativeLevel frmMain.hwnd, DISCL_BACKGROUND Or DISCL_NONEXCLUSIVE"
-         DIV.SetCooperativeLevel frmMain.hwnd, DISCL_BACKGROUND Or DISCL_NONEXCLUSIVE
+         DIV.SetCooperativeLevel frmMain.hWnd, DISCL_BACKGROUND Or DISCL_NONEXCLUSIVE
   res = "DIV.Acquire"
          DIV.Acquire
   res = ""

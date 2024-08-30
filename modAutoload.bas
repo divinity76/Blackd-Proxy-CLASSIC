@@ -2,7 +2,7 @@ Attribute VB_Name = "modAutoload"
 #Const FinalMode = 1
 Option Explicit
 Private Const CteAutoloadSubfolder As String = "autoload"
-Public SettingsOfChar As scripting.Dictionary  ' A dictionary Char Name (string) -> Settings (string)
+Public SettingsOfChar As Scripting.Dictionary  ' A dictionary Char Name (string) -> Settings (string)
 Private AutoloadUsable As Boolean
 Private AutoloadPath As String
 
@@ -26,7 +26,7 @@ End Function
 
 Private Sub LoadThisCharSetting(idConnection As Integer, strVar As String, strValue As String)
     #If FinalMode Then
-    On Error GoTo gotErr
+    On Error GoTo goterr
     #End If
     Dim i As Long
     Dim blnTemp As Boolean
@@ -323,7 +323,7 @@ Private Sub LoadThisCharSetting(idConnection As Integer, strVar As String, strVa
     Case "CustomCondEvents_thing1"
         Aux_LastLoadedCond(idConnection).thing1 = strValue
     Case "CustomCondEvents_operator"
-        Aux_LastLoadedCond(idConnection).operator = strValue
+        Aux_LastLoadedCond(idConnection).Operator = strValue
     Case "CustomCondEvents_thing2"
         Aux_LastLoadedCond(idConnection).thing2 = strValue
     Case "CustomCondEvents_delay"
@@ -337,7 +337,7 @@ Private Sub LoadThisCharSetting(idConnection As Integer, strVar As String, strVa
     Case "CustomCondEvents_ADD"
         aRes = frmCondEvents.AddCondEvent(idConnection, _
          Aux_LastLoadedCond(idConnection).thing1, _
-         Aux_LastLoadedCond(idConnection).operator, _
+         Aux_LastLoadedCond(idConnection).Operator, _
          Aux_LastLoadedCond(idConnection).thing2, _
          Aux_LastLoadedCond(idConnection).delay, _
          Aux_LastLoadedCond(idConnection).lock, _
@@ -426,18 +426,18 @@ Private Sub LoadThisCharSetting(idConnection As Integer, strVar As String, strVa
       frmTrainer.UpdateValues
     End Select
     Exit Sub
-gotErr:
+goterr:
     Exit Sub
 End Sub
 
-Public Function OverwriteOnPathFileSimple(pathfile As String, strtext As String) As Long
+Public Function OverwriteOnPathFileSimple(pathfile As String, strText As String) As Long
   Dim fn As Integer
   Dim writeThis As String
   Dim a As Long
   On Error GoTo ignoreit
   a = 0
   fn = FreeFile
-  writeThis = strtext
+  writeThis = strText
   Open pathfile For Output As #fn
     Print #fn, writeThis
   Close #fn
@@ -450,7 +450,7 @@ End Function
 
 Public Function LoadCharSettings(idConnection As Integer, Optional charName As String = "") As String
     #If FinalMode Then
-    On Error GoTo gotErr
+    On Error GoTo goterr
     #End If
     Dim loadCharName As String
     Dim strSettings As String
@@ -493,7 +493,7 @@ Public Function LoadCharSettings(idConnection As Integer, Optional charName As S
     Next ai
     LoadCharSettings = ""
     Exit Function
-gotErr:
+goterr:
     LoadCharSettings = "Unexpected error #" & CStr(Err.Number) & " at LoadCharSettings: " & Err.Description
 End Function
 
@@ -507,7 +507,7 @@ Public Sub SaveCharSettings(idConnection As Integer)
     Dim i As Long
     Dim j As Long
     #If FinalMode Then
-    On Error GoTo gotErr
+    On Error GoTo goterr
     #End If
     If GameConnected(idConnection) = True Then
         charName = CharacterName(idConnection)
@@ -517,7 +517,7 @@ Public Sub SaveCharSettings(idConnection As Integer)
         DoEvents
         Exit Sub
     End If
-    myPath = App.path
+    myPath = App.Path
     If (Right$(myPath, 1) <> "\") And (Right$(myPath, 1) <> "/") Then
       myPath = myPath & "\" & CteAutoloadSubfolder & "\" & CharacterName(idConnection) & ".txt"
     Else
@@ -545,7 +545,7 @@ Public Sub SaveCharSettings(idConnection As Integer)
             strSettings = strSettings & "LastCavebotFile=" & frmCavebot.txtFile.Text & vbCrLf
         End If
     End If
-    If frmCavebot.chkEnabled.Value = 1 Then
+    If frmCavebot.chkEnabled.value = 1 Then
     'custom ng avoid save turn on cavebot
         strSettings = strSettings & "CavebotEnabled=1" & vbCrLf
     Else
@@ -705,7 +705,7 @@ Public Sub SaveCharSettings(idConnection As Integer)
         strSettings = strSettings & "BEGIN_CustomCondEvents=1" & vbCrLf
         For i = 1 To CustomCondEvents(condEventsIDselected).Number
             strSettings = strSettings & "CustomCondEvents_thing1=" & CustomCondEvents(condEventsIDselected).ev(i).thing1 & vbCrLf
-            strSettings = strSettings & "CustomCondEvents_operator=" & CustomCondEvents(condEventsIDselected).ev(i).operator & vbCrLf
+            strSettings = strSettings & "CustomCondEvents_operator=" & CustomCondEvents(condEventsIDselected).ev(i).Operator & vbCrLf
             strSettings = strSettings & "CustomCondEvents_thing2=" & CustomCondEvents(condEventsIDselected).ev(i).thing2 & vbCrLf
             strSettings = strSettings & "CustomCondEvents_delay=" & CustomCondEvents(condEventsIDselected).ev(i).delay & vbCrLf
             strSettings = strSettings & "CustomCondEvents_lock=" & CustomCondEvents(condEventsIDselected).ev(i).lock & vbCrLf
@@ -773,7 +773,7 @@ Public Sub SaveCharSettings(idConnection As Integer)
     DoEvents
     
     Exit Sub
-gotErr:
+goterr:
     If GameConnected(idConnection) = True Then
         aRes = GiveGMmessage(idConnection, "Unable to save settings for this character. Got unexpected error " & CStr(Err.Number), "BlackdProxy")
         DoEvents
@@ -783,22 +783,22 @@ End Sub
 Public Sub PreloadAllCharSettingsFromHardDisk()
   Dim res As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim strFileName As String
   Dim myPath As String
   Dim fn As Integer
-  Dim fs As scripting.FileSystemObject
-  Dim f As scripting.Folder
-  Dim f1 As scripting.File
+  Dim fs As Scripting.FileSystemObject
+  Dim f As Scripting.Folder
+  Dim f1 As Scripting.File
   Dim currentSettingPath As String
   Dim currentSettingThing As String
   Dim currentCharName As String
   Dim strLine As String
   AutoloadUsable = True
-  Set SettingsOfChar = New scripting.Dictionary
+  Set SettingsOfChar = New Scripting.Dictionary
 
-  myPath = App.path
+  myPath = App.Path
   If (Right$(myPath, 1) <> "\") And (Right$(myPath, 1) <> "/") Then
     myPath = myPath & "\" & CteAutoloadSubfolder & "\"
   Else
@@ -806,7 +806,7 @@ Public Sub PreloadAllCharSettingsFromHardDisk()
   End If
   AutoloadPath = myPath
   
-  Set fs = New scripting.FileSystemObject
+  Set fs = New Scripting.FileSystemObject
   If fs.FolderExists(myPath) = False Then
     fs.CreateFolder (myPath)
     DoEvents
@@ -838,25 +838,25 @@ Public Sub PreloadAllCharSettingsFromHardDisk()
     End If
   Next
   Exit Sub
-gotErr:
+goterr:
   AutoloadUsable = False
   Exit Sub
 End Sub
 
 Public Sub AddSettingsOfChar(ByVal strChar As String, ByVal strSettings As String)
-  On Error GoTo gotErr
+  On Error GoTo goterr
   ' add item to dictionary
   Dim res As Boolean
   If AutoloadUsable = True Then
     SettingsOfChar.item(LCase(strChar)) = strSettings
   End If
   Exit Sub
-gotErr:
+goterr:
   LogOnFile "errors.txt", "Get error at AddSettingsOfChar : " & Err.Description
 End Sub
 
 Public Function GetSettingsOfChar(ByVal strChar As String) As String
-  On Error GoTo gotErr
+  On Error GoTo goterr
   ' get the IPandport from server name
   Dim aRes As String
   Dim res As Boolean
@@ -868,7 +868,7 @@ Public Function GetSettingsOfChar(ByVal strChar As String) As String
     End If
   End If
   Exit Function
-gotErr:
+goterr:
   LogOnFile "errors.txt", "Got error at GetSettingsOfChar : " & Err.Description
   GetSettingsOfChar = ""
 End Function

@@ -15,7 +15,7 @@ Public Type TypeHPmanaConfig
 End Type
 
 Public HPmanaConfig() As TypeHPmanaConfig
-
+Public lastLootOrder() As Long
 Public LastHealTime() As Long
 Public LastCavebotTime() As Long
 Public HPmanaRECAST As Long
@@ -103,19 +103,19 @@ End Sub
 
 
 Public Function LoadHPmanaConfig() As String
-    On Error GoTo gotErr
-  Dim fso As scripting.FileSystemObject
-  Set fso = New scripting.FileSystemObject
+    On Error GoTo goterr
+  Dim fso As Scripting.FileSystemObject
+  Set fso = New Scripting.FileSystemObject
   Dim fn As Integer
   Dim strLine As String
-  If fso.FileExists(App.path & "\HPmana.cfg") = False Then
+  If fso.FileExists(App.Path & "\HPmana.cfg") = False Then
     ReDim HPmanaConfig(0)
     Exit Function
   End If
   Set fso = Nothing
   ReDim HPmanaConfig(0)
   fn = FreeFile
-  Open App.path & "\HPmana.cfg" For Input As #fn
+  Open App.Path & "\HPmana.cfg" For Input As #fn
     While EOF(fn) = False
       Line Input #fn, strLine
       parseConfigLine strLine
@@ -124,13 +124,13 @@ Public Function LoadHPmanaConfig() As String
   DisplayLoadedHPmanaConfig
   LoadHPmanaConfig = ""
   Exit Function
-gotErr:
+goterr:
   LoadHPmanaConfig = "(at load) error code " & CStr(Err.Number) & " : " & Err.Description
 End Function
 
 
 Public Function SaveHPmanaConfig() As String
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim i As Long
     Dim ult As Long
     Dim strHD As String
@@ -150,7 +150,7 @@ Public Function SaveHPmanaConfig() As String
     OverwriteOnFile "HPmana.cfg", strHD
     SaveHPmanaConfig = ""
     Exit Function
-gotErr:
+goterr:
     SaveHPmanaConfig = "(at save) error code " & CStr(Err.Number) & " : " & Err.Description
 End Function
 
@@ -209,7 +209,7 @@ Public Sub DisplayLoadedHPmanaConfig()
 End Sub
 
 Public Function GotCustomHPsettings(idConnection As Integer) As Boolean
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim i As Long
     Dim ult As Long
     Dim lstrchar As String
@@ -227,13 +227,13 @@ Public Function GotCustomHPsettings(idConnection As Integer) As Boolean
     Next i
     GotCustomHPsettings = False
     Exit Function
-gotErr:
+goterr:
     GotCustomHPsettings = False
 End Function
 
 
 Public Function GotCustomMANAsettings(idConnection As Integer) As Boolean
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim i As Long
     Dim ult As Long
     Dim lstrchar As String
@@ -251,7 +251,7 @@ Public Function GotCustomMANAsettings(idConnection As Integer) As Boolean
     Next i
     GotCustomMANAsettings = False
     Exit Function
-gotErr:
+goterr:
     GotCustomMANAsettings = False
 End Function
 

@@ -2,11 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Blackd Proxy"
-#define MyAppVersion "40.8"
+#define MyAppVersion "43.1"
 #define MyAppPublisher "blackdtools.com"
 #define MyAppURL "http://blackdtools.com"
 #define MyAppExeName "Tibia.exe"
-
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -67,7 +66,6 @@ Source: "crackd.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "danger.wav"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ding.wav"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dx7vb.dll"; DestDir: "{app}"; Flags: 
-Source: "errors.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "hotkeys.ini"; DestDir: "{app}"; Flags: ignoreversion
 Source: "MSFLXGRD.oca"; DestDir: "{app}"; Flags: 
 Source: "msflxgrd.ocx"; DestDir: "{app}"; Flags: 
@@ -84,6 +82,7 @@ Source: "JwldButn2b.ocx"; DestDir: {sys}; Flags: onlyifdoesntexist regserver 64b
 
 
 Source: "mswsock.dll"; DestDir: "{app}"; Flags: 
+Source: "FreeImage.dll"; DestDir: "{app}"; Flags:
 Source: "player.wav"; DestDir: "{app}"; Flags: ignoreversion
 Source: "newsound1.wav"; DestDir: "{app}"; Flags: ignoreversion
 Source: "readme.rtf"; DestDir: "{app}"; Flags: ignoreversion
@@ -233,6 +232,20 @@ Source: "config1094\*"; DestDir: "{app}\config1094"; Flags: ignoreversion recurs
 Source: "config1095\*"; DestDir: "{app}\config1095"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "config1096\*"; DestDir: "{app}\config1096"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "config1097\*"; DestDir: "{app}\config1097"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1098\*"; DestDir: "{app}\config1098"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1099-old0\*"; DestDir: "{app}\config1099-old0"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1099-old1\*"; DestDir: "{app}\config1099-old1"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1099-old2\*"; DestDir: "{app}\config1099-old2"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1099-old3\*"; DestDir: "{app}\config1099-old3"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1099-old4\*"; DestDir: "{app}\config1099-old4"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1099-old5\*"; DestDir: "{app}\config1099-old5"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1099\*"; DestDir: "{app}\config1099"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1100\*"; DestDir: "{app}\config1100"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1101\*"; DestDir: "{app}\config1101"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1102\*"; DestDir: "{app}\config1102"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1103\*"; DestDir: "{app}\config1103"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1104\*"; DestDir: "{app}\config1104"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "config1110\*"; DestDir: "{app}\config1110"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "events\*"; DestDir: "{app}\events"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "fonts\*"; DestDir: "{app}\fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "ips\*"; DestDir: "{app}\ips"; Flags: ignoreversion recursesubdirs createallsubdirs

@@ -158,7 +158,7 @@ End Type
 
 Private Type TypeOffsetInfo
     pid As Long
-    offset As Long
+    Offset As Long
 End Type
 
 
@@ -176,27 +176,27 @@ Private Type PROCESSENTRY32
     szExeFile As String * MAX_PATH
 End Type
    
-Private Declare Function WriteProcessMemory Lib "kernel32" (ByVal hProcess As Long, ByVal lpBaseAddress As Any, lpBuffer As Any, ByVal nSize As Long, lpNumberOfBytesWritten As Long) As Long
-Private Declare Function ReadProcessMemory Lib "kernel32" (ByVal hProcess As Long, ByVal lpBaseAddress As Any, ByRef lpBuffer As Any, ByVal nSize As Long, lpNumberOfBytesWritten As Long) As Long
+Private Declare Function WriteProcessMemory Lib "Kernel32" (ByVal hProcess As Long, ByVal lpBaseAddress As Any, lpBuffer As Any, ByVal nSize As Long, lpNumberOfBytesWritten As Long) As Long
+Private Declare Function ReadProcessMemory Lib "Kernel32" (ByVal hProcess As Long, ByVal lpBaseAddress As Any, ByRef lpBuffer As Any, ByVal nSize As Long, lpNumberOfBytesWritten As Long) As Long
 
-Private Declare Function VirtualQueryEx& Lib "kernel32" (ByVal hProcess As Long, lpAddress As Any, lpBuffer As MEMORY_BASIC_INFORMATION, ByVal dwLength As Long)
+Private Declare Function VirtualQueryEx& Lib "Kernel32" (ByVal hProcess As Long, lpAddress As Any, lpBuffer As MEMORY_BASIC_INFORMATION, ByVal dwLength As Long)
 
-Private Declare Sub GetSystemInfo Lib "kernel32" (lpSystemInfo As SYSTEM_INFO)
+Private Declare Sub GetSystemInfo Lib "Kernel32" (lpSystemInfo As SYSTEM_INFO)
    
-Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hwnd As Long, lpdwProcessId As Long) As Long
+Private Declare Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As Long, lpdwProcessId As Long) As Long
 
-Private Declare Function OpenProcess Lib "kernel32" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal dwProcessId As Long) As Long
-Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
+Private Declare Function OpenProcess Lib "Kernel32" (ByVal dwDesiredAccess As Long, ByVal bInheritHandle As Long, ByVal dwProcessId As Long) As Long
+Private Declare Function CloseHandle Lib "Kernel32" (ByVal hObject As Long) As Long
 
 
 ' Private Declare Function VirtualProtectEx Lib "Kernel32" (ByVal hProcess As Long, ByRef lpAddress As Long, ByVal dwSize As Long, ByVal flNewProtect As Long, ByRef lpflOldProtect As Long) As Long
 
 
 
-Private Declare Function InvalidateRect Lib "user32" (ByVal hwnd As Long, ByVal lpRect As Long, ByVal bErase As Long) As Long
+Private Declare Function InvalidateRect Lib "user32" (ByVal hWnd As Long, ByVal lpRect As Long, ByVal bErase As Long) As Long
 
 
-Private Declare Sub GetStartupInfo Lib "kernel32" Alias "GetStartupInfoA" (lpStartupInfo As STARTUPINFO)
+Private Declare Sub GetStartupInfo Lib "Kernel32" Alias "GetStartupInfoA" (lpStartupInfo As STARTUPINFO)
 
 Private Const THREAD_BASE_PRIORITY_LOWRT As Long = 15 ' value that gets a thread to LowRealtime-1
 Private Const THREAD_BASE_PRIORITY_MAX As Long = 2 ' maximum thread base priority boost
@@ -214,10 +214,10 @@ Private Enum ThreadPriority
 End Enum
 
 
-Private Declare Function TerminateProcess Lib "kernel32" Alias "Terminate Process" ( _
+Private Declare Function TerminateProcess Lib "Kernel32" Alias "Terminate Process" ( _
  ByVal hProcess As Long, ByVal uExitCode As Long) As Long
 
-Private Declare Function CreateProcess Lib "kernel32" _
+Private Declare Function CreateProcess Lib "Kernel32" _
          Alias "CreateProcessA" _
          (ByVal lpApplicationName As String, _
          ByVal lpCommandLine As String, _
@@ -261,7 +261,7 @@ Public Function ResetOffsetCache(ByVal parOffsetsCacheSize As Long)
     ReDim OffsetsCache(1 To parOffsetsCacheSize)
     For i = 1 To parOffsetsCacheSize
        OffsetsCache(i).pid = -1
-       OffsetsCache(i).offset = 0
+       OffsetsCache(i).Offset = 0
     Next i
     NextOffset = 1
 End Function
@@ -328,7 +328,7 @@ End Function
 
 
 Public Function getProcessBase(ByVal hProcess As Long, ByVal expectedRegionSize As Long, Optional PIDinsteadHp As Boolean = False) As Long
-    On Error GoTo gotErr
+    On Error GoTo goterr
     ' expectedRegionSize is used again
     Dim lpMem As Long, ret As Long, lLenMBI As Long
     Dim lWritten As Long, CalcAddress As Long, lPos As Long
@@ -377,12 +377,12 @@ Public Function getProcessBase(ByVal hProcess As Long, ByVal expectedRegionSize 
     If PIDinsteadHp = True Then
        CloseHandle hProcess
     End If
-gotErr:
+goterr:
     getProcessBase = 0
 End Function
 
 Public Function getProcessOffset(ByVal hProcess As Long, ByVal pid As Long) As Long
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim lpMem As Long, ret As Long, lLenMBI As Long
     Dim lWritten As Long, CalcAddress As Long, lPos As Long
     Dim sBuffer As String
@@ -401,7 +401,7 @@ Public Function getProcessOffset(ByVal hProcess As Long, ByVal pid As Long) As L
    
      For i = 1 To OffsetsCacheSize
           If (pid = OffsetsCache(i).pid) Then
-             getProcessOffset = OffsetsCache(i).offset
+             getProcessOffset = OffsetsCache(i).Offset
              Exit Function
           End If
      Next i
@@ -418,7 +418,7 @@ Public Function getProcessOffset(ByVal hProcess As Long, ByVal pid As Long) As L
                If (mbi.RegionSize = tibiaModuleRegionSize) Then ' this is the interesting region
                    res = mbi.AllocationBase - &H400000
                    OffsetsCache(NextOffset).pid = pid
-                   OffsetsCache(NextOffset).offset = res
+                   OffsetsCache(NextOffset).Offset = res
                    NextOffset = NextOffset + 1
                    If NextOffset > OffsetsCacheSize Then
                      NextOffset = 1
@@ -432,7 +432,7 @@ Public Function getProcessOffset(ByVal hProcess As Long, ByVal pid As Long) As L
            Exit Do
         End If
     Loop
-gotErr:
+goterr:
     getProcessOffset = 0
 End Function
 Public Function Memory_ReadCString(ByVal address As Long, ByVal process_Hwnd As Long, Optional absoluteAddress As Boolean = False, Optional EOLCharacter As Byte = &H0) As String
@@ -441,10 +441,10 @@ Public Function Memory_ReadCString(ByVal address As Long, ByVal process_Hwnd As 
     Dim phandle As Long     ' Holds the Process Handle
     Dim ByteBuf As Byte   ' Byte
     Dim res As String
-    Dim offset As Long
+    Dim Offset As Long
     Dim i As Long
     Dim BytesRead As Long
-    On Error GoTo gotErr
+    On Error GoTo goterr
 
     ' First get a handle to the "game" window
     If (process_Hwnd = 0) Then Exit Function
@@ -466,8 +466,8 @@ Public Function Memory_ReadCString(ByVal address As Long, ByVal process_Hwnd As 
     '1
     'offset = 0
     If ((useDynamicOffsetBool = True) And (absoluteAddress = False)) Then
-        offset = getProcessOffset(phandle, process_Hwnd)
-        address = address + offset
+        Offset = getProcessOffset(phandle, process_Hwnd)
+        address = address + Offset
     End If
     ' Read string
     i = 0
@@ -488,7 +488,7 @@ exitwhile:
     CloseHandle phandle
     Memory_ReadCString = res
     Exit Function
-gotErr:
+goterr:
     '???
     CloseHandle phandle
     Memory_ReadCString = res
@@ -496,7 +496,10 @@ End Function
 
 Public Function Memory_ReadByte(ByVal address As Long, ByVal process_Hwnd As Long, _
  Optional absoluteAddress As Boolean = False) As Byte
-  
+   If (TibiaVersionLong >= 1100) Then
+      Memory_ReadByte = QMemory_Read1Byte(process_Hwnd, address)
+      Exit Function
+   End If
    ' Declare some variables we need
    Dim pid As Long         ' Used to hold the Process Id
    Dim phandle As Long     ' Holds the Process Handle
@@ -504,7 +507,7 @@ Public Function Memory_ReadByte(ByVal address As Long, ByVal process_Hwnd As Lon
    
    Dim res As Long
    
-   Dim offset As Long
+   Dim Offset As Long
 
    
     
@@ -528,8 +531,8 @@ Public Function Memory_ReadByte(ByVal address As Long, ByVal process_Hwnd As Lon
    '1
    'offset = 0
    If ((useDynamicOffsetBool = True) And (absoluteAddress = False)) Then
-     offset = getProcessOffset(phandle, process_Hwnd)
-     address = address + offset
+     Offset = getProcessOffset(phandle, process_Hwnd)
+     address = address + Offset
    End If
    
    
@@ -551,7 +554,7 @@ Public Function Memory_ReadLong(ByVal address As Long, ByVal process_Hwnd As Lon
    Dim phandle As Long     ' Holds the Process Handle
    Dim valbuffer As Long   ' Long
    
-   Dim offset As Long
+   Dim Offset As Long
     
    ' First get a handle to the "game" window
    If (process_Hwnd = 0) Then Exit Function
@@ -566,10 +569,10 @@ Public Function Memory_ReadLong(ByVal address As Long, ByVal process_Hwnd As Lon
    If (phandle = 0) Then Exit Function
    
    '2
-   offset = 0
+   Offset = 0
    If ((useDynamicOffsetBool = True) And (absoluteAddress = False)) Then
-     offset = getProcessOffset(phandle, process_Hwnd)
-     address = address + offset
+     Offset = getProcessOffset(phandle, process_Hwnd)
+     address = address + Offset
    End If
    
    ' Read Long
@@ -589,12 +592,12 @@ Public Function Memory_Analyze1(ByVal StartAddress As Long, ByVal BytesToRead As
     Dim phandle As Long     ' Holds the Process Handle
     Dim ByteBuf As Byte   ' Byte
     Dim res As String
-    Dim offset As Long
+    Dim Offset As Long
     Dim i As Long
     Dim LastBytesRead As Long
     Dim tmpStr As String
 
-    On Error GoTo gotErr
+    On Error GoTo goterr
 
     ' First get a handle to the "game" window
     If (process_Hwnd = 0) Then Exit Function
@@ -616,15 +619,15 @@ Public Function Memory_Analyze1(ByVal StartAddress As Long, ByVal BytesToRead As
     '1
     'offset = 0
     If ((useDynamicOffsetBool = True) And (absoluteAddress = False)) Then
-        offset = getProcessOffset(phandle, process_Hwnd)
-        StartAddress = StartAddress + offset
+        Offset = getProcessOffset(phandle, process_Hwnd)
+        StartAddress = StartAddress + Offset
     End If
     ' Read string
 
     For i = 1 To BytesToRead Step 1
         LastBytesRead = ReadProcessMemory(phandle, StartAddress + i - 1, ByteBuf, 1, 0&)
         If LastBytesRead <> 1 Then
-            GoTo gotErr
+            GoTo goterr
             'err.raise?
         End If
         '&H20 to &H7E - http://www.asciitable.com/
@@ -660,7 +663,7 @@ exitwhile:
     CloseHandle phandle
     Memory_Analyze1 = res
     Exit Function
-gotErr:
+goterr:
     '???
     Memory_Analyze1 = res & "... after reading " & CStr(i - 1) & " bytes, got an error reading at memory location (decimal) " & CStr(StartAddress + i - 1) & " :  Err.Number: " & _
                       CStr(Err.Number) & " Err.Description: " & Err.Description & " Err.LastDllError: " & CStr(Err.LastDllError)
@@ -671,7 +674,7 @@ End Function
 Public Function Memory_BlackdAddressToFinalAdddress(ByVal address As Long, ByVal process_Hwnd As Long)
    Dim pid As Long         ' Used to hold the Process Id
    Dim phandle As Long     ' Holds the Process Handle
-   Dim offset As Long
+   Dim Offset As Long
    Dim res As Long
    Dim lasterr As Long
    Dim numberw As Long
@@ -697,10 +700,10 @@ Public Function Memory_BlackdAddressToFinalAdddress(ByVal address As Long, ByVal
    End If
    
   
-   offset = 0
+   Offset = 0
    If (useDynamicOffsetBool = True) Then
-     offset = getProcessOffset(phandle, process_Hwnd)
-     address = address + offset
+     Offset = getProcessOffset(phandle, process_Hwnd)
+     address = address + Offset
    End If
    Memory_BlackdAddressToFinalAdddress = address
 End Function
@@ -761,7 +764,7 @@ Public Sub Memory_WriteByte(ByVal address As Long, ByVal valbuffer As Byte, ByVa
    'Declare some variables we need
    Dim pid As Long         ' Used to hold the Process Id
    Dim phandle As Long     ' Holds the Process Handle
-   Dim offset As Long
+   Dim Offset As Long
    Dim res As Long
    Dim lasterr As Long
    
@@ -778,10 +781,10 @@ Public Sub Memory_WriteByte(ByVal address As Long, ByVal valbuffer As Byte, ByVa
    If (phandle = 0) Then Exit Sub
    
    '3
-   offset = 0
+   Offset = 0
    If ((useDynamicOffsetBool = True) And (absoluteAddress = False)) Then
-     offset = getProcessOffset(phandle, process_Hwnd)
-     address = address + offset
+     Offset = getProcessOffset(phandle, process_Hwnd)
+     address = address + Offset
    End If
    
    ' Write byte
@@ -805,7 +808,7 @@ Public Sub Memory_WriteLong(ByVal address As Long, ByVal valbuffer As Long, ByVa
    'Declare some variables we need
    Dim pid As Long         ' Used to hold the Process Id
    Dim phandle As Long     ' Holds the Process Handle
-   Dim offset As Long
+   Dim Offset As Long
    
    ' First get a handle to the "game" window
    If (process_Hwnd = 0) Then Exit Sub
@@ -818,10 +821,10 @@ Public Sub Memory_WriteLong(ByVal address As Long, ByVal valbuffer As Long, ByVa
    If (phandle = 0) Then Exit Sub
    
    '4
-   offset = 0
+   Offset = 0
    If ((useDynamicOffsetBool = True) And (absoluteAddress = False)) Then
-     offset = getProcessOffset(phandle, process_Hwnd)
-     address = address + offset
+     Offset = getProcessOffset(phandle, process_Hwnd)
+     address = address + Offset
    End If
    
    ' Write Long
@@ -849,8 +852,8 @@ Public Function LaunchTibiaMC(ByVal strTibiaPath As String, Optional useDynamicO
     Dim strCurrentIP As String
     Dim valbuffer As Byte
       Dim loc1 As String
-      Dim fs As scripting.FileSystemObject
-      Set fs = New scripting.FileSystemObject
+      Dim fs As Scripting.FileSystemObject
+      Set fs = New Scripting.FileSystemObject
       If strTibiaPath = "" Then
         loc1 = ""
       Else

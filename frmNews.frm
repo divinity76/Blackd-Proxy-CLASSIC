@@ -62,7 +62,107 @@ End Sub
 Private Sub Form_Load()
     Dim strMsg As String
     Me.lblText = "What is new?"
-    strMsg = "Blackd Proxy 40.8" & vbCrLf & _
+    strMsg = "Blackd Proxy 43.2-dev" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - fixed issue with the ""Clear Logs""-button (github issue #93)" & vbCrLf
+    
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 43.1" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Added experimental configs for 10.99 rev6 (8 mar 2017) and 11.11. However they will not work at this moment." & vbCrLf
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 43.0" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Fixed some bugs that happened in Tibia 11.10"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 42.9" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Fixed another bug with Tibia 10.99 rev5 (7 feb 2017) and Tibia 11.10"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 42.8" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Fixed a bug with Tibia 10.99 rev5 (7 feb 2017) and Tibia 11.10"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 42.7" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Minimum changes to work in all Tibia versions up to 10.99 rev5 (7 feb 2017)" & vbCrLf & _
+    " - Minimum changes to work in all Tibia versions up to 11.10"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 42.6" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Improvements and fixes in cavebot movement for Tibia 10.99 and Tibia 11"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 42.5" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Improved debug system for Tibia 11."
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 42.4" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Minimum changes to work in the new Tibia 11 login system with optional DDoS protection. Bot will ignore login setting and will use the new setting at Proxy window. By default it will use the DDoS protection."
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 42.3" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Minimum changes to work in all Tibia versions up to 10.99 rev4 (16 jan 2017)" & vbCrLf & _
+    " - Minimum changes to work in all Tibia versions up to 11.04"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 42.2" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Minimum changes to work in all Tibia versions up to 10.99 rev3 (7 jan 2017)"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 42.1" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Minimum changes to work in all Tibia versions up to 10.99 rev2 (15 dec 2016)" & vbCrLf & _
+    " - Minimum changes to work in all Tibia versions up to 11.03"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 42.0" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Fixed a bug at Tibia 10.99 config"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 41.9" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Fixed minor bugs"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 41.8" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Minimum changes to work in all Tibia versions up to 10.99 rev1 (6 dec 2016)" & vbCrLf & _
+    " - Minimum changes to work in all Tibia versions up to 11.02"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 41.7" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Fixed a bug with Tibia 11+"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 41.6" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Improved cavebot movement for Tibia 11+" & vbCrLf & _
+    " - Improved cavebot looting for Tibia 11+" & vbCrLf & _
+    " - Fixed some bugs for Tibia 10.99+ clients"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 41.5" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Fixed an important login bug for Tibia 11.01"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 41.2" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Now cavebot should mark attacked creature with the red square"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 41.1" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+    " - Fixed a bug for Tibia 11.01"
+    
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 41.0" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - After a lot of investigation and fixes this bot is now finally compatible with Tibia 11+" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 11.01" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.99" & vbCrLf & _
+     " - Cavebot movement will be a bit chaotic in Tibia 11+. Sorry for the inconvenience." & vbCrLf & _
+     " - If you want to connect to a Open Tibia 11+, then your ot server web must provide you a launcher or a patch for Tibia.exe" & vbCrLf & _
+     " - All the configs for Tibia 11+ are restricted to customers of tibia gold from blackdtools.com"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 40.9" & vbCrLf & _
+    "----------------------------" & vbCrLf & _
+     " - Minimum changes to work in all Tibia versions up to 10.98"
+     
+    strMsg = strMsg & vbCrLf & "Blackd Proxy 40.8" & vbCrLf & _
     "----------------------------" & vbCrLf & _
      " - Fixed login system for OT servers 10.91+"
      
@@ -107,7 +207,7 @@ Private Sub Form_Load()
      " - Added Tibia Title, shows character name on Tibia title" & vbCrLf & _
      " - Revamped Aimbot" & vbCrLf & _
      " - Added Persistent, so player can execute exiva or say message every X ms" & vbCrLf & _
-     " - Classname changer on Advanced, so its possible to recognize some of custom tibia client (untested). Classname on .txt does not recognize most common custom classname (ÙbiaClient)" & vbCrLf & _
+     " - Classname changer on Advanced, so its possible to recognize some of custom tibia client (untested). Classname on .txt does not recognize most common custom classname (Ã™biaClient)" & vbCrLf & _
      " - Revamped CaveBot form, stills with all button you can show/hide advanced button and added Items ID list" & vbCrLf & _
      " - Added some new exiva comands (exiva sdmax, etc) and hotkeys list inside Hotkeys form" & vbCrLf & _
      " - Revamped Broadcast, Trainer, Advanced, Proxy forms."

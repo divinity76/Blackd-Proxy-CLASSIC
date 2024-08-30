@@ -196,8 +196,8 @@ Private Sub cmdSearchItems_Click()
   s2 = FromHexToDec(Mid(txtTileID.Text, 5, 1))
   b2 = (s1 * 16) + s2
   res = SearchItem(mapIDselected, b1, b2)
-  If res.foundcount > 0 Then
-    lblResult.Caption = "Found " & CStr(res.foundcount) & " items. Last at : bp " & _
+  If res.foundCount > 0 Then
+    lblResult.Caption = "Found " & CStr(res.foundCount) & " items. Last at : bp " & _
      CStr(CLng(res.bpID)) & " , slot " & CStr(CLng(res.slotID))
   Else
     lblResult.Caption = "None found"
@@ -259,7 +259,7 @@ Public Sub RemoveItem(clientID As Integer, bpID As Long, slot As Long, Optional 
   Dim cap As Long
   Dim aRes As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   cap = Backpack(clientID, bpID).cap
   For i = slot To cap - 2
@@ -290,7 +290,7 @@ Public Sub RemoveItem(clientID As Integer, bpID As Long, slot As Long, Optional 
   LogOnFile "errors.txt", "Warning at Removeitem (" & clientID & ", " & bpID & "," & slot & " )   : Container with cap 0!"
   End If
   Exit Sub
-gotErr:
+goterr:
   LogOnFile "errors.txt", "Unexpected error at Removeitem (" & clientID & ", " & bpID & "," & slot & " ) Cap=" & cap & "  : " & Err.Description
   aRes = GiveGMmessage(clientID, "Unexpected error in backpack module, please report to blackd. Received call: RemoveItem(" & clientID & "," & bpID & "," & slot & ") Error description: " & Err.Description, "Blackdproxy")
 End Sub

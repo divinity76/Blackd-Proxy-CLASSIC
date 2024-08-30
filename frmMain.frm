@@ -16,6 +16,22 @@ Begin VB.Form frmMain
    ScaleHeight     =   7635
    ScaleWidth      =   8400
    StartUpPosition =   2  'CenterScreen
+   Begin VB.CheckBox chkUseAntiDDoS 
+      BackColor       =   &H00000000&
+      Caption         =   "Use Anti DDoS (if available)"
+      ForeColor       =   &H00FFFFFF&
+      Height          =   255
+      Left            =   4320
+      TabIndex        =   42
+      Top             =   960
+      Value           =   1  'Checked
+      Width           =   2415
+   End
+   Begin VB.Timer TimerTibiaQ 
+      Interval        =   500
+      Left            =   5760
+      Top             =   6480
+   End
    Begin MSWinsockLib.Winsock SckHttpGet 
       Index           =   0
       Left            =   3240
@@ -68,14 +84,14 @@ Begin VB.Form frmMain
    End
    Begin VB.CheckBox chkBlockRemote 
       BackColor       =   &H00000000&
-      Caption         =   "Block remote connections"
+      Caption         =   "Firewall protection"
       ForeColor       =   &H00FFFFFF&
       Height          =   255
-      Left            =   3840
+      Left            =   2520
       TabIndex        =   39
       Top             =   960
       Value           =   1  'Checked
-      Width           =   2895
+      Width           =   1575
    End
    Begin VB.Timer timeToSpam 
       Interval        =   2000
@@ -502,10 +518,12 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 #Const FinalMode = 1
 #Const BufferDebug = 0
+
 Option Explicit
 
+
 Private Const OptCte4 = 1 'internal size of a byte ( 1 byte )
-Private Declare Sub RtlMoveMemory Lib "kernel32" ( _
+Private Declare Sub RtlMoveMemory Lib "Kernel32" ( _
     lpDest As Any, _
     lpSource As Any, _
     ByVal ByValcbCopy As Long)
@@ -595,10 +613,30 @@ Dim HTTPGetResponseBuffer() As String
 '  End If
 'End Function
 
+
+
+Private Sub chkBlockRemote_Click()
+    If (chkBlockRemote.value = 0) Then
+        useFirewall = False
+    Else
+        useFirewall = True
+    End If
+   ' Debug.Print "chkBlockRemote=" & chkBlockRemote.value
+End Sub
+
+Private Sub chkUseAntiDDoS_Click()
+    If (chkUseAntiDDoS.value = 0) Then
+        useAntiDDoS = False
+    Else
+        useAntiDDoS = True
+    End If
+   ' Debug.Print "chkUseAntiDDoS=" & chkUseAntiDDoS.value
+End Sub
+
 ' BLAKCKDINI FUNCTIONS MOVED TO MODCODE
 
 Private Sub cmbBrowse_Click()
-  ConfigurePath Me.hwnd, True
+  ConfigurePath Me.hWnd, True
 End Sub
 
 Public Sub GiveCrackdDllErrorMessage(pres As Long, ByRef packet1() As Byte, ByRef packet2() As Byte, ubound1 As Long, ubound2 As Long, p As Long)
@@ -634,20 +672,20 @@ Private Function InitSounds(thehwnd As Long) As Boolean
   bRes = DirectX_Init(thehwnd, 4)
   If bRes = True Then
     soundErrorLine = "loadingThisSound = App.Path & ""\player.wav"""
-    loadingThisSound = App.path & "\player.wav"
+    loadingThisSound = App.Path & "\player.wav"
     soundErrorLine = "DirectX_LoadSound loadingThisSound, 1"
     DirectX_LoadSound loadingThisSound, 1
     soundErrorLine = "loadingThisSound = App.Path & ""\danger.wav"""
-    loadingThisSound = App.path & "\danger.wav"
+    loadingThisSound = App.Path & "\danger.wav"
     soundErrorLine = "DirectX_LoadSound loadingThisSound, 2"
     DirectX_LoadSound loadingThisSound, 2
     soundErrorLine = "loadingThisSound = App.Path & ""\ding.wav"""
-    loadingThisSound = App.path & "\ding.wav"
+    loadingThisSound = App.Path & "\ding.wav"
     soundErrorLine = "DirectX_LoadSound loadingThisSound, 3"
     DirectX_LoadSound loadingThisSound, 3
     'custom ng
     soundErrorLine = "loadingThisSound = App.Path & ""\newsound1.wav"""
-    loadingThisSound = App.path & "\newsound1.wav"
+    loadingThisSound = App.Path & "\newsound1.wav"
     soundErrorLine = "DirectX_LoadSound loadingThisSound, 4"
     DirectX_LoadSound loadingThisSound, 4
     InitSounds = True
@@ -680,7 +718,7 @@ Private Sub Form_Load()
   Dim lngTemp As Long
   Dim moreDetails As String
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   dblAmLoaded = 0
   lastLoadLine = 1
@@ -714,7 +752,7 @@ Private Sub Form_Load()
   If (SoundIsUsable = True) Then
   dblAmLoaded = 15
   frmLoading.NotifyLoadProgress dblAmLoaded, "Loading sound in RAM memory"
-  If InitSounds(Me.hwnd) = False Then
+  If InitSounds(Me.hWnd) = False Then
     SoundIsUsable = False
     If MsgBox("Sorry, Blackd Proxy got an error while trying to initialize the Directx sound system" & vbCrLf & _
       SoundErrorWasThis & vbCrLf & vbCrLf & _
@@ -848,15 +886,17 @@ Private Sub Form_Load()
   lastLoadLine = 600
   frmLoading.NotifyLoadProgress dblAmLoaded, "Creating the first activex dictionary"
 lastLoadLine = 601
-  Set GameServerDictionary = New scripting.Dictionary
-  Set GameServerDictionaryDOMAIN = New scripting.Dictionary
-  Set specialGMnames = New scripting.Dictionary
+  Set GameServerDictionary = New Scripting.Dictionary
+  Set GameServerDictionaryDOMAIN1 = New Scripting.Dictionary
+  Set GameServerDictionaryDOMAIN2 = New Scripting.Dictionary
+  Set mainTibiaHandle = New Scripting.Dictionary
+  Set specialGMnames = New Scripting.Dictionary
   lastLoadLine = 602
-  Set ValueOfUservar = New scripting.Dictionary
+  Set ValueOfUservar = New Scripting.Dictionary
   lastLoadLine = 603
-  Set ProcessidIPrelations = New scripting.Dictionary
-  Set ProcessidAccountRelations = New scripting.Dictionary
-  Set IgnoredCreatures = New scripting.Dictionary
+  Set ProcessidIPrelations = New Scripting.Dictionary
+  Set ProcessidAccountRelations = New Scripting.Dictionary
+  Set IgnoredCreatures = New Scripting.Dictionary
   lastLoadLine = 604
   
  dblAmLoaded = 65
@@ -883,6 +923,7 @@ lastLoadLine = 660
     CavebotLastSpecialMove(i) = 0
     StatusBits(i) = "0000000000000000"
     lastUsedChannelID(i) = "05 00"
+    initInitialPacket CInt(i)
     lastRecChannelID(i) = "05 00"
     makingRune(i) = False
     UHRetryCount(i) = 0
@@ -1027,7 +1068,7 @@ lastLoadLine = 660
     myZ(i) = 7
     LastHealTime(i) = 0
     timeToRetryOpenDepot(i) = 0
-
+lastLootOrder(i) = 0
   
      ResetLooter i
     OldLootMode(i) = True
@@ -1182,28 +1223,28 @@ lastLoadLine = 660
     frmLoading.NotifyLoadProgress dblAmLoaded, "Creating activex dictionaries"
     ' Init dictionary objects:
     lastLoadLine = 720
-    Set cavebotScript(i) = New scripting.Dictionary
-    Set cavebotMelees(i) = New scripting.Dictionary
-    Set cavebotAvoid(i) = New scripting.Dictionary
-    Set cavebotExorivis(i) = New scripting.Dictionary
-    Set cavebotHMMs(i) = New scripting.Dictionary
-    Set DictSETUSEITEM(i) = New scripting.Dictionary
-    Set shotTypeDict(i) = New scripting.Dictionary
-    Set exoriTypeDict(i) = New scripting.Dictionary
-    Set cavebotGoodLoot(i) = New scripting.Dictionary
-    Set killPriorities(i) = New scripting.Dictionary
-    Set SpellKills_SpellName(i) = New scripting.Dictionary
-    Set SpellKills_Dist(i) = New scripting.Dictionary
-    Set NameOfID(i) = New scripting.Dictionary
+    Set cavebotScript(i) = New Scripting.Dictionary
+    Set cavebotMelees(i) = New Scripting.Dictionary
+    Set cavebotAvoid(i) = New Scripting.Dictionary
+    Set cavebotExorivis(i) = New Scripting.Dictionary
+    Set cavebotHMMs(i) = New Scripting.Dictionary
+    Set DictSETUSEITEM(i) = New Scripting.Dictionary
+    Set shotTypeDict(i) = New Scripting.Dictionary
+    Set exoriTypeDict(i) = New Scripting.Dictionary
+    Set cavebotGoodLoot(i) = New Scripting.Dictionary
+    Set killPriorities(i) = New Scripting.Dictionary
+    Set SpellKills_SpellName(i) = New Scripting.Dictionary
+    Set SpellKills_Dist(i) = New Scripting.Dictionary
+    Set NameOfID(i) = New Scripting.Dictionary
 
-    Set HPOfID(i) = New scripting.Dictionary
-    Set DirectionOfID(i) = New scripting.Dictionary
-    Set BigMapNamesX = New scripting.Dictionary
-    Set BigMapNamesY = New scripting.Dictionary
-    Set BigMapNamesZ = New scripting.Dictionary
-    Set BigMapNamesC = New scripting.Dictionary
-    Set MapIDTranslator = New scripting.Dictionary
-    Set IgnoredCreatures(i) = New scripting.Dictionary
+    Set HPOfID(i) = New Scripting.Dictionary
+    Set DirectionOfID(i) = New Scripting.Dictionary
+    Set BigMapNamesX = New Scripting.Dictionary
+    Set BigMapNamesY = New Scripting.Dictionary
+    Set BigMapNamesZ = New Scripting.Dictionary
+    Set BigMapNamesC = New Scripting.Dictionary
+    Set MapIDTranslator = New Scripting.Dictionary
+    Set IgnoredCreatures(i) = New Scripting.Dictionary
     lastLoadLine = 730
     dblAmLoaded = 70
       frmLoading.NotifyLoadProgress dblAmLoaded, "Building the core"
@@ -1220,7 +1261,7 @@ lastLoadLine = 660
       Backpack(i, j).name = ""
     Next j
   Next i
-  Set EnemyList = New scripting.Dictionary
+  Set EnemyList = New Scripting.Dictionary
   lastLoadLine = 740
   ' blank lines to be writen in map matrix in a block while moving:
   For j = 0 To 10
@@ -1387,7 +1428,7 @@ lastLoadLine = 660
   frmLoading.NotifyLoadProgress dblAmLoaded, "Loading modules: stealth"
         lastLoadLine = 765
   Load frmStealth
-  ToggleTopmost frmStealth.hwnd, True
+  ToggleTopmost frmStealth.hWnd, True
   frmStealth.Hide
   dblAmLoaded = 89
   
@@ -1402,9 +1443,11 @@ lastLoadLine = 660
   
   dblAmLoaded = 92
   frmLoading.NotifyLoadProgress dblAmLoaded, "Reading tibia.dat"
-  If TibiaDatExists() = False Then
-    MsgBox "tibia.dat missing/unreadable : " & vbCrLf & DBGtileError, vbOKOnly, "Problem with config" & CStr(TibiaVersionLong)
-    End
+  If (TibiaVersionLong < 1100) Then
+    If TibiaDatExists() = False Then
+      MsgBox "tibia.dat missing/unreadable : " & vbCrLf & DBGtileError, vbOKOnly, "Problem with config" & CStr(TibiaVersionLong)
+      End
+    End If
   End If
   If ((TibiaVersionLong < 710) Or (TibiaVersionLong > highestTibiaVersionLong)) Then
     MsgBox "TibiaVersionLong is holding an unsupported version value (" & CStr(TibiaVersionLong) & ")" & vbCrLf & _
@@ -1444,8 +1487,21 @@ lastLoadLine = 660
 '     CurrentTibiaDatPath = CurrentTibiaDatPath & "\Tibia.dat"
 '  End If
   
-  CurrentTibiaDatDATE = GetDATEOfFile(TibiaExePathWITHTIBIADAT)
-  'If ((TibiaVersionLong = highestTibiaVersionLong) And (UseRealTibiaDatInLatestTibiaVersion = True)) Then
+  If (TibiaVersionLong >= 1100) Then
+    
+    GetInfoOfNewDatFile TibiaExePathWITHTIBIADAT, CurrentTibiaDatVERSION, CurrentTibiaDatFILE
+    If (CurrentTibiaDatVERSION = -1) Then
+       MsgBox "IMPORTANT WARNING:" & vbCrLf & _
+       "Unable to read version of .dat file at" & vbCrLf & _
+       TibiaExePathWITHTIBIADAT & vbCrLf & _
+       "Blackd Proxy must close now." & vbCrLf & _
+       vbCrLf & "DETAILS FOR DEBUG:" & vbCrLf & _
+       dateErrDescription, vbOKOnly + vbCritical, "Critical error"
+       SaveConfigWizard True
+       End
+    End If
+  Else
+    CurrentTibiaDatDATE = GetDATEOfFile(TibiaExePathWITHTIBIADAT)
     If (CurrentTibiaDatDATE = MyErrorDate) Then
        MsgBox "IMPORTANT WARNING:" & vbCrLf & _
        "Unable to read file:" & vbCrLf & _
@@ -1453,12 +1509,10 @@ lastLoadLine = 660
        "Please ensure that you really installed Tibia there! Blackd Proxy must close now." & vbCrLf & _
        vbCrLf & "DETAILS FOR DEBUG:" & vbCrLf & _
        dateErrDescription, vbOKOnly + vbCritical, "Critical error"
-      ' UseRealTibiaDatInLatestTibiaVersion = False
-       SaveConfigWizard True ' show config again in next run
+       SaveConfigWizard True
        End
-       'GoTo loadTibiaDatPath
     End If
- ' End If
+ End If
   
   res = UnifiedLoadDatFile(TibiaExePathWITHTIBIADAT)
   moreDetails = vbCrLf & "Trying to read Tibia " & TibiaVersion & " data here:" & vbCrLf & TibiaExePathWITHTIBIADAT & vbCrLf & vbCrLf & "Tibia client " & TibiaVersion & " is probably not installed there." & vbCrLf & "That folder probably contains a different Tibia version." & vbCrLf & "Update and run Blackd Proxy again and config everything correctly."
@@ -1472,6 +1526,9 @@ lastLoadLine = 660
   End If
   If (res = -3) Then
     If MsgBox("Too many tiles found in tibia.dat , please increase MAXDATTILES in your config.ini" & CStr(res) & vbCrLf & _
+    ".dat path=" & CStr(TibiaExePathWITHTIBIADAT) & vbCrLf & _
+    "Config path=" & CStr(MAXDATTILESpath) & vbCrLf & _
+    "Current Value=" & CStr(MAXDATTILES) & vbCrLf & _
     "You can resume loading Blackd Proxy, but it is strongly NOT RECOMMENDED. 99% of cheats will not work." & vbCrLf & _
     "- Do you want to resume loading anyways?", vbYesNo + vbExclamation, "Problem with config" & CStr(TibiaVersionLong)) = vbNo Then
         SaveConfigWizard True
@@ -1508,7 +1565,7 @@ lastLoadLine = 660
   dblAmLoaded = 94
   frmLoading.NotifyLoadProgress dblAmLoaded, "Analyzing paths..."
 retrypaths:
-  givePathMsg frmLoading.hwnd
+  givePathMsg frmLoading.hWnd
   lastLoadLine = 870
   str = TibiaPath
   If (Not (OVERWRITE_MAPS_PATH = "")) Then
@@ -1597,7 +1654,7 @@ lastLoadLine = 895
   Load frmMenu
   
   'custom ng
-  If frmOld.chkOldMenu.Value = 1 Then
+  If frmOld.chkOldMenu.value = 1 Then
     frmMenu.Hide
   End If
   
@@ -1613,7 +1670,7 @@ lastLoadLine = 895
   frmTrainer.timerTrainer.enabled = True
   LoadWasCompleted = True
   Exit Sub
-gotErr:
+goterr:
   'LogOnFile "debug.txt", "Terminated by critical error (-4)"
   Select Case lastLoadLine
   Case 749 ' first jwldbutton
@@ -1654,326 +1711,328 @@ gotErr:
   End
 End Sub
 
-Public Sub DoCloseActions(ByVal Index As Integer)
+Public Sub DoCloseActions(ByVal index As Integer)
   ' Reset their vars to their initial states
  ' #If FinalMode Then
   On Error Resume Next
  ' #End If
   Dim j As Long
   Dim k As Long
-  If Index > 0 Then
-  If sckServerGame(Index).State <> sckClosed Then
-    sckServerGame(Index).Close
+  If index > 0 Then
+  If sckServerGame(index).State <> sckClosed Then
+    sckServerGame(index).Close
   End If
-  If sckClientGame(Index).State <> sckClosed Then
-    sckClientGame(Index).Close
+  If sckClientGame(index).State <> sckClosed Then
+    sckClientGame(index).Close
   End If
-      AvoidReAttacks(Index) = True
-  UHRetryCount(Index) = 0
-  runemakerMana1(Index) = -1
-    var_expleft(Index) = ""
-    var_nextlevel(Index) = ""
-    var_exph(Index) = ""
-    var_timeleft(Index) = ""
-    var_played(Index) = ""
-    var_expgained(Index) = ""
-    var_lf(Index) = vbLf
-    var_lastsender(Index) = ""
-    var_lastmsg(Index) = ""
-  CavebotHaveSpecials(Index) = False
-  CavebotLastSpecialMove(Index) = 0
-  StatusBits(Index) = "0000000000000000"
-  runeTurn(Index) = randomNumberBetween(0, 29)
-  lastUsedChannelID(Index) = "05 00"
-  lastRecChannelID(Index) = "05 00"
-  reconnectionRetryCount(Index) = 0
-  nextReconnectionRetry(Index) = 0
-  SelfDefenseID(Index) = 0
-  logoutAllowed(Index) = 0
-  ReconnectionStage(Index) = 0
-  IgnoreServer(Index) = False
-  FirstCharInCharList(Index) = ""
-  NoHealingNextTurn(Index) = False
-  DropDelayerTurn(Index) = 0
-  DelayAttacks(Index) = 0
-  ReconnectionPacket(Index).numbytes = 0
-  pauseStacking(Index) = 0
-  nextAllowedmsg(Index) = 0
-  AllowUHpaused(Index) = False
-  doingTrade(Index) = False
-  doingTrade2(Index) = False
-  cavebotOnTrapGiveAlarm(Index) = False
-  GotKillOrderTargetID(Index) = 0
-  GotKillOrder(Index) = False
-  GotKillOrderTargetName(Index) = ""
-  lastAttackedIDstatus(Index) = 0
-  previousAttackedID(Index) = 0
-  initialRuneBackpack(Index) = &HFF
-  DoingMainLoop(Index) = False
-  RequiredMoveBuffer(Index) = ""
-  ReadyBuffer(Index) = True
-  frmMapReader.RemoveListItem CharacterName(Index)
-  ReDim ConnectionBuffer(Index).packet(0)
-  makingRune(Index) = False
-  LoginMsgCount(Index) = 0
-  lastHPchange(Index) = 0
-  ConnectionBuffer(Index).numbytes = 0
-  lastFloorTrap(Index) = -1
+      AvoidReAttacks(index) = True
+  UHRetryCount(index) = 0
+  runemakerMana1(index) = -1
+    var_expleft(index) = ""
+    var_nextlevel(index) = ""
+    var_exph(index) = ""
+    var_timeleft(index) = ""
+    var_played(index) = ""
+    var_expgained(index) = ""
+    var_lf(index) = vbLf
+    var_lastsender(index) = ""
+    var_lastmsg(index) = ""
+  CavebotHaveSpecials(index) = False
+  CavebotLastSpecialMove(index) = 0
+  StatusBits(index) = "0000000000000000"
+  runeTurn(index) = randomNumberBetween(0, 29)
+  lastUsedChannelID(index) = "05 00"
+  initInitialPacket CInt(index)
+  lastRecChannelID(index) = "05 00"
+  reconnectionRetryCount(index) = 0
+  nextReconnectionRetry(index) = 0
+  SelfDefenseID(index) = 0
+  logoutAllowed(index) = 0
+  ReconnectionStage(index) = 0
+  IgnoreServer(index) = False
+  FirstCharInCharList(index) = ""
+  NoHealingNextTurn(index) = False
+  DropDelayerTurn(index) = 0
+  DelayAttacks(index) = 0
+  ReconnectionPacket(index).numbytes = 0
+  pauseStacking(index) = 0
+  nextAllowedmsg(index) = 0
+  AllowUHpaused(index) = False
+  doingTrade(index) = False
+  doingTrade2(index) = False
+  cavebotOnTrapGiveAlarm(index) = False
+  GotKillOrderTargetID(index) = 0
+  GotKillOrder(index) = False
+  GotKillOrderTargetName(index) = ""
+  lastAttackedIDstatus(index) = 0
+  previousAttackedID(index) = 0
+  initialRuneBackpack(index) = &HFF
+  DoingMainLoop(index) = False
+  RequiredMoveBuffer(index) = ""
+  ReadyBuffer(index) = True
+  frmMapReader.RemoveListItem CharacterName(index)
+  ReDim ConnectionBuffer(index).packet(0)
+  makingRune(index) = False
+  LoginMsgCount(index) = 0
+  lastHPchange(index) = 0
+  ConnectionBuffer(index).numbytes = 0
+  lastFloorTrap(index) = -1
   givenUFO = False
-  cancelAllMove(Index) = 0
-  posSpamActivated(Index) = False
-  posSpamChannelB1(Index) = &HFF
-  posSpamChannelB2(Index) = &HFF
+  cancelAllMove(index) = 0
+  posSpamActivated(index) = False
+  posSpamChannelB1(index) = &HFF
+  posSpamChannelB2(index) = &HFF
   
-  getSpamActivated(Index) = False
-  getSpamChannelB1(Index) = &HFF
-  getSpamChannelB2(Index) = &HFF
-  executingCavebot(Index) = False
-  ResetEventList Index
-  ResetCondEventList Index
-  MustCheckFirstClientPacket(Index) = True
+  getSpamActivated(index) = False
+  getSpamChannelB1(index) = &HFF
+  getSpamChannelB2(index) = &HFF
+  executingCavebot(index) = False
+  ResetEventList index
+  ResetCondEventList index
+  MustCheckFirstClientPacket(index) = True
   
   If TibiaVersionLong >= 841 Then
-     NeedToIgnoreFirstGamePacket(Index) = True
+     NeedToIgnoreFirstGamePacket(index) = True
   Else
-    NeedToIgnoreFirstGamePacket(Index) = False
+    NeedToIgnoreFirstGamePacket(index) = False
   End If
   
-  sentFirstPacket(Index) = True
-  IDstring(Index) = ""
-  myID(Index) = 0
-  CharacterName(Index) = ""
-  ConnectionBuffer(Index).numbytes = 0
-  GameConnected(Index) = False
-  onDepotPhase(Index) = 0
-  CavebotChaoticMode(Index) = 0
-  TurnsWithRedSquareZero(Index) = 0
-  bLevelSpy(Index) = False
-  depotX(Index) = 0
-  nextForcedDepotDeployRetry(Index) = 0
-  depotY(Index) = 0
-  depotZ(Index) = 0
-  doneDepotChestOpen(Index) = False
-  depotTileID(Index) = 0
-  depotS(Index) = 0
-  lastDepotBPID(Index) = 0
-  nextLight(Index) = "D7"
-  NameOfID(Index).RemoveAll
-  HPOfID(Index).RemoveAll
-  DirectionOfID(Index).RemoveAll
-  currTargetName(Index) = ""
-  currTargetID(Index) = 0
-  lootTimeExpire(Index) = 0
-  CheatsPaused(Index) = False
-  DangerGM(Index) = False
-  DangerPK(Index) = False
-  DangerPlayer(Index) = False
-  LogoutTimeGM(Index) = 0
-  GMname(Index) = ""
-  cavebotOnDanger(Index) = -1
-  cavebotOnGMclose(Index) = False
-  cavebotOnGMpause(Index) = False
-  lastAttackedID(Index) = 0
-  CavebotTimeWithSameTarget(Index) = GetTickCount()
-  CavebotTimeStart(Index) = GetTickCount()
-  maxAttackTime(Index) = 40000
-  ChaotizeNextMaxAttackTime Index
-  maxHit(Index) = 10000
-  previousAttackedID(Index) = 0
-  DangerGMname(Index) = ""
-  DangerPKname(Index) = ""
-  DangerPlayerName(Index) = ""
-  friendlyMode(Index) = 0
-  cavebotLenght(Index) = 0
-  cavebotEnabled(Index) = False
-  EnableMaxAttackTime(Index) = False
-  cavebotScript(Index).RemoveAll
-  autoLoot(Index) = False
-  myLastCorpseX(Index) = 0
-  myLastCorpseY(Index) = 0
-  myLastCorpseZ(Index) = 0
-  myLastCorpseS(Index) = 0
-  lastIngameCheck(Index) = ""
-  lastIngameCheckTileID(Index) = "00 00"
-  myLastCorpseTileID(Index) = 0
-  lootWaiting(Index) = False
-  requestLootBp(Index) = &HFF
-  SendingSpecialOutfit(Index) = False
-  moveRetry(Index) = 0
-  lastX(Index) = 0
-  lastY(Index) = 0
-  lastZ(Index) = 0
-  lastDestX(Index) = 0
-  lastDestY(Index) = 0
-  lastDestZ(Index) = 0
-  receivedLogin(Index) = False
-  setFollowTarget(Index) = True
-  ignoreNext(Index) = 0
-  GotPacketWarning(Index) = False
-  LastHealTime(Index) = 0
-  timeToRetryOpenDepot(Index) = 0
-  ResetLooter Index
-  OldLootMode(Index) = True
-  ClientExecutingLongCommand(Index) = False
-  LootAll(Index) = False
-  PKwarnings(Index) = True
-  LastCavebotTime(Index) = 0
-  stealthLog(Index) = ""
-  myHP(Index) = cte_initHP
-  myMaxHP(Index) = cte_initHP
-  myMaxMana(Index) = cte_initMANA
-  lastHPchange(Index) = 0
-  myNewStat(Index) = 0
-  myMana(Index) = 0
-  myCap(Index) = 0
-  myStamina(Index) = 0
-  somethingChangedInBps(Index) = False
-  mySoulpoints(Index) = 100
-  myExp(Index) = 0
-  SpellKillHPlimit(Index) = 0
-  SpellKillMaxHPlimit(Index) = 100
-  AllowedLootDistance(Index) = 3
-  myInitialExp(Index) = 0
-  myInitialTickCount(Index) = 0
-  myLevel(Index) = 50000000
-  myMagLevel(Index) = 0
+  sentFirstPacket(index) = True
+  IDstring(index) = ""
+  myID(index) = 0
+  CharacterName(index) = ""
+  ConnectionBuffer(index).numbytes = 0
+  GameConnected(index) = False
+  onDepotPhase(index) = 0
+  CavebotChaoticMode(index) = 0
+  TurnsWithRedSquareZero(index) = 0
+  bLevelSpy(index) = False
+  depotX(index) = 0
+  nextForcedDepotDeployRetry(index) = 0
+  depotY(index) = 0
+  depotZ(index) = 0
+  doneDepotChestOpen(index) = False
+  depotTileID(index) = 0
+  depotS(index) = 0
+  lastDepotBPID(index) = 0
+  nextLight(index) = "D7"
+  NameOfID(index).RemoveAll
+  HPOfID(index).RemoveAll
+  DirectionOfID(index).RemoveAll
+  currTargetName(index) = ""
+  currTargetID(index) = 0
+  lootTimeExpire(index) = 0
+  CheatsPaused(index) = False
+  DangerGM(index) = False
+  DangerPK(index) = False
+  DangerPlayer(index) = False
+  LogoutTimeGM(index) = 0
+  GMname(index) = ""
+  cavebotOnDanger(index) = -1
+  cavebotOnGMclose(index) = False
+  cavebotOnGMpause(index) = False
+  lastAttackedID(index) = 0
+  CavebotTimeWithSameTarget(index) = GetTickCount()
+  CavebotTimeStart(index) = GetTickCount()
+  maxAttackTime(index) = 40000
+  ChaotizeNextMaxAttackTime index
+  maxHit(index) = 10000
+  previousAttackedID(index) = 0
+  DangerGMname(index) = ""
+  DangerPKname(index) = ""
+  DangerPlayerName(index) = ""
+  friendlyMode(index) = 0
+  cavebotLenght(index) = 0
+  cavebotEnabled(index) = False
+  EnableMaxAttackTime(index) = False
+  cavebotScript(index).RemoveAll
+  autoLoot(index) = False
+  myLastCorpseX(index) = 0
+  myLastCorpseY(index) = 0
+  myLastCorpseZ(index) = 0
+  myLastCorpseS(index) = 0
+  lastIngameCheck(index) = ""
+  lastIngameCheckTileID(index) = "00 00"
+  myLastCorpseTileID(index) = 0
+  lootWaiting(index) = False
+  requestLootBp(index) = &HFF
+  SendingSpecialOutfit(index) = False
+  moveRetry(index) = 0
+  lastX(index) = 0
+  lastY(index) = 0
+  lastZ(index) = 0
+  lastDestX(index) = 0
+  lastDestY(index) = 0
+  lastDestZ(index) = 0
+  receivedLogin(index) = False
+  setFollowTarget(index) = True
+  ignoreNext(index) = 0
+  GotPacketWarning(index) = False
+  LastHealTime(index) = 0
+  lastLootOrder(index) = 0
+  timeToRetryOpenDepot(index) = 0
+  ResetLooter index
+  OldLootMode(index) = True
+  ClientExecutingLongCommand(index) = False
+  LootAll(index) = False
+  PKwarnings(index) = True
+  LastCavebotTime(index) = 0
+  stealthLog(index) = ""
+  myHP(index) = cte_initHP
+  myMaxHP(index) = cte_initHP
+  myMaxMana(index) = cte_initMANA
+  lastHPchange(index) = 0
+  myNewStat(index) = 0
+  myMana(index) = 0
+  myCap(index) = 0
+  myStamina(index) = 0
+  somethingChangedInBps(index) = False
+  mySoulpoints(index) = 100
+  myExp(index) = 0
+  SpellKillHPlimit(index) = 0
+  SpellKillMaxHPlimit(index) = 100
+  AllowedLootDistance(index) = 3
+  myInitialExp(index) = 0
+  myInitialTickCount(index) = 0
+  myLevel(index) = 50000000
+  myMagLevel(index) = 0
   For k = 1 To EQUIPMENT_SLOTS
-    mySlot(Index, k).t1 = &H0
-    mySlot(Index, k).t2 = &H0
-    mySlot(Index, k).t3 = &H0
+    mySlot(index, k).t1 = &H0
+    mySlot(index, k).t2 = &H0
+    mySlot(index, k).t3 = &H0
   Next k
-  savedItem(Index).t1 = &H0
-  savedItem(Index).t2 = &H0
-  savedItem(Index).t2 = &H0
-  pushDelay(Index) = CInt(Int((PUSHDELAYTIMES * Rnd)))
+  savedItem(index).t1 = &H0
+  savedItem(index).t2 = &H0
+  savedItem(index).t2 = &H0
+  pushDelay(index) = CInt(Int((PUSHDELAYTIMES * Rnd)))
   'exeLine(Index) = 0
-   updateExeLine Index, 0, False, False
-  pushTarget(Index) = 0
+   updateExeLine index, 0, False, False
+  pushTarget(index) = 0
   'ProcessID(index) = -1
-  fishCounter(Index) = 0
-  AfterLoginLogoutReason(Index) = ""
-  RemoveAllMelee Index
-  RemoveAllHMM Index
+  fishCounter(index) = 0
+  AfterLoginLogoutReason(index) = ""
+  RemoveAllMelee index
+  RemoveAllHMM index
   
-  RemoveAllSETUSEITEM Index
+  RemoveAllSETUSEITEM index
 
   
-  RemoveAllAvoid Index
-  RemoveAllShotType Index
-  RemoveAllExorivis Index
-  RemoveAllGoodLoot Index
-  RemoveAllClientSpamOrders Index
+  RemoveAllAvoid index
+  RemoveAllShotType index
+  RemoveAllExorivis index
+  RemoveAllGoodLoot index
+  RemoveAllClientSpamOrders index
   
-  RuneMakerOptions(Index).activated = RuneMakerOptions_activated_default
-  RuneMakerOptions(Index).autoEat = RuneMakerOptions_autoEat_default
-  RuneMakerOptions(Index).ManaFluid = RuneMakerOptions_ManaFluid_default
-  RuneMakerOptions(Index).autoLogoutAnyFloor = RuneMakerOptions_autoLogoutAnyFloor_default
-  RuneMakerOptions(Index).autoLogoutCurrentFloor = RuneMakerOptions_autoLogoutCurrentFloor_default
-  RuneMakerOptions(Index).autoLogoutOutOfRunes = RuneMakerOptions_autoLogoutOutOfRunes_default
-  RuneMakerOptions(Index).autoWaste = RuneMakerOptions_autoWaste_default
-  RuneMakerOptions(Index).msgSound = RuneMakerOptions_msgSound_default
-  RuneMakerOptions(Index).msgSound2 = RuneMakerOptions_msgSound2_default
-  RuneMakerOptions(Index).firstActionText = RuneMakerOptions_firstActionText_default
-  RuneMakerOptions(Index).firstActionMana = RuneMakerOptions_firstActionMana_default
-  RuneMakerOptions(Index).LowMana = RuneMakerOptions_LowMana_default
-  RuneMakerOptions(Index).secondActionText = RuneMakerOptions_secondActionText_default
-  RuneMakerOptions(Index).secondActionMana = RuneMakerOptions_secondActionMana_default
-  RuneMakerOptions(Index).secondActionSoulpoints = RuneMakerOptions_secondActionSoulpoints_default
+  RuneMakerOptions(index).activated = RuneMakerOptions_activated_default
+  RuneMakerOptions(index).autoEat = RuneMakerOptions_autoEat_default
+  RuneMakerOptions(index).ManaFluid = RuneMakerOptions_ManaFluid_default
+  RuneMakerOptions(index).autoLogoutAnyFloor = RuneMakerOptions_autoLogoutAnyFloor_default
+  RuneMakerOptions(index).autoLogoutCurrentFloor = RuneMakerOptions_autoLogoutCurrentFloor_default
+  RuneMakerOptions(index).autoLogoutOutOfRunes = RuneMakerOptions_autoLogoutOutOfRunes_default
+  RuneMakerOptions(index).autoWaste = RuneMakerOptions_autoWaste_default
+  RuneMakerOptions(index).msgSound = RuneMakerOptions_msgSound_default
+  RuneMakerOptions(index).msgSound2 = RuneMakerOptions_msgSound2_default
+  RuneMakerOptions(index).firstActionText = RuneMakerOptions_firstActionText_default
+  RuneMakerOptions(index).firstActionMana = RuneMakerOptions_firstActionMana_default
+  RuneMakerOptions(index).LowMana = RuneMakerOptions_LowMana_default
+  RuneMakerOptions(index).secondActionText = RuneMakerOptions_secondActionText_default
+  RuneMakerOptions(index).secondActionMana = RuneMakerOptions_secondActionMana_default
+  RuneMakerOptions(index).secondActionSoulpoints = RuneMakerOptions_secondActionSoulpoints_default
   
   'custom ng var
-  healingCheatsOptions(Index).sdmax = healingCheatsOptions_sdmax_default
-  healingCheatsOptions(Index).antipush = healingCheatsOptions_antipush_default
-  healingCheatsOptions(Index).pmax = healingCheatsOptions_pmax_default
-  healingCheatsOptions(Index).htarget = healingCheatsOptions_htarget_default
-  healingCheatsOptions(Index).exaustEat = healingCheatsOptions_exaustEat_default
-  healingCheatsOptions(Index).HouseX = healingCheatsOptions_HouseX_default
-  healingCheatsOptions(Index).HouseY = healingCheatsOptions_HouseY_default
+  healingCheatsOptions(index).sdmax = healingCheatsOptions_sdmax_default
+  healingCheatsOptions(index).antipush = healingCheatsOptions_antipush_default
+  healingCheatsOptions(index).pmax = healingCheatsOptions_pmax_default
+  healingCheatsOptions(index).htarget = healingCheatsOptions_htarget_default
+  healingCheatsOptions(index).exaustEat = healingCheatsOptions_exaustEat_default
+  healingCheatsOptions(index).HouseX = healingCheatsOptions_HouseX_default
+  healingCheatsOptions(index).HouseY = healingCheatsOptions_HouseY_default
   
   'custom ng healing
-    healingCheatsOptions(Index).txtSpellhi = healingCheatsOptions_txtSpellhi_default
-    healingCheatsOptions(Index).txtSpelllo = healingCheatsOptions_txtSpelllo_default
-    healingCheatsOptions(Index).txtPot = healingCheatsOptions_txtPot_default
-    healingCheatsOptions(Index).txtMana = healingCheatsOptions_txtMana_default
-    healingCheatsOptions(Index).txtHealthhi = healingCheatsOptions_txtHealthhi_default
-    healingCheatsOptions(Index).txtHealthlo = healingCheatsOptions_txtHealthlo_default
-    healingCheatsOptions(Index).txtHealpot = healingCheatsOptions_txtHealpot_default
-    healingCheatsOptions(Index).txtManapot = healingCheatsOptions_txtManapot_default
-    healingCheatsOptions(Index).txtManahi = healingCheatsOptions_txtManahi_default
-    healingCheatsOptions(Index).txtManalo = healingCheatsOptions_txtManalo_default
-    healingCheatsOptions(Index).Combo1 = healingCheatsOptions_Combo1_default
-    healingCheatsOptions(Index).Combo2 = healingCheatsOptions_Combo2_default
+    healingCheatsOptions(index).txtSpellhi = healingCheatsOptions_txtSpellhi_default
+    healingCheatsOptions(index).txtSpelllo = healingCheatsOptions_txtSpelllo_default
+    healingCheatsOptions(index).txtPot = healingCheatsOptions_txtPot_default
+    healingCheatsOptions(index).txtMana = healingCheatsOptions_txtMana_default
+    healingCheatsOptions(index).txtHealthhi = healingCheatsOptions_txtHealthhi_default
+    healingCheatsOptions(index).txtHealthlo = healingCheatsOptions_txtHealthlo_default
+    healingCheatsOptions(index).txtHealpot = healingCheatsOptions_txtHealpot_default
+    healingCheatsOptions(index).txtManapot = healingCheatsOptions_txtManapot_default
+    healingCheatsOptions(index).txtManahi = healingCheatsOptions_txtManahi_default
+    healingCheatsOptions(index).txtManalo = healingCheatsOptions_txtManalo_default
+    healingCheatsOptions(index).Combo1 = healingCheatsOptions_Combo1_default
+    healingCheatsOptions(index).Combo2 = healingCheatsOptions_Combo2_default
   
     'custom ng
     'extras
-    extrasOptions(Index).txtSpell = extrasOptions_txtSpell_default
-    extrasOptions(Index).txtMana = extrasOptions_txtMana_default
-    extrasOptions(Index).txtSSA = extrasOptions_txtSSA_default
-    extrasOptions(Index).cmbHouse = extrasOptions_cmbHouse_default
-    extrasOptions(Index).chkMana = extrasOptions_chkMana_default
-    extrasOptions(Index).chkDanger = extrasOptions_chkDanger_default
-    extrasOptions(Index).chkPM = extrasOptions_chkPM_default
-    extrasOptions(Index).chkEat = extrasOptions_chkEat_default
-    extrasOptions(Index).chkautoUtamo = extrasOptions_chkautoUtamo_default
-    extrasOptions(Index).chkautoHur = extrasOptions_chkautoHur_default
-    extrasOptions(Index).chkautogHur = extrasOptions_chkautogHur_default
-    extrasOptions(Index).chkAFK = extrasOptions_chkAFK_default
-    extrasOptions(Index).chkGold = extrasOptions_chkGold_default
-    extrasOptions(Index).chkPlat = extrasOptions_chkPlat_default
-    extrasOptions(Index).chkDash = extrasOptions_chkDash_default
-    extrasOptions(Index).chkMW = extrasOptions_chkMW_default
-    extrasOptions(Index).chkSSA = extrasOptions_chkSSA_default
-    extrasOptions(Index).chkTitle = extrasOptions_chkTitle_default
-    extrasOptions(Index).chkHouse = extrasOptions_chkHouse_default
+    extrasOptions(index).txtSpell = extrasOptions_txtSpell_default
+    extrasOptions(index).txtMana = extrasOptions_txtMana_default
+    extrasOptions(index).txtSSA = extrasOptions_txtSSA_default
+    extrasOptions(index).cmbHouse = extrasOptions_cmbHouse_default
+    extrasOptions(index).chkMana = extrasOptions_chkMana_default
+    extrasOptions(index).chkDanger = extrasOptions_chkDanger_default
+    extrasOptions(index).chkPM = extrasOptions_chkPM_default
+    extrasOptions(index).chkEat = extrasOptions_chkEat_default
+    extrasOptions(index).chkautoUtamo = extrasOptions_chkautoUtamo_default
+    extrasOptions(index).chkautoHur = extrasOptions_chkautoHur_default
+    extrasOptions(index).chkautogHur = extrasOptions_chkautogHur_default
+    extrasOptions(index).chkAFK = extrasOptions_chkAFK_default
+    extrasOptions(index).chkGold = extrasOptions_chkGold_default
+    extrasOptions(index).chkPlat = extrasOptions_chkPlat_default
+    extrasOptions(index).chkDash = extrasOptions_chkDash_default
+    extrasOptions(index).chkMW = extrasOptions_chkMW_default
+    extrasOptions(index).chkSSA = extrasOptions_chkSSA_default
+    extrasOptions(index).chkTitle = extrasOptions_chkTitle_default
+    extrasOptions(index).chkHouse = extrasOptions_chkHouse_default
 
     'custom ng
     'persistent
-    persistentOptions(Index).txtHk1 = persistentOptions_txtHk1_default
-    persistentOptions(Index).txtHk2 = persistentOptions_txtHk2_default
-    persistentOptions(Index).txtHk3 = persistentOptions_txtHk3_default
-    persistentOptions(Index).txtHk4 = persistentOptions_txtHk4_default
-    persistentOptions(Index).txtHk5 = persistentOptions_txtHk5_default
-    persistentOptions(Index).txtHk6 = persistentOptions_txtHk6_default
-    persistentOptions(Index).txtHk7 = persistentOptions_txtHk7_default
-    persistentOptions(Index).txtHk8 = persistentOptions_txtHk8_default
-    persistentOptions(Index).txtHk9 = persistentOptions_txtHk9_default
-    persistentOptions(Index).txtHk10 = persistentOptions_txtHk10_default
-    persistentOptions(Index).txtHk11 = persistentOptions_txtHk11_default
-    persistentOptions(Index).txtExiva1 = persistentOptions_txtExiva1_default
-    persistentOptions(Index).txtExiva2 = persistentOptions_txtExiva2_default
-    persistentOptions(Index).txtExiva3 = persistentOptions_txtExiva3_default
-    persistentOptions(Index).txtExiva4 = persistentOptions_txtExiva4_default
-    persistentOptions(Index).txtExiva5 = persistentOptions_txtExiva5_default
-    persistentOptions(Index).txtExiva6 = persistentOptions_txtExiva6_default
-    persistentOptions(Index).txtExiva7 = persistentOptions_txtExiva7_default
-    persistentOptions(Index).txtExiva8 = persistentOptions_txtExiva8_default
-    persistentOptions(Index).txtExiva9 = persistentOptions_txtExiva9_default
-    persistentOptions(Index).txtExiva10 = persistentOptions_txtExiva10_default
-    persistentOptions(Index).txtExiva11 = persistentOptions_txtExiva11_default
-    persistentOptions(Index).chkExiva1 = persistentOptions_chkExiva1_default
-    persistentOptions(Index).chkExiva2 = persistentOptions_chkExiva2_default
-    persistentOptions(Index).chkExiva3 = persistentOptions_chkExiva3_default
-    persistentOptions(Index).chkExiva4 = persistentOptions_chkExiva4_default
-    persistentOptions(Index).chkExiva5 = persistentOptions_chkExiva5_default
-    persistentOptions(Index).chkExiva6 = persistentOptions_chkExiva6_default
-    persistentOptions(Index).chkExiva7 = persistentOptions_chkExiva7_default
-    persistentOptions(Index).chkExiva8 = persistentOptions_chkExiva8_default
-    persistentOptions(Index).chkExiva9 = persistentOptions_chkExiva9_default
-    persistentOptions(Index).chkExiva10 = persistentOptions_chkExiva10_default
-    persistentOptions(Index).chkExiva11 = persistentOptions_chkExiva11_default
+    persistentOptions(index).txtHk1 = persistentOptions_txtHk1_default
+    persistentOptions(index).txtHk2 = persistentOptions_txtHk2_default
+    persistentOptions(index).txtHk3 = persistentOptions_txtHk3_default
+    persistentOptions(index).txtHk4 = persistentOptions_txtHk4_default
+    persistentOptions(index).txtHk5 = persistentOptions_txtHk5_default
+    persistentOptions(index).txtHk6 = persistentOptions_txtHk6_default
+    persistentOptions(index).txtHk7 = persistentOptions_txtHk7_default
+    persistentOptions(index).txtHk8 = persistentOptions_txtHk8_default
+    persistentOptions(index).txtHk9 = persistentOptions_txtHk9_default
+    persistentOptions(index).txtHk10 = persistentOptions_txtHk10_default
+    persistentOptions(index).txtHk11 = persistentOptions_txtHk11_default
+    persistentOptions(index).txtExiva1 = persistentOptions_txtExiva1_default
+    persistentOptions(index).txtExiva2 = persistentOptions_txtExiva2_default
+    persistentOptions(index).txtExiva3 = persistentOptions_txtExiva3_default
+    persistentOptions(index).txtExiva4 = persistentOptions_txtExiva4_default
+    persistentOptions(index).txtExiva5 = persistentOptions_txtExiva5_default
+    persistentOptions(index).txtExiva6 = persistentOptions_txtExiva6_default
+    persistentOptions(index).txtExiva7 = persistentOptions_txtExiva7_default
+    persistentOptions(index).txtExiva8 = persistentOptions_txtExiva8_default
+    persistentOptions(index).txtExiva9 = persistentOptions_txtExiva9_default
+    persistentOptions(index).txtExiva10 = persistentOptions_txtExiva10_default
+    persistentOptions(index).txtExiva11 = persistentOptions_txtExiva11_default
+    persistentOptions(index).chkExiva1 = persistentOptions_chkExiva1_default
+    persistentOptions(index).chkExiva2 = persistentOptions_chkExiva2_default
+    persistentOptions(index).chkExiva3 = persistentOptions_chkExiva3_default
+    persistentOptions(index).chkExiva4 = persistentOptions_chkExiva4_default
+    persistentOptions(index).chkExiva5 = persistentOptions_chkExiva5_default
+    persistentOptions(index).chkExiva6 = persistentOptions_chkExiva6_default
+    persistentOptions(index).chkExiva7 = persistentOptions_chkExiva7_default
+    persistentOptions(index).chkExiva8 = persistentOptions_chkExiva8_default
+    persistentOptions(index).chkExiva9 = persistentOptions_chkExiva9_default
+    persistentOptions(index).chkExiva10 = persistentOptions_chkExiva10_default
+    persistentOptions(index).chkExiva11 = persistentOptions_chkExiva11_default
     
     'ng custom aimbot
-    aimbotOptions(Index).chkSDcombo = aimbotOptions_chkSDcombo_default
-    aimbotOptions(Index).chkUEcombo = aimbotOptions_chkUEcombo_default
-    aimbotOptions(Index).txtLeader = aimbotOptions_txtLeader_default
-    aimbotOptions(Index).txtCombo = aimbotOptions_txtCombo_default
+    aimbotOptions(index).chkSDcombo = aimbotOptions_chkSDcombo_default
+    aimbotOptions(index).chkUEcombo = aimbotOptions_chkUEcombo_default
+    aimbotOptions(index).txtLeader = aimbotOptions_txtLeader_default
+    aimbotOptions(index).txtCombo = aimbotOptions_txtCombo_default
     
     
-  sentWelcome(Index) = False
+  sentWelcome(index) = False
   For j = 0 To HIGHEST_BP_ID
-    Backpack(Index, j).open = False
-    Backpack(Index, j).cap = 0
-    Backpack(Index, j).used = 0
-    Backpack(Index, j).name = ""
+    Backpack(index, j).open = False
+    Backpack(index, j).cap = 0
+    Backpack(index, j).used = 0
+    Backpack(index, j).name = ""
   Next j
   frmTrueMap.LoadChars
   frmRunemaker.LoadRuneChars
@@ -1988,13 +2047,13 @@ Public Sub DoCloseActions(ByVal Index As Integer)
   
   frmEvents.LoadEventChars
   frmCondEvents.LoadCondEventChars
-  ResetInternalTrainerValues Index
+  ResetInternalTrainerValues index
   frmTrainer.LoadTrainerChars
   frmCavebot.LoadCavebotChars
   frmBroadcast.LoadBroadcastChars
   End If
-  If frmRunemaker.chkCloseSound.Value = 1 Then
-     frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "(Giving alarm because client " & CStr(Index) & " was closed)"
+  If frmRunemaker.chkCloseSound.value = 1 Then
+     frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "(Giving alarm because client " & CStr(index) & " was closed)"
      ChangePlayTheDangerSound True
   End If
   Exit Sub
@@ -2026,9 +2085,9 @@ Private Sub HideAdvancedOptions()
   chkAutoHide.enabled = False
   cmbPrefered.enabled = False
   frmMain.Width = 6900
-  'frmMain.Height = 6550
+  frmMain.Height = 6550  ' Back to old default height
   'custom ng
-  frmMain.Height = 2490
+ ' frmMain.Height = 2490
 End Sub
 
 Private Sub ShowAdvancedOptions()
@@ -2060,8 +2119,8 @@ End Sub
 
 Private Sub chkAutoHide_Click()
   ' change auto Hide option
-  If chkAutoHide.Value = 1 Then
-    If chkLogPackets.Value = 0 Then
+  If chkAutoHide.value = 1 Then
+    If chkLogPackets.value = 0 Then
       gridLog.Visible = False
       gridLog.enabled = False
       txtPackets.Height = 3495
@@ -2075,12 +2134,12 @@ End Sub
 
 Private Sub chkLogPackets_Click()
   ' change log packets mode
-  If chkLogPackets.Value = 1 Then
+  If chkLogPackets.value = 1 Then
     gridLog.Visible = True
     gridLog.enabled = True
     txtPackets.Height = 1215
   Else
-    If chkAutoHide.Value = 1 Then
+    If chkAutoHide.value = 1 Then
       gridLog.Visible = False
       gridLog.enabled = False
       txtPackets.Height = 3495
@@ -2150,7 +2209,7 @@ End Sub
 
 Private Sub chckMemoryIP_Click()
   ' change memory IPS option
-  If chckMemoryIP.Value = 1 Then
+  If chckMemoryIP.value = 1 Then
    LastNumTibiaClients = 0 ' this will force change IPs now
   End If
 End Sub
@@ -2160,11 +2219,13 @@ End Sub
 
 
 Private Sub cmdClear_Click()
-  ' clear logs
-  txtPackets.Text = ""
-  InitGridLog
+    ' clear logs
+    If frmMain.LogFull3.value = True Then
+        LogOnFile txtLogFile.Text, txtPackets.Text
+    End If
+    txtPackets.Text = ""
+    InitGridLog
 End Sub
-
 
 
 
@@ -2281,11 +2342,11 @@ Public Function ReadIniThisFirst() As Long
   Dim tmpVersion As String
   Dim debugPoint As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   res = -1
   debugPoint = 1
-  userHere = App.path
+  userHere = App.Path
   debugPoint = 2
   If Right$(userHere, 1) = "\" Then
     userHere = userHere & "settings.ini"
@@ -2331,7 +2392,7 @@ Public Function ReadIniThisFirst() As Long
   If configPath = "" Then
     here = myMainConfigINIPath()
   Else
-    here = App.path & "\" & configPath & "\config.ini"
+    here = App.Path & "\" & configPath & "\config.ini"
   End If
   Select Case configPath
   Case "config740"
@@ -2576,6 +2637,11 @@ Public Function ReadIniThisFirst() As Long
     TibiaVersionLong = 1032
   Case Else
     SetFutureTibiaVersion (configPath)
+    If Tibia11allowed = False Then
+        If (TibiaVersionLong >= 1100) Then
+            End
+        End If
+    End If
   End Select
   
   If TibiaVersionLong < 820 Then
@@ -2962,6 +3028,7 @@ TibiaExePathWITHTIBIADAT = GetWITHTIBIADAT()
     HIGHEST_BP_ID = 15
   End If
   strInfo = String$(50, 0)
+ ' here = "C:\Program Files (x86)\Blackd Proxy\config1099\config.ini"
   i = getBlackdINI("MemoryAddresses", "MAXDATTILES", "", strInfo, Len(strInfo), here)
   If i > 0 Then
     strInfo = Left(strInfo, i)
@@ -2970,7 +3037,11 @@ TibiaExePathWITHTIBIADAT = GetWITHTIBIADAT()
   Else
     MAXDATTILES = 10000
   End If
-
+  If (TibiaVersionLong >= 1099) And (MAXDATTILES < 30000) Then
+    MAXDATTILES = 30000
+    Debug.Print "Warning: Fixed MAXDATTILES"
+  End If
+  MAXDATTILESpath = here
   
   strInfo = String$(50, 0)
   i = getBlackdINI("Proxy", "MAXTILEIDLISTSIZE", "", strInfo, Len(strInfo), here)
@@ -3019,7 +3090,7 @@ TibiaExePathWITHTIBIADAT = GetWITHTIBIADAT()
   Else
     AlternativeBinding = 0
   End If
-  frmAdvanced.chkAlternativeBinding.Value = AlternativeBinding
+  frmAdvanced.chkAlternativeBinding.value = AlternativeBinding
   
   
   strInfo = String$(10, 0)
@@ -3065,6 +3136,30 @@ TibiaExePathWITHTIBIADAT = GetWITHTIBIADAT()
     tibiaclassname = "tibiaclient"
   End If
   
+    ' tibiaclassname
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "tibiamainname", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    tibiamainname = strInfo
+  Else
+    tibiamainname = "Tibia"
+  End If
+  
+  
+  strInfo = String$(10, 0)
+  i = getBlackdINI("MemoryAddresses", "subTibiaVersionLong", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    lonInfo = CLng(strInfo)
+    subTibiaVersionLong = lonInfo
+  Else
+    subTibiaVersionLong = 0
+  End If
+
+  
+  
+  
   
   strInfo = String$(10, 0)
   i = getBlackdINI("MemoryAddresses", "NumberOfLoginServers", "", strInfo, Len(strInfo), here)
@@ -3077,6 +3172,12 @@ TibiaExePathWITHTIBIADAT = GetWITHTIBIADAT()
         NumberOfLoginServers = 10
     Else
         NumberOfLoginServers = 5
+    End If
+  End If
+  If (TibiaVersionLong >= 1099) And (subTibiaVersionLong > 0) Then
+    If NumberOfLoginServers > 8 Then
+        NumberOfLoginServers = 8
+        Debug.Print "Warning: Fixed NumberOfLoginServers"
     End If
   End If
   
@@ -3359,25 +3460,265 @@ TibiaExePathWITHTIBIADAT = GetWITHTIBIADAT()
   
 
   
-  strInfo = String$(10, 0)
+'  If TibiaVersionLong >= 1100 Then
+'    moveByMemoryEnabled = False ' temporally disabled
+'  Else
+'    moveByMemoryEnabled = True
+'  End If
+  moveByMemoryEnabled = True
+
+  ' Tibia ANY version
+  strInfo = String$(255, 0)
   i = getBlackdINI("MemoryAddresses", "adrConnectionKey", "", strInfo, Len(strInfo), here)
   If i > 0 Then
     strInfo = Left(strInfo, i)
-    lonInfo = CLng(strInfo)
-    adrConnectionKey = lonInfo
+    adrConnectionKey = ReadAddressPath(strInfo, "adrConnectionKey")
   Else
-    adrConnectionKey = &H6FA1A0
+    If TibiaVersionLong >= 1100 Then
+        adrConnectionKey = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 1DC > 308 > 90 > C8", "adrConnectionKey") ' 11.01
+    Else
+        adrConnectionKey = ReadAddressPath("&H6FA1A0", "adrConnectionKey") ' oldest value
+    End If
+  End If
+
+  ' Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrNewRedSquare", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrNewRedSquare = ReadAddressPath(strInfo, "adrNewRedSquare")
+  Else
+    adrNewRedSquare = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 1D8 > E4 > 1C", "adrNewRedSquare") ' 11.0
   End If
   
+  
+  ' FOR MINIMAP CLICK (1) - Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrGameRect_Width_Double", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrGameRect_Width_Double = ReadAddressPath(strInfo, "adrGameRect_Width_Double")
+  Else
+    adrGameRect_Width_Double = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 10C > 18 > 4 > 74 > 4 > 88", "adrGameRect_Width_Double")  ' 11.0
+  End If
+  ' FOR MINIMAP CLICK (2) - Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrMiniMapRect_Y_Double", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrMiniMapRect_Y_Double = ReadAddressPath(strInfo, "adrMiniMapRect_Y_Double")
+  Else
+    adrMiniMapRect_Y_Double = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 134 > 24 > 8 > 4 > 90", "adrMiniMapRect_Y_Double")  ' 11.0
+  End If
+  ' FOR MINIMAP CLICK (3) - Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrMiniMapRect_Width_Double", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrMiniMapRect_Width_Double = ReadAddressPath(strInfo, "adrMiniMapRect_Width_Double")
+  Else
+    adrMiniMapRect_Width_Double = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 8 > 134 > 24 > 8 > 4 > 98", "adrMiniMapRect_Width_Double")  ' 11.0
+  End If
+  ' FOR MINIMAP CLICK (4) - Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrMiniMapRect_Height_Double", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrMiniMapRect_Height_Double = ReadAddressPath(strInfo, "adrMiniMapRect_Height_Double")
+  Else
+    adrMiniMapRect_Height_Double = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 134 > 24 > 8 > 4 > A0", "adrMiniMapRect_Height_Double")  ' 11.0
+  End If
+  ' FOR MINIMAP CLICK (5) - Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrMiniMapDisplay_MinX", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrMiniMapDisplay_MinX = ReadAddressPath(strInfo, "adrMiniMapDisplay_MinX")
+  Else
+    adrMiniMapDisplay_MinX = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 134 > 24 > 2c > 20", "adrMiniMapDisplay_MinX")  ' 11.0
+  End If
+  ' FOR MINIMAP CLICK (6) - Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrMiniMapDisplay_MinY", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrMiniMapDisplay_MinY = ReadAddressPath(strInfo, "adrMiniMapDisplay_MinY")
+  Else
+    adrMiniMapDisplay_MinY = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 134 > 24 > 2c > 24", "adrMiniMapDisplay_MinY")  ' 11.0
+  End If
+  ' FOR MINIMAP CLICK (7) - Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrMiniMapDisplay_Z", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrMiniMapDisplay_Z = ReadAddressPath(strInfo, "adrMiniMapDisplay_Z")
+  Else
+    adrMiniMapDisplay_Z = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 134 > 24 > 2c > 28", "adrMiniMapDisplay_Z")  ' 11.0
+  End If
+  ' FOR MINIMAP CLICK (8) - Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrMiniMapDisplay_SizeX", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrMiniMapDisplay_SizeX = ReadAddressPath(strInfo, "adrMiniMapDisplay_SizeX")
+  Else
+    adrMiniMapDisplay_SizeX = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 134 > 24 > 2c > 30", "adrMiniMapDisplay_SizeX")  ' 11.0
+  End If
+  ' FOR MINIMAP CLICK (9) - Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrMiniMapDisplay_SizeY", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrMiniMapDisplay_SizeY = ReadAddressPath(strInfo, "adrMiniMapDisplay_SizeY")
+  Else
+    adrMiniMapDisplay_SizeY = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 134 > 24 > 2c > 34", "adrMiniMapDisplay_SizeY")  ' 11.0
+  End If
+  ' FOR MINIMAP CLICK (10) - Tibia 11 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrMiniMapDisplay_Zoom_PointSize1_Float", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrMiniMapDisplay_Zoom_PointSize1_Float = ReadAddressPath(strInfo, "adrMiniMapDisplay_Zoom_PointSize1_Float")
+  Else
+    adrMiniMapDisplay_Zoom_PointSize1_Float = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 134 > 24 > 2c > 48", "adrMiniMapDisplay_Zoom_PointSize1_Float")  ' 11.0
+  End If
+
+  ' FOR MINIMAP CLICK (11) - Tibia 11.10 +
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrSidebar_Count", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrSidebar_Count = ReadAddressPath(strInfo, "adrSidebar_Count")
+  Else
+    adrSidebar_Count = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 10C > 18 > 4 > F8", "adrSidebar_Count")  ' 11.10
+  End If
+  
+  strInfo = String$(10, 0)
+  i = getBlackdINI("MemoryAddresses", "offSetSquare_ARGB_8bytes", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    lonInfo = CLng(strInfo)
+    offSetSquare_ARGB_8bytes = lonInfo
+  Else
+    offSetSquare_ARGB_8bytes = &H84 ' Tibia 11.00
+  End If
+  
+  strInfo = String$(10, 0)
+  i = getBlackdINI("MemoryAddresses", "adrServerList_PortOffset", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    lonInfo = CLng(strInfo)
+    adrServerList_PortOffset = lonInfo
+  Else
+    adrServerList_PortOffset = &H20 ' Tibia 11.00 --- &H24 since Tibia 11.04
+  End If
+ ' Debug.Print Hex(adrServerList_PortOffset)
+  'Debug.Print "OK"
+'  ' Tibia 11 +
+'  strInfo = String$(255, 0)
+'  i = getBlackdINI("MemoryAddresses", "adrNewBlueSquare", "", strInfo, Len(strInfo), here)
+'  If i > 0 Then
+'    strInfo = Left(strInfo, i)
+'    adrNewBlueSquare = ReadAddressPath(strInfo)
+'  Else
+'    adrNewBlueSquare = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 1D8 > E4 > 14")  ' 11.0
+'  End If
+
+  ' Tibia ANY version
   strInfo = String$(255, 0)
   i = getBlackdINI("MemoryAddresses", "adrSelectedCharIndex", "", strInfo, Len(strInfo), here)
   If i > 0 Then
     strInfo = Left(strInfo, i)
-    adrSelectedCharIndex = ReadAddressPath(strInfo)
+    adrSelectedCharIndex = ReadAddressPath(strInfo, "adrSelectedCharIndex")
   Else
     'adrSelectedCharIndex = &H6FC9D8 '7.63
-    adrSelectedCharIndex = ReadAddressPath("&H5F6CB0") '7.6
+    adrSelectedCharIndex = ReadAddressPath("&H5F6CB0", "adrSelectedCharIndex") '7.6
   End If
+  
+  
+  ' Tibia 11
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrSelectedCharIndex", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrSelectedItem_height = ReadAddressPath(strInfo, "adrSelectedCharIndex")
+  Else
+    adrSelectedItem_height = ReadAddressPath("""Qt5Widgets.dll"" + 00401DC4 > 70 > 4 > a8", "adrSelectedCharIndex") ' 11.0
+  End If
+  
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrSelectedCharName", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrSelectedCharName = ReadAddressPath(strInfo, "adrSelectedCharName")
+  Else
+    adrSelectedCharName = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > C > 4 > 18 > 38 > 28", "adrSelectedCharName") ' 11.0
+  End If
+  
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrServerList_CollectionStart", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrServerList_CollectionStart = ReadAddressPath(strInfo, "adrServerList_CollectionStart")
+  Else
+    adrServerList_CollectionStart = ReadAddressPath("""Qt5Core.dll"" + 4555C8 > 8 > 168 > 54 > 18 > 2c", "adrServerList_CollectionStart") ' 11.0
+  End If
+ 
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", " adrBattlelist_CollectionStart", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+     adrBattlelist_CollectionStart = ReadAddressPath(strInfo, " adrBattlelist_CollectionStart")
+  Else
+     adrBattlelist_CollectionStart = ReadAddressPath("""Qt5Core.dll"" + 4555C8 > 8 > 1D8 > E4 > 8", " adrBattlelist_CollectionStart") ' 11.0
+  End If
+  
+  strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrSelectedCharName_afterCharList", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrSelectedCharName_afterCharList = ReadAddressPath(strInfo, "adrSelectedCharName_afterCharList")
+  Else
+    adrSelectedCharName_afterCharList = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 320 > 18 > 60 > 0", "adrSelectedCharName_afterCharList") ' 11.0
+  End If
+   strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrSelectedServerURL_afterCharList", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrSelectedServerURL_afterCharList = ReadAddressPath(strInfo, "adrSelectedServerURL_afterCharList")
+  Else
+    adrSelectedServerURL_afterCharList = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 320 > 18 > 60 > 4", "adrSelectedServerURL_afterCharList") ' 11.0
+  End If
+    strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrSelectedServerPORT_afterCharList", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrSelectedServerPORT_afterCharList = ReadAddressPath(strInfo, "adrSelectedServerPORT_afterCharList")
+  Else
+    adrSelectedServerPORT_afterCharList = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 320 > 18 > 60 > 8", "adrSelectedServerPORT_afterCharList") ' 11.0
+  End If
+    strInfo = String$(255, 0)
+  i = getBlackdINI("MemoryAddresses", "adrSelectedServerNAME_afterCharList", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    adrSelectedServerNAME_afterCharList = ReadAddressPath(strInfo, "adrSelectedServerNAME_afterCharList")
+  Else
+    adrSelectedServerNAME_afterCharList = ReadAddressPath("""Qt5Core.dll"" + 004555C8 > 8 > 320 > 18 > 60 > C", "adrSelectedServerNAME_afterCharList") ' 11.0
+  End If
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
 '  strInfo = String$(10, 0)
 '  i = getBlackdINI("MemoryAddresses", "adrAccount", "", strInfo, Len(strInfo), here)
@@ -3512,6 +3853,16 @@ TibiaExePathWITHTIBIADAT = GetWITHTIBIADAT()
   
   
   strInfo = String$(10, 0)
+  i = getBlackdINI("MemoryAddresses", "maxStepsPerMovement", "", strInfo, Len(strInfo), here)
+  If i > 0 Then
+    strInfo = Left(strInfo, i)
+    lonInfo = CLng(strInfo)
+    maxStepsPerMovement = lonInfo
+  Else
+    maxStepsPerMovement = 5
+  End If
+  
+  strInfo = String$(10, 0)
   i = getBlackdINI("MemoryAddresses", "adrPointerToInternalFPSminusH5D", "", strInfo, Len(strInfo), here)
   If i > 0 Then
     strInfo = Left(strInfo, i)
@@ -3598,6 +3949,7 @@ ReDim DoingNewLootMAXGTC(1 To MAXCLIENTS)
   ReDim Aux_LastLoadedCond(1 To MAXCLIENTS)
   ReDim stealthLog(1 To MAXCLIENTS)
   ReDim LastHealTime(1 To MAXCLIENTS)
+  ReDim lastLootOrder(1 To MAXCLIENTS)
   ReDim LastCavebotTime(1 To MAXCLIENTS)
   ReDim CavebotStartTime(1 To MAXCLIENTS)
   ReDim IgnoreServer(1 To MAXCLIENTS)
@@ -3806,6 +4158,7 @@ ReDim DoingNewLootMAXGTC(1 To MAXCLIENTS)
   ReDim runemakerMana1(1 To MAXCLIENTS)
   ReDim makingRune(1 To MAXCLIENTS)
   ReDim lastUsedChannelID(1 To MAXCLIENTS)
+  ReDim mustSendFirstWhenConnected(1 To MAXCLIENTS)
   ReDim lastRecChannelID(1 To MAXCLIENTS)
   ReDim CavebotHaveSpecials(1 To MAXCLIENTS)
   ReDim CavebotLastSpecialMove(1 To MAXCLIENTS)
@@ -4015,7 +4368,7 @@ ReDim DoingNewLootMAXGTC(1 To MAXCLIENTS)
   
   res = 0
   Exit Function
-gotErr:
+goterr:
   MsgBox "Sorry, Blackd Proxy was not able to read .ini files (start)" & vbCrLf & "Possible reasons:" & vbCrLf & _
   " - Corrupted settings.ini ?" & vbCrLf & _
   " - Corrupted config.ini ?" & vbCrLf & _
@@ -4039,13 +4392,13 @@ Public Sub ReadIni()
   Dim idLoginSP As Long
   Dim ibucle As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
-  userHere = App.path & "\settings.ini" ' user config file name
+  userHere = App.Path & "\settings.ini" ' user config file name
   If configPath = "" Then
     here = myMainConfigINIPath()
   Else
-    here = App.path & "\" & configPath & "\config.ini"
+    here = App.Path & "\" & configPath & "\config.ini"
   End If
   strInfo = String$(255, 0)
   i = getBlackdINI("Proxy", "ForwardGameTo", "", strInfo, Len(strInfo), here)
@@ -4059,6 +4412,40 @@ Public Sub ReadIni()
   i = getBlackdINI("Proxy", "txtServerGameP", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   txtServerGameP.Text = strInfo
+  
+  
+  
+  
+  strInfo = String$(10, 0)
+  i = getBlackdINI("Proxy", "useAntiDDoS", "", strInfo, Len(strInfo), here)
+  strInfo = Left(strInfo, i)
+  If strInfo = "0" Then
+    useAntiDDoS = False
+    frmMain.chkUseAntiDDoS.value = 0
+  Else
+    useAntiDDoS = True
+    frmMain.chkUseAntiDDoS.value = 1
+  End If
+  
+  strInfo = String$(10, 0)
+  i = getBlackdINI("Proxy", "useFirewall", "", strInfo, Len(strInfo), here)
+  strInfo = Left(strInfo, i)
+  If strInfo = "0" Then
+    useFirewall = False
+    frmMain.chkBlockRemote.value = 0
+  Else
+    useFirewall = True
+    frmMain.chkBlockRemote.value = 1
+  End If
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   If (OVERWRITE_OT_MODE = True) Then
@@ -4082,19 +4469,19 @@ Public Sub ReadIni()
   
   
   If strInfo = "3" Then
-    TrueServer1.Value = False
-    TrueServer2.Value = False
-    TrueServer3.Value = True
+    TrueServer1.value = False
+    TrueServer2.value = False
+    TrueServer3.value = True
     TrueServer3_Click
   ElseIf strInfo = "2" Then
-    TrueServer1.Value = False
-    TrueServer2.Value = True
-    TrueServer3.Value = False
+    TrueServer1.value = False
+    TrueServer2.value = True
+    TrueServer3.value = False
     TrueServer2_Click
   Else
-    TrueServer1.Value = True
-    TrueServer2.Value = False
-    TrueServer3.Value = False
+    TrueServer1.value = True
+    TrueServer2.value = False
+    TrueServer3.value = False
     TrueServer1_Click
   End If
   
@@ -4102,25 +4489,25 @@ Public Sub ReadIni()
   i = getBlackdINI("Cheats", "MapClickOption", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmHardcoreCheats.ActionInspect.Value = True
-    frmHardcoreCheats.ActionMove.Value = False
-    frmHardcoreCheats.ActionNothing.Value = False
-    frmHardcoreCheats.ActionPath.Value = False
+    frmHardcoreCheats.ActionInspect.value = True
+    frmHardcoreCheats.ActionMove.value = False
+    frmHardcoreCheats.ActionNothing.value = False
+    frmHardcoreCheats.ActionPath.value = False
   ElseIf strInfo = "3" Then
-    frmHardcoreCheats.ActionInspect.Value = False
-    frmHardcoreCheats.ActionMove.Value = False
-    frmHardcoreCheats.ActionNothing.Value = True
-    frmHardcoreCheats.ActionPath.Value = False
+    frmHardcoreCheats.ActionInspect.value = False
+    frmHardcoreCheats.ActionMove.value = False
+    frmHardcoreCheats.ActionNothing.value = True
+    frmHardcoreCheats.ActionPath.value = False
   ElseIf strInfo = "2" Then
-    frmHardcoreCheats.ActionInspect.Value = False
-    frmHardcoreCheats.ActionMove.Value = True
-    frmHardcoreCheats.ActionNothing.Value = False
-    frmHardcoreCheats.ActionPath.Value = False
+    frmHardcoreCheats.ActionInspect.value = False
+    frmHardcoreCheats.ActionMove.value = True
+    frmHardcoreCheats.ActionNothing.value = False
+    frmHardcoreCheats.ActionPath.value = False
   Else '4
-    frmHardcoreCheats.ActionInspect.Value = False
-    frmHardcoreCheats.ActionMove.Value = False
-    frmHardcoreCheats.ActionNothing.Value = False
-    frmHardcoreCheats.ActionPath.Value = True
+    frmHardcoreCheats.ActionInspect.value = False
+    frmHardcoreCheats.ActionMove.value = False
+    frmHardcoreCheats.ActionNothing.value = False
+    frmHardcoreCheats.ActionPath.value = True
   End If
   
   strInfo = String$(255, 0)
@@ -4164,10 +4551,10 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    chkLogPackets.Value = lonInfo
+    chkLogPackets.value = lonInfo
     chkLogPackets_Click
   Else
-    chkLogPackets.Value = 0
+    chkLogPackets.value = 0
     chkLogPackets_Click
   End If
   
@@ -4176,9 +4563,9 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    chckMemoryIP.Value = lonInfo
+    chckMemoryIP.value = lonInfo
   Else
-    chckMemoryIP.Value = 1
+    chckMemoryIP.value = 1
   End If
 
   strInfo = String$(10, 0)
@@ -4186,9 +4573,9 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    chckAlter.Value = lonInfo
+    chckAlter.value = lonInfo
   Else
-    chckAlter.Value = 1
+    chckAlter.value = 1
   End If
 
   strInfo = String$(10, 0)
@@ -4478,9 +4865,9 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    frmHotkeys.chkHotkeysActivated.Value = lonInfo
+    frmHotkeys.chkHotkeysActivated.value = lonInfo
   Else
-    frmHotkeys.chkHotkeysActivated.Value = 1
+    frmHotkeys.chkHotkeysActivated.value = 1
   End If
 
   strInfo = String$(10, 0)
@@ -4488,9 +4875,9 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    frmHotkeys.chkRepeat.Value = lonInfo
+    frmHotkeys.chkRepeat.value = lonInfo
   Else
-    frmHotkeys.chkRepeat.Value = 0
+    frmHotkeys.chkRepeat.value = 0
   End If
   
   
@@ -4539,9 +4926,9 @@ Public Sub ReadIni()
   i = getBlackdINI("Cavebot", "AutoChangePKHeal", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmCavebot.chkChangePkHeal.Value = 0
+    frmCavebot.chkChangePkHeal.value = 0
   Else
-    frmCavebot.chkChangePkHeal.Value = 1
+    frmCavebot.chkChangePkHeal.value = 1
   End If
 
   strInfo = String$(10, 0)
@@ -4549,10 +4936,10 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    frmCavebot.scrollPkHeal.Value = lonInfo
+    frmCavebot.scrollPkHeal.value = lonInfo
     frmCavebot.scrollPkHeal_Change
   Else
-    frmCavebot.scrollPkHeal.Value = 75
+    frmCavebot.scrollPkHeal.value = 75
     frmCavebot.scrollPkHeal_Change
   End If
   
@@ -4561,10 +4948,10 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    frmCavebot.scrollExorivis.Value = lonInfo
+    frmCavebot.scrollExorivis.value = lonInfo
     frmCavebot.scrollExorivis_Change
   Else
-    frmCavebot.scrollExorivis.Value = 50
+    frmCavebot.scrollExorivis.value = 50
     frmCavebot.scrollExorivis_Change
   End If
   
@@ -4601,17 +4988,17 @@ Public Sub ReadIni()
   i = getBlackdINI("Log", "LogFullAction", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "3" Then
-    LogFull1.Value = False
-    LogFull2.Value = False
-    LogFull3.Value = True
+    LogFull1.value = False
+    LogFull2.value = False
+    LogFull3.value = True
   ElseIf strInfo = "2" Then
-    LogFull1.Value = False
-    LogFull2.Value = True
-    LogFull3.Value = False
+    LogFull1.value = False
+    LogFull2.value = True
+    LogFull3.value = False
   Else
-    LogFull1.Value = True
-    LogFull2.Value = False
-    LogFull3.Value = False
+    LogFull1.value = True
+    LogFull2.value = False
+    LogFull3.value = False
   End If
   
   
@@ -4635,9 +5022,9 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    chkSelect.Value = lonInfo
+    chkSelect.value = lonInfo
   Else
-    chkSelect.Value = 1
+    chkSelect.value = 1
   End If
   
   strInfo = String$(10, 0)
@@ -4645,10 +5032,10 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    chkAutoHide.Value = lonInfo
+    chkAutoHide.value = lonInfo
     chkAutoHide_Click
   Else
-    chkAutoHide.Value = 1
+    chkAutoHide.value = 1
     chkAutoHide_Click
   End If
   
@@ -4658,9 +5045,9 @@ Public Sub ReadIni()
 
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmHardcoreCheats.chkLogoutIfDanger.Value = 1
+    frmHardcoreCheats.chkLogoutIfDanger.value = 1
   Else
-    frmHardcoreCheats.chkLogoutIfDanger.Value = 0
+    frmHardcoreCheats.chkLogoutIfDanger.value = 0
   End If
   
   
@@ -4669,9 +5056,9 @@ Public Sub ReadIni()
 
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmStealth.chkStealthCommands.Value = 0
+    frmStealth.chkStealthCommands.value = 0
   Else
-    frmStealth.chkStealthCommands.Value = 1
+    frmStealth.chkStealthCommands.value = 1
   End If
   
    strInfo = String$(10, 0)
@@ -4679,9 +5066,9 @@ Public Sub ReadIni()
 
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmStealth.chkStealthMessages.Value = 0
+    frmStealth.chkStealthMessages.value = 0
   Else
-    frmStealth.chkStealthMessages.Value = 1
+    frmStealth.chkStealthMessages.value = 1
   End If
   
   
@@ -4690,9 +5077,9 @@ Public Sub ReadIni()
 
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmStealth.chkStealthExp.Value = 0
+    frmStealth.chkStealthExp.value = 0
   Else
-    frmStealth.chkStealthExp.Value = 1
+    frmStealth.chkStealthExp.value = 1
   End If
   
   strInfo = String$(10, 0)
@@ -4700,9 +5087,9 @@ Public Sub ReadIni()
 
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmStealth.chkAvoidChat.Value = 0
+    frmStealth.chkAvoidChat.value = 0
   Else
-    frmStealth.chkAvoidChat.Value = 1
+    frmStealth.chkAvoidChat.value = 1
   End If
   
   
@@ -4711,36 +5098,36 @@ Public Sub ReadIni()
   i = getBlackdINI("Cheats", "RevealInvis", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmHardcoreCheats.chkReveal.Value = 0
+    frmHardcoreCheats.chkReveal.value = 0
   Else
-    frmHardcoreCheats.chkReveal.Value = 1
+    frmHardcoreCheats.chkReveal.value = 1
   End If
   
   strInfo = String$(10, 0)
   i = getBlackdINI("Cheats", "ChangeLight", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmHardcoreCheats.chkLight.Value = 0
+    frmHardcoreCheats.chkLight.value = 0
   Else
-    frmHardcoreCheats.chkLight.Value = 1
+    frmHardcoreCheats.chkLight.value = 1
   End If
   
   strInfo = String$(10, 0)
   i = getBlackdINI("Cheats", "AutoHealEnabled", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmHardcoreCheats.chkAutoHeal.Value = 0
+    frmHardcoreCheats.chkAutoHeal.value = 0
   Else
-    frmHardcoreCheats.chkAutoHeal.Value = 1
+    frmHardcoreCheats.chkAutoHeal.value = 1
   End If
   
   strInfo = String$(10, 0)
   i = getBlackdINI("Cheats", "UHalarmEnabled", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmHardcoreCheats.chkRuneAlarm.Value = 0
+    frmHardcoreCheats.chkRuneAlarm.value = 0
   Else
-    frmHardcoreCheats.chkRuneAlarm.Value = 1
+    frmHardcoreCheats.chkRuneAlarm.value = 1
   End If
   
 
@@ -4749,9 +5136,9 @@ Public Sub ReadIni()
   i = getBlackdINI("Cheats", "AutoVitaEnabled", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmHardcoreCheats.chkAutoVita.Value = 1
+    frmHardcoreCheats.chkAutoVita.value = 1
   Else
-    frmHardcoreCheats.chkAutoVita.Value = 0
+    frmHardcoreCheats.chkAutoVita.value = 0
   End If
   
   strInfo = String$(10, 0)
@@ -4759,10 +5146,10 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    frmHardcoreCheats.scrollLight.Value = lonInfo
+    frmHardcoreCheats.scrollLight.value = lonInfo
     frmHardcoreCheats.scrollLight_Change
   Else
-    frmHardcoreCheats.scrollLight.Value = 15
+    frmHardcoreCheats.scrollLight.value = 15
     frmHardcoreCheats.scrollLight_Change
   End If
   
@@ -4770,9 +5157,9 @@ Public Sub ReadIni()
   i = getBlackdINI("Cheats", "AcceptSDorder", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmHardcoreCheats.chkAcceptSDorder.Value = 1
+    frmHardcoreCheats.chkAcceptSDorder.value = 1
   Else
-    frmHardcoreCheats.chkAcceptSDorder.Value = 0
+    frmHardcoreCheats.chkAcceptSDorder.value = 0
   End If
   
   strInfo = String$(10, 0)
@@ -4879,9 +5266,9 @@ Public Sub ReadIni()
   i = getBlackdINI("Cheats", "TitleExp", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmHardcoreCheats.chkCaptionExp.Value = 0
+    frmHardcoreCheats.chkCaptionExp.value = 0
   Else
-    frmHardcoreCheats.chkCaptionExp.Value = 1
+    frmHardcoreCheats.chkCaptionExp.value = 1
   End If
   
   'custom ng
@@ -4910,9 +5297,9 @@ Public Sub ReadIni()
   i = getBlackdINI("Cheats", "chkAutorelog", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmHardcoreCheats.chkAutorelog.Value = 1
+    frmHardcoreCheats.chkAutorelog.value = 1
   Else
-    frmHardcoreCheats.chkAutorelog.Value = 0
+    frmHardcoreCheats.chkAutorelog.value = 0
   End If
   
   If ((Antibanmode = 1) Or (TibiaVersionLong >= 841)) Then
@@ -4920,7 +5307,7 @@ Public Sub ReadIni()
     'frmHardcoreCheats.chkAutorelog.enabled = False
     If TibiaVersionLong >= 841 Then
        frmHardcoreCheats.chkAutorelog.Caption = "Autorelog disabled since 8.41"
-       frmHardcoreCheats.chkAutorelog.Value = 0
+       frmHardcoreCheats.chkAutorelog.value = 0
        frmHardcoreCheats.chkAutorelog.enabled = False
     Else
     frmHardcoreCheats.chkAutorelog.Caption = "Autorelog. WARNING: do not use during server save!"
@@ -4928,7 +5315,7 @@ Public Sub ReadIni()
     'frmHardcoreCheats.txtRelogBackpacks.enabled = False
     'frmHardcoreCheats.lblBackpacks.enabled = False
     End If
-    frmAdvanced.chkWantBypass.Value = 0
+    frmAdvanced.chkWantBypass.value = 0
     frmAdvanced.chkWantBypass.Caption = "Bypass disabled (antiban mode)"
     frmAdvanced.chkWantBypass.enabled = False
   End If
@@ -5101,19 +5488,19 @@ Public Sub ReadIni()
   i = getBlackdINI("Warbot", "AUTOFRIENDHEAL_MODE", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "2" Then
-    frmWarbot.AutoHealOption1.Value = False
-    frmWarbot.AutoHealOption3.Value = False
-    frmWarbot.AutoHealOption2.Value = True
+    frmWarbot.AutoHealOption1.value = False
+    frmWarbot.AutoHealOption3.value = False
+    frmWarbot.AutoHealOption2.value = True
     GLOBAL_AUTOFRIENDHEAL_MODE = 2
   ElseIf strInfo = "3" Then
-    frmWarbot.AutoHealOption1.Value = False
-    frmWarbot.AutoHealOption2.Value = False
-    frmWarbot.AutoHealOption3.Value = True
+    frmWarbot.AutoHealOption1.value = False
+    frmWarbot.AutoHealOption2.value = False
+    frmWarbot.AutoHealOption3.value = True
     GLOBAL_AUTOFRIENDHEAL_MODE = 3
   Else
-    frmWarbot.AutoHealOption2.Value = False
-    frmWarbot.AutoHealOption3.Value = False
-    frmWarbot.AutoHealOption1.Value = True
+    frmWarbot.AutoHealOption2.value = False
+    frmWarbot.AutoHealOption3.value = False
+    frmWarbot.AutoHealOption1.value = True
     GLOBAL_AUTOFRIENDHEAL_MODE = 1
   End If
   
@@ -5123,9 +5510,9 @@ Public Sub ReadIni()
   i = getBlackdINI("Warbot", "AutoHealFriendEnabled", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmWarbot.chkAutoHealFriendEnabled.Value = 1
+    frmWarbot.chkAutoHealFriendEnabled.value = 1
   Else
-    frmWarbot.chkAutoHealFriendEnabled.Value = 0
+    frmWarbot.chkAutoHealFriendEnabled.value = 0
   End If
   
   'chkRecordLogins
@@ -5133,9 +5520,9 @@ Public Sub ReadIni()
   i = getBlackdINI("Warbot", "RecordLogins", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmMagebomb.chkRecordLogins.Value = 1
+    frmMagebomb.chkRecordLogins.value = 1
   Else
-    frmMagebomb.chkRecordLogins.Value = 0
+    frmMagebomb.chkRecordLogins.value = 0
   End If
   
   'UHretry
@@ -5158,10 +5545,10 @@ Public Sub ReadIni()
   If i > 0 Then
     strInfo = Left(strInfo, i)
     lonInfo = CLng(strInfo)
-    frmHardcoreCheats.scrollHP2.Value = lonInfo
+    frmHardcoreCheats.scrollHP2.value = lonInfo
     frmHardcoreCheats.scrollHP2_Change
   Else
-    frmHardcoreCheats.scrollHP2.Value = 70
+    frmHardcoreCheats.scrollHP2.value = 70
     frmHardcoreCheats.scrollHP2_Change
   End If
   
@@ -5190,9 +5577,9 @@ Public Sub ReadIni()
   i = getBlackdINI("Tools", "InspectTileIDs", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmCheats.chkInspectTileID.Value = 1
+    frmCheats.chkInspectTileID.value = 1
   Else
-    frmCheats.chkInspectTileID.Value = 0
+    frmCheats.chkInspectTileID.value = 0
   End If
   
     For ibucle = 1 To MAXCLIENTS
@@ -5209,20 +5596,20 @@ Public Sub ReadIni()
   i = getBlackdINI("Cavebot", "LootProtection", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmCavebot.chkLootProtection.Value = 0
+    frmCavebot.chkLootProtection.value = 0
   Else
-    frmCavebot.chkLootProtection.Value = 1
+    frmCavebot.chkLootProtection.value = 1
   End If
   
   strInfo = String$(10, 0)
   i = getBlackdINI("Cavebot", "BlockOption", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "2" Then
-    frmCavebot.Option1.Value = False
-    frmCavebot.Option2.Value = True
+    frmCavebot.Option1.value = False
+    frmCavebot.Option2.value = True
   Else
-    frmCavebot.Option1.Value = True
-    frmCavebot.Option2.Value = False
+    frmCavebot.Option1.value = True
+    frmCavebot.Option2.value = False
   End If
   
   strInfo = String$(50, 0)
@@ -5285,9 +5672,9 @@ Public Sub ReadIni()
   i = getBlackdINI("Cheats", "LockOnMyFloor", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmHardcoreCheats.chkLockOnMyFloor.Value = 0
+    frmHardcoreCheats.chkLockOnMyFloor.value = 0
   Else
-    frmHardcoreCheats.chkLockOnMyFloor.Value = 1
+    frmHardcoreCheats.chkLockOnMyFloor.value = 1
   End If
 
 
@@ -5338,18 +5725,18 @@ frmRunemaker.txrRunemakerChaos2.Text = CStr(RunemakerChaos2)
   i = getBlackdINI("Runemaker", "ChkOnDangerSS2", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmRunemaker.chkOnDangerSS.Value = 1
+    frmRunemaker.chkOnDangerSS.value = 1
   Else
-    frmRunemaker.chkOnDangerSS.Value = 0
+    frmRunemaker.chkOnDangerSS.value = 0
   End If
   
   strInfo = String$(10, 0)
   i = getBlackdINI("AdvancedProxyOptions", "ForceLoginServer", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmMain.chkForceLoginServer.Value = 1
+    frmMain.chkForceLoginServer.value = 1
   Else
-    frmMain.chkForceLoginServer.Value = 0
+    frmMain.chkForceLoginServer.value = 0
   End If
   
   strInfo = String$(10, 0)
@@ -5360,7 +5747,7 @@ frmRunemaker.txrRunemakerChaos2.Text = CStr(RunemakerChaos2)
   Else
     bypass_def1 = 0
   End If
-  frmAdvanced.chkWantBypass.Value = bypass_def1
+  frmAdvanced.chkWantBypass.value = bypass_def1
   
   strInfo = String$(250, 0)
   i = getBlackdINI("AdvancedProxyOptions", "BypassLoginCharacter", "", strInfo, Len(strInfo), here)
@@ -5386,14 +5773,14 @@ frmRunemaker.txrRunemakerChaos2.Text = CStr(RunemakerChaos2)
   i = getBlackdINI("Cheats", "MapOnTop", "", strInfo, Len(strInfo), here)
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmHardcoreCheats.chkOnTop.Value = 0
-    ToggleTopmost frmTrueMap.hwnd, False
-    ToggleTopmost frmMapReader.hwnd, False
+    frmHardcoreCheats.chkOnTop.value = 0
+    ToggleTopmost frmTrueMap.hWnd, False
+    ToggleTopmost frmMapReader.hWnd, False
     MapWantedOnTop = False
   Else
-    frmHardcoreCheats.chkOnTop.Value = 1
-    ToggleTopmost frmTrueMap.hwnd, True
-    ToggleTopmost frmMapReader.hwnd, True
+    frmHardcoreCheats.chkOnTop.value = 1
+    ToggleTopmost frmTrueMap.hWnd, True
+    ToggleTopmost frmMapReader.hWnd, True
     MapWantedOnTop = True
   End If
   
@@ -5440,10 +5827,10 @@ frmRunemaker.txrRunemakerChaos2.Text = CStr(RunemakerChaos2)
   
   strInfo = Left(strInfo, i)
   If strInfo = "1" Then
-    frmOld.chkOldMenu.Value = 1
+    frmOld.chkOldMenu.value = 1
     'frmOld.chkOldMenu_Click
   Else
-    frmOld.chkOldMenu.Value = 0
+    frmOld.chkOldMenu.value = 0
   End If
   
   
@@ -5453,10 +5840,10 @@ frmRunemaker.txrRunemakerChaos2.Text = CStr(RunemakerChaos2)
 
   strInfo = Left(strInfo, i)
   If strInfo = "0" Then
-    frmHardcoreCheats.chkApplyCheats.Value = 0
+    frmHardcoreCheats.chkApplyCheats.value = 0
     frmHardcoreCheats.chkApplyCheats_Click
   Else
-    frmHardcoreCheats.chkApplyCheats.Value = 1
+    frmHardcoreCheats.chkApplyCheats.value = 1
   End If
   strInfo = String$(50, 0)
   i = getBlackdINI("Proxy", "Version", "", strInfo, Len(strInfo), here)
@@ -5476,7 +5863,7 @@ frmRunemaker.txrRunemakerChaos2.Text = CStr(RunemakerChaos2)
    frmMain.Caption = frmMain.Caption & " for Tibia " & TibiaVersion
 
   Exit Sub
-gotErr:
+goterr:
   MsgBox "Sorry, Blackd Proxy was not able to read ini files (end)" & vbCrLf & "Possible reasons:" & vbCrLf & _
   " - Corrupted config.ini" & vbCrLf & _
   " - Corrupted settings.ini" & vbCrLf & _
@@ -5488,16 +5875,17 @@ End Sub
 
 Public Sub WriteIni()
   ' write ini file
+  On Error GoTo goterr
   Dim i As Integer
   Dim strInfo As String
   Dim here As String
   Dim idLoginSP As Long
-  userHere = App.path & "\settings.ini"
+  userHere = App.Path & "\settings.ini"
   
   If configPath = "" Then
     here = myMainConfigINIPath()
   Else
-    here = App.path & "\" & configPath & "\config.ini"
+    here = App.Path & "\" & configPath & "\config.ini"
   End If
   
   strInfo = CStr(configPath)
@@ -5542,20 +5930,39 @@ Public Sub WriteIni()
   strInfo = gmStart2 & "-"
   i = setBlackdINI("Proxy", "AltGmStartWithThis3", strInfo, here)
   
-  If TrueServer1.Value = True Then
+  If TrueServer1.value = True Then
     strInfo = "1"
-  ElseIf TrueServer2.Value = True Then
+  ElseIf TrueServer2.value = True Then
     strInfo = "2"
   Else
     strInfo = "3"
   End If
   i = setBlackdINI("Proxy", "ForwardOption", strInfo, here)
   
-  If frmHardcoreCheats.ActionPath.Value = True Then
+  
+  
+  
+  If frmMain.chkUseAntiDDoS.value = 1 Then
+     strInfo = "1"
+  Else
+     strInfo = "0"
+  End If
+  i = setBlackdINI("Proxy", "useAntiDDoS", strInfo, here)
+  
+  
+  If frmMain.chkBlockRemote.value = 1 Then
+     strInfo = "1"
+  Else
+     strInfo = "0"
+  End If
+  i = setBlackdINI("Proxy", "useFirewall", strInfo, here)
+  
+  
+  If frmHardcoreCheats.ActionPath.value = True Then
     strInfo = "4"
-  ElseIf frmHardcoreCheats.ActionInspect.Value = True Then
+  ElseIf frmHardcoreCheats.ActionInspect.value = True Then
     strInfo = "1"
-  ElseIf frmHardcoreCheats.ActionMove.Value = True Then
+  ElseIf frmHardcoreCheats.ActionMove.value = True Then
     strInfo = "2"
   Else
     strInfo = "3"
@@ -5577,10 +5984,10 @@ Public Sub WriteIni()
     
   
   
-  strInfo = CStr(chckMemoryIP.Value)
+  strInfo = CStr(chckMemoryIP.value)
   i = setBlackdINI("AdvancedProxyOptions", "LocalLoginUseProxy", strInfo, here)
   
-   strInfo = CStr(chckAlter.Value)
+   strInfo = CStr(chckAlter.value)
   i = setBlackdINI("AdvancedProxyOptions", "LocalGameUseProxy", strInfo, here)
   
   ' txtClientLoginP
@@ -5590,9 +5997,9 @@ Public Sub WriteIni()
   strInfo = txtClientGameP.Text
   i = setBlackdINI("AdvancedProxyOptions", "ListenGamePort", strInfo, here)
   
-  strInfo = CStr(frmMain.chkForceLoginServer.Value)
+  strInfo = CStr(frmMain.chkForceLoginServer.value)
   i = setBlackdINI("AdvancedProxyOptions", "ForceLoginServer", strInfo, here)
-  strInfo = CStr(frmAdvanced.chkWantBypass.Value)
+  strInfo = CStr(frmAdvanced.chkWantBypass.value)
   i = setBlackdINI("AdvancedProxyOptions", "WantBypass", strInfo, here)
   strInfo = frmAdvanced.txtLoginCharacter.Text
   i = setBlackdINI("AdvancedProxyOptions", "BypassLoginCharacter", strInfo, here)
@@ -5606,9 +6013,9 @@ Public Sub WriteIni()
   strInfo = txtMaxLines.Text
   i = setBlackdINI("Log", "MaxHexLines", strInfo, here)
   
-  If LogFull1.Value = True Then
+  If LogFull1.value = True Then
     strInfo = "1"
-  ElseIf LogFull2.Value = True Then
+  ElseIf LogFull2.value = True Then
     strInfo = "2"
   Else
     strInfo = "3"
@@ -5698,8 +6105,8 @@ Public Sub WriteIni()
   strInfo = "&H" & Hex(adrOutfit)
   i = setBlackdINI("MemoryAddresses", "adrOutfit", strInfo, here)
   
-  strInfo = "&H" & Hex(adrConnectionKey)
-  i = setBlackdINI("MemoryAddresses", "adrConnectionKey", strInfo, here)
+  'strInfo = "&H" & Hex(adrConnectionKey)
+  'i = setBlackdINI("MemoryAddresses", "adrConnectionKey", strInfo, here)
   
   'strInfo = "&H" & Hex(adrSelectedCharIndex)
   'i = setBlackdINI("MemoryAddresses", "adrSelectedCharIndex", strInfo, here)
@@ -5734,9 +6141,12 @@ Public Sub WriteIni()
   
   strInfo = "&H" & Hex(adrNum)
   i = setBlackdINI("MemoryAddresses", "adrNum", strInfo, here)
+  
   strInfo = "&H" & Hex(adrConnected)
   i = setBlackdINI("MemoryAddresses", "adrConnected", strInfo, here)
   
+  strInfo = CStr(maxStepsPerMovement)
+  i = setBlackdINI("MemoryAddresses", "maxStepsPerMovement", strInfo, here)
   
   strInfo = "&H" & Hex(adrPointerToInternalFPSminusH5D)
   i = setBlackdINI("MemoryAddresses", "adrPointerToInternalFPSminusH5D", strInfo, here)
@@ -5745,10 +6155,10 @@ Public Sub WriteIni()
   i = setBlackdINI("MemoryAddresses", "adrInternalFPS", strInfo, here)
   
   'frmHotkeys.chkHotkeysActivated.Value
-  strInfo = CStr(frmHotkeys.chkHotkeysActivated.Value)
+  strInfo = CStr(frmHotkeys.chkHotkeysActivated.value)
   i = setBlackdINI("Hotkeys", "HotkeysActivated", strInfo, here)
   'frmHotkeys.chkRepeat.Value
-  strInfo = CStr(frmHotkeys.chkRepeat.Value)
+  strInfo = CStr(frmHotkeys.chkRepeat.value)
   i = setBlackdINI("Hotkeys", "RepeatEnabled", strInfo, here)
   'frmHotkeys.txtDelay.Text
   strInfo = frmHotkeys.txtDelay.Text
@@ -5758,64 +6168,64 @@ Public Sub WriteIni()
   
   
   'chkSelect
-  strInfo = CStr(chkSelect.Value)
+  strInfo = CStr(chkSelect.value)
   i = setBlackdINI("Log", "AutoSelectHexAscii", strInfo, here)
   'chkAutoHide
-  strInfo = CStr(chkAutoHide.Value)
+  strInfo = CStr(chkAutoHide.value)
   i = setBlackdINI("Log", "HideHexLogIfLogDisabled", strInfo, here)
   
  'chkLogoutIfDanger
-  strInfo = CStr(frmHardcoreCheats.chkLogoutIfDanger.Value)
+  strInfo = CStr(frmHardcoreCheats.chkLogoutIfDanger.value)
   i = setBlackdINI("Cheats", "LogoutIfDangerAtStart", strInfo, here)
   
   
   
 
-  strInfo = CStr(frmStealth.chkStealthMessages.Value)
+  strInfo = CStr(frmStealth.chkStealthMessages.value)
   i = setBlackdINI("Cheats", "chkStealthMessages", strInfo, here)
   
-  strInfo = CStr(frmStealth.chkStealthCommands.Value)
+  strInfo = CStr(frmStealth.chkStealthCommands.value)
   i = setBlackdINI("Cheats", "chkStealthCommands", strInfo, here)
   
-  strInfo = CStr(frmStealth.chkStealthExp.Value)
+  strInfo = CStr(frmStealth.chkStealthExp.value)
   i = setBlackdINI("Cheats", "chkStealthExp", strInfo, here)
   
-  strInfo = CStr(frmStealth.chkAvoidChat.Value)
+  strInfo = CStr(frmStealth.chkAvoidChat.value)
   i = setBlackdINI("Cheats", "chkAvoidChat", strInfo, here)
   
   'chkReveal
-  strInfo = CStr(frmHardcoreCheats.chkReveal.Value)
+  strInfo = CStr(frmHardcoreCheats.chkReveal.value)
   i = setBlackdINI("Cheats", "RevealInvis", strInfo, here)
   
   'chkLight
-  strInfo = CStr(frmHardcoreCheats.chkLight.Value)
+  strInfo = CStr(frmHardcoreCheats.chkLight.value)
   i = setBlackdINI("Cheats", "ChangeLight", strInfo, here)
    
   'chkAutoHeal
-  strInfo = CStr(frmHardcoreCheats.chkAutoHeal.Value)
+  strInfo = CStr(frmHardcoreCheats.chkAutoHeal.value)
   i = setBlackdINI("Cheats", "AutoHealEnabled", strInfo, here)
 
-  strInfo = CStr(frmHardcoreCheats.chkRuneAlarm.Value)
+  strInfo = CStr(frmHardcoreCheats.chkRuneAlarm.value)
   i = setBlackdINI("Cheats", "UHalarmEnabled", strInfo, here)
   
 
   'chkCaptionExp
-  strInfo = CStr(frmHardcoreCheats.chkCaptionExp.Value)
+  strInfo = CStr(frmHardcoreCheats.chkCaptionExp.value)
   i = setBlackdINI("Cheats", "TitleExp", strInfo, here)
 
-  strInfo = CStr(frmHardcoreCheats.chkAutoGratz.Value)
+  strInfo = CStr(frmHardcoreCheats.chkAutoGratz.value)
   i = setBlackdINI("Cheats", "chkAutoGratz", strInfo, here)
   
-  strInfo = CStr(frmHardcoreCheats.chkAutorelog.Value)
+  strInfo = CStr(frmHardcoreCheats.chkAutorelog.value)
   i = setBlackdINI("Cheats", "chkAutorelog", strInfo, here)
   
   strInfo = CStr(Antibanmode)
   i = setBlackdINI("Cheats", "Antibanmode", strInfo, here)
   
-  strInfo = CStr(frmHardcoreCheats.chkProtectedShots.Value)
+  strInfo = CStr(frmHardcoreCheats.chkProtectedShots.value)
   i = setBlackdINI("Cheats", "chkProtectedShots", strInfo, here)
   
-  strInfo = CStr(frmHardcoreCheats.chkGmMessagesPauseAll.Value)
+  strInfo = CStr(frmHardcoreCheats.chkGmMessagesPauseAll.value)
   i = setBlackdINI("Cheats", "chkGmMessagesPauseAll", strInfo, here)
   
   strInfo = frmHardcoreCheats.txtExuraVita.Text
@@ -5824,30 +6234,30 @@ Public Sub WriteIni()
   strInfo = frmHardcoreCheats.txtExuraVitaMana.Text
   i = setBlackdINI("Cheats", "txtExuraVitaMana", strInfo, here)
   
-  strInfo = CStr(frmCavebot.chkChangePkHeal.Value)
+  strInfo = CStr(frmCavebot.chkChangePkHeal.value)
   i = setBlackdINI("Cavebot", "AutoChangePKHeal", strInfo, here)
 
 
-  strInfo = CStr(frmCavebot.scrollPkHeal.Value)
+  strInfo = CStr(frmCavebot.scrollPkHeal.value)
   i = setBlackdINI("Cavebot", "NewAutohealForPKattack", strInfo, here) ' fixed in 9.42
   'SafeHPforExoriVis
-  strInfo = CStr(frmCavebot.scrollExorivis.Value)
+  strInfo = CStr(frmCavebot.scrollExorivis.value)
   i = setBlackdINI("Cavebot", "SafeHPforExoriVis", strInfo, here)
   
   strInfo = CStr(SetVeryFriendly_NOATTACKTIMER_ms)
   i = setBlackdINI("Cavebot", "SetVeryFriendly_NOATTACKTIMER_ms", strInfo, here)
    
   'chkAutoVita
-  strInfo = CStr(frmHardcoreCheats.chkAutoVita.Value)
+  strInfo = CStr(frmHardcoreCheats.chkAutoVita.value)
   i = setBlackdINI("Cheats", "AutoVitaEnabled", strInfo, here)
   
   'chkAcceptSDorder
-  strInfo = CStr(frmHardcoreCheats.chkAcceptSDorder.Value)
+  strInfo = CStr(frmHardcoreCheats.chkAcceptSDorder.value)
   i = setBlackdINI("Cheats", "AcceptSDorder", strInfo, here)
   
   
   
-  strInfo = CStr(frmBroadcast.chkMC.Value)
+  strInfo = CStr(frmBroadcast.chkMC.value)
   i = setBlackdINI("Broadcast", "BroadcastMC", strInfo, here)
   
   
@@ -5890,11 +6300,11 @@ Public Sub WriteIni()
    
  
   'chkColorEffects
-  strInfo = CStr(frmHardcoreCheats.chkColorEffects.Value)
+  strInfo = CStr(frmHardcoreCheats.chkColorEffects.value)
   i = setBlackdINI("Cheats", "ColorEffects", strInfo, here)
   
   'scrollLight
-  strInfo = CStr(frmHardcoreCheats.scrollLight.Value)
+  strInfo = CStr(frmHardcoreCheats.scrollLight.value)
   i = setBlackdINI("Cheats", "LightPower", strInfo, here)
   
   
@@ -5912,7 +6322,7 @@ Public Sub WriteIni()
 
 
   'scrollHP2
-   strInfo = CStr(frmHardcoreCheats.scrollHP2.Value)
+   strInfo = CStr(frmHardcoreCheats.scrollHP2.value)
   i = setBlackdINI("Cheats", "LowHPforAutoVita", strInfo, here)
 
   'warbot
@@ -5939,11 +6349,11 @@ Public Sub WriteIni()
   i = setBlackdINI("Warbot", "AUTOFRIENDHEAL_MODE", strInfo, here)
   
   'AutoHealFriendEnabled
-  strInfo = CStr(frmWarbot.chkAutoHealFriendEnabled.Value)
+  strInfo = CStr(frmWarbot.chkAutoHealFriendEnabled.value)
   i = setBlackdINI("Warbot", "AutoHealFriendEnabled", strInfo, here)
   
   'chkRecordLogins
-  strInfo = CStr(frmMagebomb.chkRecordLogins.Value)
+  strInfo = CStr(frmMagebomb.chkRecordLogins.value)
   i = setBlackdINI("Warbot", "RecordLogins", strInfo, here)
   
   'txtAlarmUHs
@@ -5955,11 +6365,11 @@ Public Sub WriteIni()
   i = setBlackdINI("Cheats", "UHretry", strInfo, here)
    
   'chkLockOnMyFloor
-   strInfo = CStr(frmHardcoreCheats.chkLockOnMyFloor.Value)
+   strInfo = CStr(frmHardcoreCheats.chkLockOnMyFloor.value)
   i = setBlackdINI("Cheats", "LockOnMyFloor", strInfo, here)
   
   'chkOnTop
-  strInfo = CStr(frmHardcoreCheats.chkOnTop.Value)
+  strInfo = CStr(frmHardcoreCheats.chkOnTop.value)
   i = setBlackdINI("Cheats", "MapOnTop", strInfo, here)
   
   
@@ -5976,23 +6386,23 @@ Public Sub WriteIni()
   i = setBlackdINI("Runemaker", "RunemakerChaos2", strInfo, here)
   
   'ChkDangerSound
-  strInfo = CStr(frmRunemaker.ChkDangerSound.Value)
+  strInfo = CStr(frmRunemaker.ChkDangerSound.value)
   i = setBlackdINI("Runemaker", "ChkDangerSound", strInfo, here)
   
   'ChkCloseSound
-  strInfo = CStr(frmRunemaker.chkCloseSound.Value)
+  strInfo = CStr(frmRunemaker.chkCloseSound.value)
   i = setBlackdINI("Runemaker", "ChkCloseSound", strInfo, here)
   
   'ChkCloseSound
-  strInfo = CStr(frmRunemaker.chkOnDangerSS.Value)
+  strInfo = CStr(frmRunemaker.chkOnDangerSS.value)
   i = setBlackdINI("Runemaker", "ChkOnDangerSS2", strInfo, here)
   
   'chkApplyCheats
-  strInfo = CStr(frmHardcoreCheats.chkApplyCheats.Value)
+  strInfo = CStr(frmHardcoreCheats.chkApplyCheats.value)
   i = setBlackdINI("Cheats", "CheatsEnabled", strInfo, here)
   
   'custom ng save old menu
-  strInfo = CStr(frmOld.chkOldMenu.Value)
+  strInfo = CStr(frmOld.chkOldMenu.value)
   i = setBlackdINI("OldMenu", "chkOldMenu", strInfo, here)
   
   
@@ -6010,7 +6420,7 @@ Public Sub WriteIni()
   i = setBlackdINI("Cheats", "TimerConditionTick2", strInfo, here)
   
   'chkInspectTileID
-  strInfo = CStr(frmCheats.chkInspectTileID.Value)
+  strInfo = CStr(frmCheats.chkInspectTileID.value)
   i = setBlackdINI("Tools", "InspectTileIDs", strInfo, here)
   
   
@@ -6037,10 +6447,10 @@ Public Sub WriteIni()
   'strInfo = CStr(frmCavebot.chkAllowRepositionAtStart.Value)
   'i = setBlackdINI("Cavebot", "AllowRepositionAtStart", strInfo, here)
   
-  strInfo = CStr(frmCavebot.chkLootProtection.Value)
+  strInfo = CStr(frmCavebot.chkLootProtection.value)
   i = setBlackdINI("Cavebot", "LootProtection", strInfo, here)
     
-  If frmCavebot.Option1.Value = True Then
+  If frmCavebot.Option1.value = True Then
     strInfo = "1"
   Else
     strInfo = "2"
@@ -6099,7 +6509,7 @@ Public Sub WriteIni()
   
   
   
-  strInfo = CStr(frmAdvanced.chkAlternativeBinding.Value)
+  strInfo = CStr(frmAdvanced.chkAlternativeBinding.value)
   i = setBlackdINI("AdvancedProxyOptions", "AlternativeBinding", strInfo, here)
    
    
@@ -6263,6 +6673,9 @@ Public Sub WriteIni()
   i = setBlackdINI("tileIDs", "byteMana", strInfo, here)
   strInfo = "&H" & Hex(byteLife)
   i = setBlackdINI("tileIDs", "byteLife", strInfo, here)
+  Exit Sub
+goterr:
+  Debug.Print "Error at WriteIni: " & Err.Description
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
@@ -6311,7 +6724,7 @@ End Sub
 
 Private Sub gridLog_Click()
   ' user clicked in the gridLog
-  If chkSelect.Value = 1 Then
+  If chkSelect.value = 1 Then
     'flash on the equivalent cell
     gridLog.Row = gridLog.RowSel
     If gridLog.ColSel < 10 Then
@@ -6325,23 +6738,23 @@ End Sub
 ' [COMMON WITH FREE PROXY]
 
 
-Private Sub SckClient_Close(Index As Integer)
+Private Sub SckClient_Close(index As Integer)
   ' client closes
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
-  SckClient(Index).Close
+  SckClient(index).Close
   'SckServer(index).Close 'close his brother server
-  If Connected(Index) = True Then
-   Connected(Index) = False
-   txtPackets.Text = txtPackets.Text & vbCrLf & "#client" & Index & " closed#"
+  If Connected(index) = True Then
+   Connected(index) = False
+   txtPackets.Text = txtPackets.Text & vbCrLf & "#client" & index & " closed#"
   End If
   Exit Sub
-gotErr:
-  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckClient_Close(" & Index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
+goterr:
+  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckClient_Close(" & index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
 End Sub
 
-Private Sub SckClient_ConnectionRequest(Index As Integer, ByVal requestID As Long)
+Private Sub SckClient_ConnectionRequest(index As Integer, ByVal requestID As Long)
     ' client connects
     Dim i As Integer
     Dim num As Integer
@@ -6357,7 +6770,7 @@ Private Sub SckClient_ConnectionRequest(Index As Integer, ByVal requestID As Lon
     Dim lngVirtualTooSlow As Long
 
     #If FinalMode Then
-    On Error GoTo gotErr
+    On Error GoTo goterr
     #End If
     useID = 0
     For i = 1 To MAXCLIENTS
@@ -6376,7 +6789,7 @@ Private Sub SckClient_ConnectionRequest(Index As Integer, ByVal requestID As Lon
         SckClient(useID).Accept requestID
         DoEvents
         strFrom = SckClient(useID).RemoteHostIP
-        If frmMain.chkBlockRemote.Value = 1 Then
+        If frmMain.chkBlockRemote.value = 1 Then
             If Left$(strFrom, 8) <> "127.0.0." Then
                 txtPackets.Text = txtPackets.Text & vbCrLf & "ALARM: Remote connection detected from " & SckClient(useID).RemoteHostIP & " ( " & SckClient(useID).RemoteHost & " ) to port " & CStr(SckClient(useID).RemotePort) & " It have been blocked. Please block your Blackd Proxy ports in your router or firewall for higher security."
                 ChangePlayTheDangerSound True
@@ -6385,11 +6798,11 @@ Private Sub SckClient_ConnectionRequest(Index As Integer, ByVal requestID As Lon
                 Exit Sub
             End If
         End If
-        If TrueServer1.Value = False Then
+        If TrueServer1.value = False Then
             PREFEREDLOGINSERVER = ForwardGameTo.Text
             PREFEREDLOGINPORT = CLng(txtServerLoginP.Text)
             blnDoingBest = False
-        ElseIf ((chkForceLoginServer.Value = 1) Or (TrueServer1.Value = False)) Then
+        ElseIf ((chkForceLoginServer.value = 1) Or (TrueServer1.value = False)) Then
             PREFEREDLOGINSERVER = cmbPrefered.Text
             blnDoingBest = False
         Else
@@ -6407,8 +6820,8 @@ Private Sub SckClient_ConnectionRequest(Index As Integer, ByVal requestID As Lon
     
         gotFirstLoginPacket(useID) = False
         Connected(useID) = True
-        If frmAdvanced.chkWantBypass.Value = 0 Then ' new in 9.38
-            If TrueServer1.Value = True Then
+        If frmAdvanced.chkWantBypass.value = 0 Then ' new in 9.38
+            If TrueServer1.value = True Then
                 txtPackets.Text = txtPackets.Text & vbCrLf & "#client" & useID & " connected (IP " & _
                 SckClient(useID).RemoteHostIP & ") , forwarding to " & PREFEREDLOGINSERVER & ":" & _
                  CStr(PREFEREDLOGINPORT) & " #"
@@ -6428,7 +6841,7 @@ Private Sub SckClient_ConnectionRequest(Index As Integer, ByVal requestID As Lon
                 On Error GoTo gotPortErr
                 sckServer(useID).RemotePort = CLng(txtServerLoginP.Text)
             End If
-            On Error GoTo gotErr
+            On Error GoTo goterr
             If blnDoingBest = False Then
                 sckServer(useID).Connect
                 ' ot servers
@@ -6486,8 +6899,8 @@ Private Sub SckClient_ConnectionRequest(Index As Integer, ByVal requestID As Lon
         End If
     End If
     Exit Sub
-gotErr:
-    frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckClient_ConnectionRequest(" & Index & "," & requestID & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
+goterr:
+    frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckClient_ConnectionRequest(" & index & "," & requestID & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
     Exit Sub
 gotHostErr:
     frmMain.Show
@@ -6506,7 +6919,7 @@ gotPortErr:
     Exit Sub
 End Sub
 
-Private Sub SckClient_DataArrival(Index As Integer, ByVal bytesTotal As Long)
+Private Sub SckClient_DataArrival(index As Integer, ByVal bytesTotal As Long)
   ' data arrives from client
   Dim timeOut As Long
   Dim packet() As Byte 'a tibia packet is an array of bytes
@@ -6524,12 +6937,12 @@ Private Sub SckClient_DataArrival(Index As Integer, ByVal bytesTotal As Long)
   
   'If LoginMethod = 1 Then
   
-  SckClient(Index).GetData packet, vbArray + vbByte
+  SckClient(index).GetData packet, vbArray + vbByte
   ' PAUSE /  UNCOMMENT MSGBOX TO FIND ADDRESS OF LAST PACKET SENT,adrLastPacket (matching testing.txt , with tsearch)
   'OverwriteOnFile "testing.txt", frmMain.showAsStr2(packet, 0)
   'MsgBox "debug - continue"
-  strIP = SckClient(Index).LocalIP
-  strip2 = SckClient(Index).RemoteHostIP
+  strIP = SckClient(index).LocalIP
+  strip2 = SckClient(index).RemoteHostIP
   mypid = GiveProcessIDbyLastPacket(packet, strIP, strip2, "LOGIN1")
   
 '    If TibiaVersionLong >= 841 Then
@@ -6539,75 +6952,75 @@ Private Sub SckClient_DataArrival(Index As Integer, ByVal bytesTotal As Long)
 '    End If
 '
   If (UseCrackd = True) Then
-    If (gotFirstLoginPacket(Index) = False) Then
-      res = readLoginTibiaKeyAtPID(Index, mypid)
+    If (gotFirstLoginPacket(index) = False) Then
+      res = readLoginTibiaKeyAtPID(index, mypid)
       If res < 0 Then
-        Connected(Index) = False
-        SckClient(Index).Close
+        Connected(index) = False
+        SckClient(index).Close
         frmMain.txtPackets.Text = frmMain.txtPackets.Text & _
          "WARNING: readLoginTibiaKeyAtPID failed! (this is a debug message that might be ignored)"
         Exit Sub
       End If
-      gotFirstLoginPacket(Index) = True
+      gotFirstLoginPacket(index) = True
 
       #If BufferDebug = 1 Then
       LogOnFile "bufferLog.txt", "USING DECIPHER KEY1 = " & _
-       GoodHex(loginPacketKey(Index).key(0)) & " " & _
-       GoodHex(loginPacketKey(Index).key(1)) & " " & _
-       GoodHex(loginPacketKey(Index).key(2)) & " " & _
-       GoodHex(loginPacketKey(Index).key(3)) & " " & _
-       GoodHex(loginPacketKey(Index).key(4)) & " " & _
-       GoodHex(loginPacketKey(Index).key(5)) & " " & _
-       GoodHex(loginPacketKey(Index).key(6)) & " " & _
-       GoodHex(loginPacketKey(Index).key(7)) & " " & _
-       GoodHex(loginPacketKey(Index).key(8)) & " " & _
-       GoodHex(loginPacketKey(Index).key(9)) & " " & _
-       GoodHex(loginPacketKey(Index).key(10)) & " " & _
-       GoodHex(loginPacketKey(Index).key(11)) & " " & _
-       GoodHex(loginPacketKey(Index).key(12)) & " " & _
-       GoodHex(loginPacketKey(Index).key(13)) & " " & _
-       GoodHex(loginPacketKey(Index).key(14)) & " " & _
-       GoodHex(loginPacketKey(Index).key(15)) & vbCrLf
+       GoodHex(loginPacketKey(index).Key(0)) & " " & _
+       GoodHex(loginPacketKey(index).Key(1)) & " " & _
+       GoodHex(loginPacketKey(index).Key(2)) & " " & _
+       GoodHex(loginPacketKey(index).Key(3)) & " " & _
+       GoodHex(loginPacketKey(index).Key(4)) & " " & _
+       GoodHex(loginPacketKey(index).Key(5)) & " " & _
+       GoodHex(loginPacketKey(index).Key(6)) & " " & _
+       GoodHex(loginPacketKey(index).Key(7)) & " " & _
+       GoodHex(loginPacketKey(index).Key(8)) & " " & _
+       GoodHex(loginPacketKey(index).Key(9)) & " " & _
+       GoodHex(loginPacketKey(index).Key(10)) & " " & _
+       GoodHex(loginPacketKey(index).Key(11)) & " " & _
+       GoodHex(loginPacketKey(index).Key(12)) & " " & _
+       GoodHex(loginPacketKey(index).Key(13)) & " " & _
+       GoodHex(loginPacketKey(index).Key(14)) & " " & _
+       GoodHex(loginPacketKey(index).Key(15)) & vbCrLf
       #End If
 
-      If chkLogPackets.Value = 1 Then
+      If chkLogPackets.value = 1 Then
       txtPackets.Text = txtPackets.Text & vbCrLf & "USING DECIPHER KEY1 = " & _
-       GoodHex(loginPacketKey(Index).key(0)) & " " & _
-       GoodHex(loginPacketKey(Index).key(1)) & " " & _
-       GoodHex(loginPacketKey(Index).key(2)) & " " & _
-       GoodHex(loginPacketKey(Index).key(3)) & " " & _
-       GoodHex(loginPacketKey(Index).key(4)) & " " & _
-       GoodHex(loginPacketKey(Index).key(5)) & " " & _
-       GoodHex(loginPacketKey(Index).key(6)) & " " & _
-       GoodHex(loginPacketKey(Index).key(7)) & " " & _
-       GoodHex(loginPacketKey(Index).key(8)) & " " & _
-       GoodHex(loginPacketKey(Index).key(9)) & " " & _
-       GoodHex(loginPacketKey(Index).key(10)) & " " & _
-       GoodHex(loginPacketKey(Index).key(11)) & " " & _
-       GoodHex(loginPacketKey(Index).key(12)) & " " & _
-       GoodHex(loginPacketKey(Index).key(13)) & " " & _
-       GoodHex(loginPacketKey(Index).key(14)) & " " & _
-       GoodHex(loginPacketKey(Index).key(15)) & vbCrLf
+       GoodHex(loginPacketKey(index).Key(0)) & " " & _
+       GoodHex(loginPacketKey(index).Key(1)) & " " & _
+       GoodHex(loginPacketKey(index).Key(2)) & " " & _
+       GoodHex(loginPacketKey(index).Key(3)) & " " & _
+       GoodHex(loginPacketKey(index).Key(4)) & " " & _
+       GoodHex(loginPacketKey(index).Key(5)) & " " & _
+       GoodHex(loginPacketKey(index).Key(6)) & " " & _
+       GoodHex(loginPacketKey(index).Key(7)) & " " & _
+       GoodHex(loginPacketKey(index).Key(8)) & " " & _
+       GoodHex(loginPacketKey(index).Key(9)) & " " & _
+       GoodHex(loginPacketKey(index).Key(10)) & " " & _
+       GoodHex(loginPacketKey(index).Key(11)) & " " & _
+       GoodHex(loginPacketKey(index).Key(12)) & " " & _
+       GoodHex(loginPacketKey(index).Key(13)) & " " & _
+       GoodHex(loginPacketKey(index).Key(14)) & " " & _
+       GoodHex(loginPacketKey(index).Key(15)) & vbCrLf
        End If
     End If
   Else
-      gotFirstLoginPacket(Index) = False
+      gotFirstLoginPacket(index) = False
   End If
-  If chkLogPackets.Value = 1 Then
-    LogLine "CLIENT" & Index & ":"
+  If chkLogPackets.value = 1 Then
+    LogLine "CLIENT" & index & ":"
     LogPacket packet
-    txtPackets.Text = txtPackets.Text & vbCrLf & "CLIENT" & Index & ">" & showAsStr2(packet, 0)
+    txtPackets.Text = txtPackets.Text & vbCrLf & "CLIENT" & index & ">" & showAsStr2(packet, 0)
     txtPackets.SelStart = Len(txtPackets.Text)
   End If
   
-    If frmAdvanced.chkWantBypass.Value = 1 Then ' new in 9.38
-       BypassLoginServer Index
+    If frmAdvanced.chkWantBypass.value = 1 Then ' new in 9.38
+       BypassLoginServer index
        Exit Sub
     End If
     
   timeOut = GetTickCount() + 30000
   ' Debug.Print "Connected = " & Connected(Index) & " ; state = " & sckServer(Index).State
-  While ((Connected(Index) = True) And (sckServer(Index).State <> sckConnected))
+  While ((Connected(index) = True) And (sckServer(index).State <> sckConnected))
       gtcnow = GetTickCount()
       If gtcnow >= timeOut Then
           'frmMain.DoCloseActions index
@@ -6615,13 +7028,13 @@ Private Sub SckClient_DataArrival(Index As Integer, ByVal bytesTotal As Long)
           Exit Sub
         End If
     'Debug.Print sckServer(Index).State
-    If sckServer(Index).State = sckClosed Then
-      Connected(Index) = False
+    If sckServer(index).State = sckClosed Then
+      Connected(index) = False
     End If
     DoEvents 'wait
   Wend
-  If ((Connected(Index) = True) And (sckServer(Index).State = sckConnected)) Then
-    sckServer(Index).SendData packet
+  If ((Connected(index) = True) And (sckServer(index).State = sckConnected)) Then
+    sckServer(index).SendData packet
   End If
   
   
@@ -6633,40 +7046,40 @@ Private Sub SckClient_DataArrival(Index As Integer, ByVal bytesTotal As Long)
   'End If
   Exit Sub
 errclose:
-  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "# ID" & Index & " lost connection at SckClient_DataArrival #"
-  Connected(Index) = False
+  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "# ID" & index & " lost connection at SckClient_DataArrival #"
+  Connected(index) = False
   DoEvents
 End Sub
 
-Private Sub SckClientGame_Close(Index As Integer)
+Private Sub SckClientGame_Close(index As Integer)
   ' game client closes
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
-  If frmRunemaker.chkCloseSound.Value = 1 Then
+  If frmRunemaker.chkCloseSound.value = 1 Then
      ChangePlayTheDangerSound True
   End If
   If TibiaVersionLong >= 841 Then
-    GameConnected(Index) = False
+    GameConnected(index) = False
   End If
-  FirstCharInCharList(Index) = ""
+  FirstCharInCharList(index) = ""
 
   
-  sckClientGame(Index).Close
-  sckServerGame(Index).Close 'close his brother server
-  txtPackets.Text = txtPackets.Text & vbCrLf & "#gameclient" & Index & " closed ( by client )#"
-  DoCloseActions Index
+  sckClientGame(index).Close
+  sckServerGame(index).Close 'close his brother server
+  txtPackets.Text = txtPackets.Text & vbCrLf & "#gameclient" & index & " closed ( by client )#"
+  DoCloseActions index
   Exit Sub
-gotErr:
- frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckClientGame_Close(" & Index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
- DoCloseActions Index
+goterr:
+ frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckClientGame_Close(" & index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
+ DoCloseActions index
 End Sub
 
 
 
-Private Sub sckClientGame_Connect(Index As Integer)
+Private Sub sckClientGame_Connect(index As Integer)
 'Debug.Print "clientgame connect:" & Index
- setsockopt sckClientGame(Index).SocketHandle, IPPROTO_TCP, TCP_NODELAY, 1, 4
+ setsockopt sckClientGame(index).SocketHandle, IPPROTO_TCP, TCP_NODELAY, 1, 4
 End Sub
 
 Private Sub closeAllTibiaClientsExcept(ByVal mypid As Long)
@@ -6688,7 +7101,7 @@ If (mypid > 0) Then
 End If
 End Sub
 
-Private Sub SckClientGame_ConnectionRequest(Index As Integer, ByVal requestID As Long)
+Private Sub SckClientGame_ConnectionRequest(index As Integer, ByVal requestID As Long)
   ' game client gets connection request
   Dim i As Integer
   Dim num As Integer
@@ -6701,9 +7114,17 @@ Private Sub SckClientGame_ConnectionRequest(Index As Integer, ByVal requestID As
   Dim UpdatedDATE As Date
   Dim res As Long
   Dim tmpPORT As Long
+  Dim strToDomain As String
+  Dim tmpStr As String
+  Dim genPacket() As Byte
+  
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
+  
+  If cteDebugConEvents = True Then
+     LogConEvent "SckClientGame_ConnectionRequest(" & CStr(index) & "," & CStr(requestID) & ")"
+  End If
   useID = 0
   For i = 1 To MAXCLIENTS
     If GameConnected(i) = False Then
@@ -6722,8 +7143,7 @@ Private Sub SckClientGame_ConnectionRequest(Index As Integer, ByVal requestID As
     End If
     sckClientGame(useID).Close
     sckClientGame(useID).Accept requestID
-    If frmMain.chkBlockRemote.Value = 1 Then
-
+    If frmMain.chkBlockRemote.value = 1 Then
       strRemoteIP = sckClientGame(useID).RemoteHostIP
       If Left$(strRemoteIP, 8) <> "127.0.0." Then
         txtPackets.Text = txtPackets.Text & vbCrLf & "ALARM: Remote connection detected from " & sckClientGame(useID).RemoteHostIP & " ( " & sckClientGame(useID).RemoteHost & " ) to port " & CStr(sckClientGame(useID).RemotePort) & " It have been blocked. Please block your Blackd Proxy ports in your router or firewall for higher security."
@@ -6734,184 +7154,200 @@ Private Sub SckClientGame_ConnectionRequest(Index As Integer, ByVal requestID As
       End If
     End If
     If TibiaVersionLong <= 840 Then
-        GameConnected(useID) = True
+      GameConnected(useID) = True
     End If
     sentFirstPacket(useID) = False
     lastPing(useID) = GetTickCount()
     txtPackets.Text = txtPackets.Text & vbCrLf & "#gameclient" & useID & " connected (IP " & _
      sckClientGame(useID).RemoteHostIP & ") #"
-     
-     
     If TibiaVersionLong >= 841 Then
-     'now gameserver must send something first
-     
-     
-     tmpID = CInt(useID)
-     
-     ProcessID(tmpID) = GetProcessIdByAdrConnected()
-     'ProcessID(tmpID) = GetProcessIdByManualDebug()
-     If ProcessID(tmpID) = -1 Then
-       txtPackets.Text = txtPackets.Text & vbCrLf & "#critical error 4 on connection " & tmpID & " , closing it#"
-       sckClientGame(tmpID).Close
-       sckServerGame(tmpID).Close
-       GameConnected(tmpID) = False
-       DoCloseActions tmpID
-       Exit Sub
-     End If
-     If ProcessID(tmpID) = -2 Then
-       txtPackets.Text = txtPackets.Text & vbCrLf & "#cant stablish connection " & tmpID & " because there are several clients at login screen, aborting connection#"
-       sckClientGame(tmpID).Close
-       sckServerGame(tmpID).Close
-       GameConnected(tmpID) = False
-       DoCloseActions tmpID
-       Exit Sub
-     End If
-     listPos = GetCharListPositionPre(tmpID, selName)
-     ' important problem in tibia 9.71 !!!!!!!!!!!
-     pres = UpdateCharListFromMemory(tmpID, listPos)
-
-     ' NEW ANTIBAN FEATURE:
-     ' SINCE BLACKD PROXY 22.2, WE NOW RELOAD TIBIA.DAT AT NINJA PATCHES:
-'        If ((TibiaVersionLong = highestTibiaVersionLong) And (UseRealTibiaDatInLatestTibiaVersion = True)) Then
-          UpdatedDATE = GetDATEOfFile(TibiaExePathWITHTIBIADAT)
-          If (Not (CurrentTibiaDatDATE = UpdatedDATE)) Then
-            CurrentTibiaDatDATE = UpdatedDATE ' fix 22.3
-            ' close the rest of clients because they would be using outdated tibia.dat other way
-            closeAllTibiaClientsExcept ProcessID(tmpID)
-            ' reload tibia.dat
-            res = UnifiedLoadDatFile(TibiaExePathWITHTIBIADAT)
-            If ((res = -1) Or (res = -2)) Then
-              MsgBox "Non compatible tibia.dat file , error " & CStr(res), vbOKOnly, "Problem with config" & CStr(TibiaVersionLong)
-              End
-            End If
-            If (res = -3) Then
-              MsgBox "Too many tiles found in tibia.dat , please increase MAXDATTILES in your settings.ini" & CStr(res), vbOKOnly, "Problem with config" & CStr(TibiaVersionLong)
-              End
-            End If
-            If (res = -4) Then
-              MsgBox "Outstanding error -4 while reading tibia.dat: " & vbCrLf & DBGtileError, vbOKOnly, "Problem with config" & CStr(TibiaVersionLong)
-              End
-            End If
-            If (res = -5) Then
-              MsgBox "Bug caught: " & vbCrLf & DBGtileError, vbOKOnly, "Debug report"
-              End
-            End If
-            frmMenu.Caption = "Updated Tibia.dat : " & CStr(UpdatedDATE)
+      'now gameserver must send something first
+      tmpID = CInt(useID)
+      ProcessID(tmpID) = GetProcessIdByAdrConnected()
+      If cteDebugConEvents = True Then
+        LogConEvent "Connection request at mc slot " & CStr(tmpID) & " from PID = " & ProcessID(tmpID)
+      End If
+      'ProcessID(tmpID) = GetProcessIdByManualDebug()
+      If ProcessID(tmpID) = -1 Then
+        tmpStr = "#critical error 4 on connection " & tmpID & " , closing it#"
+        txtPackets.Text = txtPackets.Text & vbCrLf & tmpStr
+        If cteDebugConEvents = True Then
+          LogConEvent tmpStr
+        End If
+        sckClientGame(tmpID).Close
+        sckServerGame(tmpID).Close
+        GameConnected(tmpID) = False
+        DoCloseActions tmpID
+        Exit Sub
+      End If
+      If ProcessID(tmpID) = -2 Then
+        tmpStr = "#critical error 4 on connection " & tmpID & " , closing it#"
+        txtPackets.Text = txtPackets.Text & vbCrLf & tmpStr
+        If cteDebugConEvents = True Then
+          LogConEvent tmpStr
+        End If
+        sckClientGame(tmpID).Close
+        sckServerGame(tmpID).Close
+        GameConnected(tmpID) = False
+        DoCloseActions tmpID
+        Exit Sub
+      End If
+      If (TibiaVersionLong >= 1100) Then ' Tibia 11.00
+        If Tibia11allowed = False Then
+            End
+        End If
+        Dim strSelectedChar As String
+        strSelectedChar = QMemory_ReadStringP(ProcessID(tmpID), adrSelectedCharName_afterCharList)
+        'Debug.Print ("SELECTED CHAR=" & strSelectedChar)
+        ' TODO: Complete connection system in 11.0
+        ' build char list
+        ' set listpos
+        ' set selName
+        BuildCharListForTibiaQ tmpID, selName, listPos
+        If listPos = -1 Then ' unexpected packet
+          tmpStr = "#critical error 1 on connection " & tmpID & " , closing it#"
+          txtPackets.Text = txtPackets.Text & vbCrLf & tmpStr
+          If cteDebugConEvents = True Then
+            LogConEvent tmpStr
           End If
-'        End If
-     ' --------------------------
-
-     'pres = readTibiaKeyAtPID(tmpID, ProcessID(tmpID))
-     
-'     If LastCharServerIndex > 0 Then 'refresh charlist if fresh login
-'        CopyCharList2ToList3 LastCharServerIndex, tmpID
-'     End If
-'     LastCharServerIndex = 0
-
-     ' ProcessID(tmpID) = GetProcessIDfromCharList2(tmpID)
-     listPos = GetCharListPosition2(tmpID, selName)
-     If listPos = -1 Then ' unexpected packet
-       txtPackets.Text = txtPackets.Text & vbCrLf & "#critical error 1 on connection " & tmpID & " , closing it#"
-       sckClientGame(tmpID).Close
-       sckServerGame(tmpID).Close
-       GameConnected(tmpID) = False
-       DoCloseActions tmpID
-       Exit Sub
-     End If
-
-
-'aun no?
-
+          sckClientGame(tmpID).Close
+          sckServerGame(tmpID).Close
+          GameConnected(tmpID) = False
+          DoCloseActions tmpID
+          Exit Sub
+        End If
+      Else ' old
+        listPos = GetCharListPositionPre(tmpID, selName)
+        ' important problem in tibia 9.71 !
+        pres = UpdateCharListFromMemory(tmpID, listPos)
+        ' NEW ANTIBAN FEATURE:
+        ' SINCE BLACKD PROXY 22.2, WE NOW RELOAD TIBIA.DAT AT NINJA PATCHES:
+        ' If ((TibiaVersionLong = highestTibiaVersionLong) And (UseRealTibiaDatInLatestTibiaVersion = True)) Then
+        UpdatedDATE = GetDATEOfFile(TibiaExePathWITHTIBIADAT)
+        If (Not (CurrentTibiaDatDATE = UpdatedDATE)) Then
+          CurrentTibiaDatDATE = UpdatedDATE ' fix 22.3
+          ' close the rest of clients because they would be using outdated tibia.dat other way
+          closeAllTibiaClientsExcept ProcessID(tmpID)
+          ' reload tibia.dat
+          res = UnifiedLoadDatFile(TibiaExePathWITHTIBIADAT)
+          If ((res = -1) Or (res = -2)) Then
+            MsgBox "Non compatible tibia.dat file , error " & CStr(res), vbOKOnly, "Problem with config" & CStr(TibiaVersionLong)
+            End
+          End If
+          If (res = -3) Then
+            MsgBox "Too many tiles found in tibia.dat , please increase MAXDATTILES in your settings.ini" & CStr(res), vbOKOnly, "Problem with config" & CStr(TibiaVersionLong)
+            End
+          End If
+          If (res = -4) Then
+            MsgBox "Outstanding error -4 while reading tibia.dat: " & vbCrLf & DBGtileError, vbOKOnly, "Problem with config" & CStr(TibiaVersionLong)
+            End
+          End If
+          If (res = -5) Then
+            MsgBox "Bug caught: " & vbCrLf & DBGtileError, vbOKOnly, "Debug report"
+            End
+          End If
+          frmMenu.Caption = "Updated Tibia.dat : " & CStr(UpdatedDATE)
+        End If
+        listPos = GetCharListPosition2(tmpID, selName)
+        If listPos = -1 Then ' unexpected packet
+          txtPackets.Text = txtPackets.Text & vbCrLf & "#critical error 1 on connection " & tmpID & " , closing it#"
+          sckClientGame(tmpID).Close
+          sckServerGame(tmpID).Close
+          GameConnected(tmpID) = False
+          DoCloseActions tmpID
+          Exit Sub
+        End If
+      End If
       CharacterName(tmpID) = selName
-      
-'     frmTrueMap.LoadChars
-'     frmRunemaker.LoadRuneChars
-'     frmStealth.LoadStealthChars
-'     frmHPmana.LoadHPmanaChars
-'     frmEvents.LoadEventChars
-'     frmCondEvents.LoadCondEventChars
-'     frmTrainer.LoadTrainerChars
-'     frmCavebot.LoadCavebotChars
-'     MustCheckFirstClientPacket(tmpID) = False
+         '  frmTrueMap.LoadChars
+          ' frmRunemaker.LoadRuneChars
+          ' frmStealth.LoadStealthChars
+         '  frmHPmana.LoadHPmanaChars
+         '  frmEvents.LoadEventChars
+         '  frmCondEvents.LoadCondEventChars
+        '   frmTrainer.LoadTrainerChars
+         '  frmCavebot.LoadCavebotChars
+           
+      '     MustCheckFirstClientPacket(tmpID) = False
       MustCheckFirstClientPacket(tmpID) = True
       NeedToIgnoreFirstGamePacket(tmpID) = True
-'ok:
-
-     If TrueServer2.Value = True Then
-       
-       txtPackets.Text = txtPackets.Text & vbCrLf & "# the client ID " & tmpID & " selected the character " & _
+      If cteDebugConEvents = True Then
+         LogConEvent "M = True ; N = True"
+      End If
+      If TrueServer2.value = True Then
+        txtPackets.Text = txtPackets.Text & vbCrLf & "# the client ID " & tmpID & " selected the character " & _
          selName & " - forwarding connection to " & _
          ForwardGameTo.Text & _
          CStr(txtServerGameP.Text) & " #"
-       sckServerGame(tmpID).Close
-       sckServerGame(tmpID).RemoteHost = ForwardGameTo.Text
-       sckServerGame(tmpID).RemotePort = CLng(txtServerGameP.Text)
-       sckServerGame(tmpID).Connect
-     Else
-       If (LimitedToServer <> "-") Then
-         If (LimitedToServer <> CharacterList2(tmpID).item(listPos).ServerName) Then
-             txtPackets.Text = txtPackets.Text & vbCrLf & "#the client ID " & tmpID & " have been closed: You are only allowed to connect to " & LimitedToServer & " with this friend account"
-             LogOnFile "errors.txt", "You are only allowed to connect to " & LimitedToServer & " with this friend account"
-             frmMain.DoCloseActions tmpID
-             Exit Sub
-         End If
-       End If
-              logoutAllowed(tmpID) = 20000 + GetTickCount() ' disable reconnection 20 sec
-      ' RecordLoginOnFile CharacterList2(tmpID).item(listPos).CharacterName, buildIPstring(CInt(CharacterList2(tmpID).item(listPos).serverIP1), _
-         CInt(CharacterList2(tmpID).item(listPos).serverIP2), _
-         CInt(CharacterList2(tmpID).item(listPos).serverIP3), _
-         CInt(CharacterList2(tmpID).item(listPos).serverIP4)), CLng(CharacterList2(tmpID).item(listPos).serverPort), tmpID
-       '!!!!!!!!!!!
-       'OverwriteOnFileSimple "ips.txt", CharacterList2(tmpID).item(listPos).ServerName & " " & _
-         CharacterList2(tmpID).item(listPos).serverIP1 & "." & _
-         CharacterList2(tmpID).item(listPos).serverIP2 & "." & _
-         CharacterList2(tmpID).item(listPos).serverIP3 & "." & _
-         CharacterList2(tmpID).item(listPos).serverIP4
-
-       If TibiaVersionLong >= 1011 Then
-        txtPackets.Text = txtPackets.Text & vbCrLf & "#the client ID " & tmpID & " selected the character " & _
-          CharacterList2(tmpID).item(listPos).CharacterName & " - forwarding connection to " & tibiaEntryServer & ":" & _
-          CStr(CharacterList2(tmpID).item(listPos).serverPort) & " ( " & _
-          CharacterList2(tmpID).item(listPos).ServerName & " ) #"
         sckServerGame(tmpID).Close
-        If TibiaVersionLong = 1011 Then
-          sckServerGame(tmpID).RemoteHost = tibiaEntryServer
-        Else
-          sckServerGame(tmpID).RemoteHost = CharacterList2(tmpID).item(listPos).serverDOMAIN
+        sckServerGame(tmpID).RemoteHost = ForwardGameTo.Text
+        sckServerGame(tmpID).RemotePort = CLng(txtServerGameP.Text)
+        sckServerGame(tmpID).Connect
+      Else ' real servers
+        If (LimitedToServer <> "-") Then
+          If (LimitedToServer <> CharacterList2(tmpID).item(listPos).ServerName) Then
+            txtPackets.Text = txtPackets.Text & vbCrLf & "#the client ID " & tmpID & " have been closed: You are only allowed to connect to " & LimitedToServer & " with this friend account"
+            LogOnFile "errors.txt", "You are only allowed to connect to " & LimitedToServer & " with this friend account"
+            frmMain.DoCloseActions tmpID
+            Exit Sub
+          End If
         End If
-        tmpPORT = CLng(CharacterList2(tmpID).item(listPos).serverPort)
-        sckServerGame(tmpID).RemotePort = tmpPORT
-        sckServerGame(tmpID).Connect
-       Else
-        txtPackets.Text = txtPackets.Text & vbCrLf & "#the client ID " & tmpID & " selected the character " & _
-          CharacterList2(tmpID).item(listPos).CharacterName & " - forwarding connection to " & _
-          CharacterList2(tmpID).item(listPos).serverIP1 & "." & _
-          CharacterList2(tmpID).item(listPos).serverIP2 & "." & _
-          CharacterList2(tmpID).item(listPos).serverIP3 & "." & _
-          CharacterList2(tmpID).item(listPos).serverIP4 & ":" & _
-          CStr(CharacterList2(tmpID).item(listPos).serverPort) & " ( " & _
+        logoutAllowed(tmpID) = 20000 + GetTickCount() ' disable reconnection 20 sec
+        If TibiaVersionLong >= 1011 Then
+          If (TibiaVersionLong = 1011) Then
+            strToDomain = tibiaEntryServer
+          Else
+            strToDomain = CharacterList2(tmpID).item(listPos).serverDOMAIN
+          End If
+          'lastServerName = CharacterList2(tmpID).item(listPos).ServerName
+          
+          
+   
+          txtPackets.Text = txtPackets.Text & vbCrLf & "#the client ID " & tmpID & " selected the character " & _
+           CharacterList2(tmpID).item(listPos).CharacterName & " - forwarding connection to " & strToDomain & ":" & _
+           CStr(CharacterList2(tmpID).item(listPos).serverPort) & " ( " & _
           CharacterList2(tmpID).item(listPos).ServerName & " ) #"
-        sckServerGame(tmpID).Close
-        sckServerGame(tmpID).RemoteHost = _
+          sckServerGame(tmpID).Close
+          If TibiaVersionLong = 1011 Then
+            sckServerGame(tmpID).RemoteHost = tibiaEntryServer
+          Else
+            sckServerGame(tmpID).RemoteHost = CharacterList2(tmpID).item(listPos).serverDOMAIN
+          End If
+          tmpPORT = CLng(CharacterList2(tmpID).item(listPos).serverPort)
+          sckServerGame(tmpID).RemotePort = tmpPORT
+          sckServerGame(tmpID).Connect
+          
+          
+
+          If cteDebugConEvents = True Then
+            LogConEvent "Connecting to " & CharacterList2(tmpID).item(listPos).ServerName & " = " & CharacterList2(tmpID).item(listPos).serverDOMAIN & ":" & CharacterList2(tmpID).item(listPos).serverPort
+          End If
+        Else ' old method
+          txtPackets.Text = txtPackets.Text & vbCrLf & "#the client ID " & tmpID & " selected the character " & _
+           CharacterList2(tmpID).item(listPos).CharacterName & " - forwarding connection to " & _
+           CharacterList2(tmpID).item(listPos).serverIP1 & "." & _
+           CharacterList2(tmpID).item(listPos).serverIP2 & "." & _
+           CharacterList2(tmpID).item(listPos).serverIP3 & "." & _
+           CharacterList2(tmpID).item(listPos).serverIP4 & ":" & _
+           CStr(CharacterList2(tmpID).item(listPos).serverPort) & " ( " & _
+           CharacterList2(tmpID).item(listPos).ServerName & " ) #"
+          sckServerGame(tmpID).Close
+          sckServerGame(tmpID).RemoteHost = _
           buildIPstring(CInt(CharacterList2(tmpID).item(listPos).serverIP1), _
-          CInt(CharacterList2(tmpID).item(listPos).serverIP2), _
-          CInt(CharacterList2(tmpID).item(listPos).serverIP3), _
-          CInt(CharacterList2(tmpID).item(listPos).serverIP4))
-        sckServerGame(tmpID).RemotePort = CLng(CharacterList2(tmpID).item(listPos).serverPort)
-        sckServerGame(tmpID).Connect
-       End If
-     End If
-    
-    
-     ' // tibia 8.41
-    End If
-     
-  End If
+           CInt(CharacterList2(tmpID).item(listPos).serverIP2), _
+           CInt(CharacterList2(tmpID).item(listPos).serverIP3), _
+           CInt(CharacterList2(tmpID).item(listPos).serverIP4))
+          sckServerGame(tmpID).RemotePort = CLng(CharacterList2(tmpID).item(listPos).serverPort)
+          sckServerGame(tmpID).Connect
+        End If ' old method
+      End If ' else - real servers
+    End If  ' tibia > 8.41
+  End If ' If useID > 0 Then
   Exit Sub
-gotErr:
-  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckClientGame_ConnectionRequest(" & Index & "," & requestID & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
+goterr:
+  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckClientGame_ConnectionRequest(" & index & "," & requestID & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
 End Sub
-Private Sub HandleSckClientGame_Data(Index As Integer, MyCodingIsLazyPacket() As Byte, bytesTotal As Long)
+Private Sub HandleSckClientGame_Data(ByRef index As Integer, ByRef MyCodingIsLazyPacket() As Byte, ByRef bytesTotal As Long)
   ' gameclient gets data
   Dim packet() As Byte 'a tibia packet is an array of bytes
   Dim listPos As Integer
@@ -6937,9 +7373,9 @@ Private Sub HandleSckClientGame_Data(Index As Integer, MyCodingIsLazyPacket() As
   
   
   
-  If Index > 0 Then
+  If index > 0 Then
   processIt = True
-  If (UseCrackd = True) And (MustCheckFirstClientPacket(Index) = False) Then
+  If (UseCrackd = True) And (MustCheckFirstClientPacket(index) = False) Then
     'sckClientGame(Index).GetData realRawPacket, vbArray + vbByte
     ReDim realRawPacket(bytesTotal - 1)
     RtlMoveMemory realRawPacket(0), MyCodingIsLazyPacket(0), bytesTotal
@@ -6957,12 +7393,12 @@ Private Sub HandleSckClientGame_Data(Index As Integer, MyCodingIsLazyPacket() As
             SPlen = GetTheLong(realRawPacket(SPpos), realRawPacket(SPpos + 1))
             ReDim SPpacket(SPlen + 1)
             RtlMoveMemory SPpacket(0), realRawPacket(SPpos), (SPlen + 2)
-            pres = DecipherTibiaProtected(SPpacket(0), packetKey(Index).key(0), UBound(SPpacket), UBound(packetKey(Index).key))
+            pres = DecipherTibiaProtected(SPpacket(0), packetKey(index).Key(0), UBound(SPpacket), UBound(packetKey(index).Key))
         Else ' skip CRC
             SPlen = GetTheLong(realRawPacket(SPpos), realRawPacket(SPpos + 1))
             ReDim SPpacket(SPlen + 1)
             RtlMoveMemory SPpacket(0), realRawPacket(SPpos), (SPlen + 2)
-            pres = DecipherTibiaProtectedSP(SPpacket(0), packetKey(Index).key(0), UBound(SPpacket), UBound(packetKey(Index).key))
+            pres = DecipherTibiaProtectedSP(SPpacket(0), packetKey(index).Key(0), UBound(SPpacket), UBound(packetKey(index).Key))
         End If
         
         If (pres = 0) Then
@@ -6981,16 +7417,19 @@ Private Sub HandleSckClientGame_Data(Index As Integer, MyCodingIsLazyPacket() As
               ' somehow a login packet arrived here
               ReDim packet(UBound(realRawPacket))
               RtlMoveMemory packet(0), realRawPacket(0), UBound(realRawPacket) + 1
-              MustCheckFirstClientPacket(Index) = True
+              MustCheckFirstClientPacket(index) = True
+              If cteDebugConEvents = True Then
+                LogConEvent "M = True. Starting workaround for rare error"
+              End If
               GoTo workAroundForRareError
             Else
-              GiveCrackdDllErrorMessage pres, SPpacket, packetKey(Index).key, UBound(SPpacket), UBound(packetKey(Index).key), 1
+              GiveCrackdDllErrorMessage pres, SPpacket, packetKey(index).Key, UBound(SPpacket), UBound(packetKey(index).Key), 1
               Exit Sub
             End If
         End If
-        res = ApplyHardcoreCheats(packet, Index)
+        res = ApplyHardcoreCheats(packet, index)
         If res <> 1 Then
-            UnifiedSendToServerGame Index, packet, True
+            UnifiedSendToServerGame index, packet, True
         End If
         SPpos = 2 + SPpos + SPlen
         If SPpos < SPlim Then
@@ -7006,94 +7445,99 @@ Private Sub HandleSckClientGame_Data(Index As Integer, MyCodingIsLazyPacket() As
   End If
 workAroundForRareError:
   'MustCheckFirstClientPacket(Index) = False ' tibia 8.41 !
-  If MustCheckFirstClientPacket(Index) = True Then
+  If MustCheckFirstClientPacket(index) = True Then
        'store connection packet to allow reconnection later
        res = UBound(packet)
-       ReDim ReconnectionPacket(Index).packet(res)
-       ReconnectionPacket(Index).numbytes = res + 1
-       RtlMoveMemory ReconnectionPacket(Index).packet(0), packet(0), ReconnectionPacket(Index).numbytes
+       ReDim ReconnectionPacket(index).packet(res)
+       ReconnectionPacket(index).numbytes = res + 1
+       RtlMoveMemory ReconnectionPacket(index).packet(0), packet(0), ReconnectionPacket(index).numbytes
 
       'LogOnFile "lastp.txt", showAsStr2(packet, 0) & vbCrLf
      'If AlternativeBinding = 0 Then
      '   UpdateProcessIDbyLastPacket Index, packet
      'Else
-        strIP = sckClientGame(Index).LocalIP
-        strip2 = sckClientGame(Index).RemoteHostIP
+        strIP = sckClientGame(index).LocalIP
+        strip2 = sckClientGame(index).RemoteHostIP
         If TibiaVersionLong >= 841 Then
             ' processid(index) already holds a valid value
             
             'ProcessID(Index) = GetProcessIDfromCharList3(Index)
         Else
-            ProcessID(Index) = GiveProcessIDbyLastPacket(packet, strIP, strip2, "GAMESERVERLOGIN")
+            ProcessID(index) = GiveProcessIDbyLastPacket(packet, strIP, strip2, "GAMESERVERLOGIN")
         End If
      'End If
-     If ProcessID(Index) <= 0 Then
-       DoCloseActions Index
+     If ProcessID(index) <= 0 Then
+       DoCloseActions index
        Exit Sub
      End If
 
      If TibiaVersionLong <= 840 Then
-     listPos = GetCharListPositionPre(Index, selName)
-     pres = UpdateCharListFromMemory(Index, listPos)
+     listPos = GetCharListPositionPre(index, selName)
+     pres = UpdateCharListFromMemory(index, listPos)
      End If
      If (UseCrackd = True) Then
-       pres = readTibiaKeyAtPID(Index, ProcessID(Index))
+      ' Debug.Print frmMain.showAsStr(packet, True)
        
+       pres = readTibiaKeyAtPID(index, ProcessID(index))
+       If (pres = -1) Then
+         DoCloseActions index
+         Exit Sub
+       End If
        #If BufferDebug = 1 Then
          LogOnFile "bufferLog.txt", "USING DECIPHER KEY2 = " & _
-       GoodHex(packetKey(Index).key(0)) & " " & _
-       GoodHex(packetKey(Index).key(1)) & " " & _
-       GoodHex(packetKey(Index).key(2)) & " " & _
-       GoodHex(packetKey(Index).key(3)) & " " & _
-       GoodHex(packetKey(Index).key(4)) & " " & _
-       GoodHex(packetKey(Index).key(5)) & " " & _
-       GoodHex(packetKey(Index).key(6)) & " " & _
-       GoodHex(packetKey(Index).key(7)) & " " & _
-       GoodHex(packetKey(Index).key(8)) & " " & _
-       GoodHex(packetKey(Index).key(9)) & " " & _
-       GoodHex(packetKey(Index).key(10)) & " " & _
-       GoodHex(packetKey(Index).key(11)) & " " & _
-       GoodHex(packetKey(Index).key(12)) & " " & _
-       GoodHex(packetKey(Index).key(13)) & " " & _
-       GoodHex(packetKey(Index).key(14)) & " " & _
-       GoodHex(packetKey(Index).key(15)) & vbCrLf
+       GoodHex(packetKey(index).Key(0)) & " " & _
+       GoodHex(packetKey(index).Key(1)) & " " & _
+       GoodHex(packetKey(index).Key(2)) & " " & _
+       GoodHex(packetKey(index).Key(3)) & " " & _
+       GoodHex(packetKey(index).Key(4)) & " " & _
+       GoodHex(packetKey(index).Key(5)) & " " & _
+       GoodHex(packetKey(index).Key(6)) & " " & _
+       GoodHex(packetKey(index).Key(7)) & " " & _
+       GoodHex(packetKey(index).Key(8)) & " " & _
+       GoodHex(packetKey(index).Key(9)) & " " & _
+       GoodHex(packetKey(index).Key(10)) & " " & _
+       GoodHex(packetKey(index).Key(11)) & " " & _
+       GoodHex(packetKey(index).Key(12)) & " " & _
+       GoodHex(packetKey(index).Key(13)) & " " & _
+       GoodHex(packetKey(index).Key(14)) & " " & _
+       GoodHex(packetKey(index).Key(15)) & vbCrLf
        #End If
-       If chkLogPackets.Value = 1 Then
+       If chkLogPackets.value = 1 Then
       txtPackets.Text = txtPackets.Text & vbCrLf & "USING DECIPHER KEY2 = " & _
-       GoodHex(packetKey(Index).key(0)) & " " & _
-       GoodHex(packetKey(Index).key(1)) & " " & _
-       GoodHex(packetKey(Index).key(2)) & " " & _
-       GoodHex(packetKey(Index).key(3)) & " " & _
-       GoodHex(packetKey(Index).key(4)) & " " & _
-       GoodHex(packetKey(Index).key(5)) & " " & _
-       GoodHex(packetKey(Index).key(6)) & " " & _
-       GoodHex(packetKey(Index).key(7)) & " " & _
-       GoodHex(packetKey(Index).key(8)) & " " & _
-       GoodHex(packetKey(Index).key(9)) & " " & _
-       GoodHex(packetKey(Index).key(10)) & " " & _
-       GoodHex(packetKey(Index).key(11)) & " " & _
-       GoodHex(packetKey(Index).key(12)) & " " & _
-       GoodHex(packetKey(Index).key(13)) & " " & _
-       GoodHex(packetKey(Index).key(14)) & " " & _
-       GoodHex(packetKey(Index).key(15)) & vbCrLf
+       GoodHex(packetKey(index).Key(0)) & " " & _
+       GoodHex(packetKey(index).Key(1)) & " " & _
+       GoodHex(packetKey(index).Key(2)) & " " & _
+       GoodHex(packetKey(index).Key(3)) & " " & _
+       GoodHex(packetKey(index).Key(4)) & " " & _
+       GoodHex(packetKey(index).Key(5)) & " " & _
+       GoodHex(packetKey(index).Key(6)) & " " & _
+       GoodHex(packetKey(index).Key(7)) & " " & _
+       GoodHex(packetKey(index).Key(8)) & " " & _
+       GoodHex(packetKey(index).Key(9)) & " " & _
+       GoodHex(packetKey(index).Key(10)) & " " & _
+       GoodHex(packetKey(index).Key(11)) & " " & _
+       GoodHex(packetKey(index).Key(12)) & " " & _
+       GoodHex(packetKey(index).Key(13)) & " " & _
+       GoodHex(packetKey(index).Key(14)) & " " & _
+       GoodHex(packetKey(index).Key(15)) & vbCrLf
        End If
      End If 'usecrackd
      processIt = False
 
-     listPos = GetCharListPosition2(Index, selName)
+     listPos = GetCharListPosition2(index, selName)
 
      If listPos = -1 Then ' unexpected packet
-       txtPackets.Text = txtPackets.Text & vbCrLf & "#critical error 2 on connection " & Index & " , closing it#"
-       sckClientGame(Index).Close
-       sckServerGame(Index).Close
-       GameConnected(Index) = False
-       DoCloseActions Index
+       txtPackets.Text = txtPackets.Text & vbCrLf & "#critical error 2 on connection " & index & " , closing it#"
+       sckClientGame(index).Close
+       sckServerGame(index).Close
+       GameConnected(index) = False
+       DoCloseActions index
        Exit Sub
      End If
 
-     CharacterName(Index) = selName
+     CharacterName(index) = selName
      If TibiaVersionLong >= 841 Then
-        GameConnected(Index) = True
+        GameConnected(index) = True
      End If
      ' events that happens when a char complete the login stage
     frmTrueMap.LoadChars
@@ -7111,58 +7555,61 @@ workAroundForRareError:
     frmTrainer.LoadTrainerChars
     frmCavebot.LoadCavebotChars
     frmBroadcast.LoadBroadcastChars
-    LoadCharSettings Index
+    LoadCharSettings index
     
     
-     MustCheckFirstClientPacket(Index) = False
+     MustCheckFirstClientPacket(index) = False
+     If cteDebugConEvents = True Then
+        LogConEvent "M = False"
+     End If
      If TibiaVersionLong <= 840 Then
-     If TrueServer2.Value = True Then
+     If TrueServer2.value = True Then
        
-       txtPackets.Text = txtPackets.Text & vbCrLf & "# the client ID " & Index & " selected the character " & _
+       txtPackets.Text = txtPackets.Text & vbCrLf & "# the client ID " & index & " selected the character " & _
          selName & " - forwarding connection to " & _
          ForwardGameTo.Text & _
          CStr(txtServerGameP.Text) & " #"
-       sckServerGame(Index).Close
-       sckServerGame(Index).RemoteHost = ForwardGameTo.Text
-       sckServerGame(Index).RemotePort = CLng(txtServerGameP.Text)
-       sckServerGame(Index).Connect
+       sckServerGame(index).Close
+       sckServerGame(index).RemoteHost = ForwardGameTo.Text
+       sckServerGame(index).RemotePort = CLng(txtServerGameP.Text)
+       sckServerGame(index).Connect
      Else
        If (LimitedToServer <> "-") Then
-         If (LimitedToServer <> CharacterList2(Index).item(listPos).ServerName) Then
-             txtPackets.Text = txtPackets.Text & vbCrLf & "#the client ID " & Index & " have been closed: You are only allowed to connect to " & LimitedToServer & " with this friend account"
+         If (LimitedToServer <> CharacterList2(index).item(listPos).ServerName) Then
+             txtPackets.Text = txtPackets.Text & vbCrLf & "#the client ID " & index & " have been closed: You are only allowed to connect to " & LimitedToServer & " with this friend account"
              LogOnFile "errors.txt", "You are only allowed to connect to " & LimitedToServer & " with this friend account"
-             frmMain.DoCloseActions Index
+             frmMain.DoCloseActions index
              Exit Sub
          End If
        End If
-              logoutAllowed(Index) = 20000 + GetTickCount() ' disable reconnection 20 sec
+              logoutAllowed(index) = 20000 + GetTickCount() ' disable reconnection 20 sec
        
       
        
-       RecordLoginOnFile CharacterList2(Index).item(listPos).CharacterName, buildIPstring(CInt(CharacterList2(Index).item(listPos).serverIP1), _
-         CInt(CharacterList2(Index).item(listPos).serverIP2), _
-         CInt(CharacterList2(Index).item(listPos).serverIP3), _
-         CInt(CharacterList2(Index).item(listPos).serverIP4)), CLng(CharacterList2(Index).item(listPos).serverPort), Index
+       RecordLoginOnFile CharacterList2(index).item(listPos).CharacterName, buildIPstring(CInt(CharacterList2(index).item(listPos).serverIP1), _
+         CInt(CharacterList2(index).item(listPos).serverIP2), _
+         CInt(CharacterList2(index).item(listPos).serverIP3), _
+         CInt(CharacterList2(index).item(listPos).serverIP4)), CLng(CharacterList2(index).item(listPos).serverPort), index
        
-       txtPackets.Text = txtPackets.Text & vbCrLf & "#the client ID " & Index & " selected the character " & _
-         CharacterList2(Index).item(listPos).CharacterName & " - forwarding connection to " & _
-         CharacterList2(Index).item(listPos).serverIP1 & "." & _
-         CharacterList2(Index).item(listPos).serverIP2 & "." & _
-         CharacterList2(Index).item(listPos).serverIP3 & "." & _
-         CharacterList2(Index).item(listPos).serverIP4 & ":" & _
-         CStr(CharacterList2(Index).item(listPos).serverPort) & " ( " & _
-         CharacterList2(Index).item(listPos).ServerName & " ) #"
-       sckServerGame(Index).Close
-       sckServerGame(Index).RemoteHost = _
-         buildIPstring(CInt(CharacterList2(Index).item(listPos).serverIP1), _
-         CInt(CharacterList2(Index).item(listPos).serverIP2), _
-         CInt(CharacterList2(Index).item(listPos).serverIP3), _
-         CInt(CharacterList2(Index).item(listPos).serverIP4))
-       sckServerGame(Index).RemotePort = CLng(CharacterList2(Index).item(listPos).serverPort)
+       txtPackets.Text = txtPackets.Text & vbCrLf & "#the client ID " & index & " selected the character " & _
+         CharacterList2(index).item(listPos).CharacterName & " - forwarding connection to " & _
+         CharacterList2(index).item(listPos).serverIP1 & "." & _
+         CharacterList2(index).item(listPos).serverIP2 & "." & _
+         CharacterList2(index).item(listPos).serverIP3 & "." & _
+         CharacterList2(index).item(listPos).serverIP4 & ":" & _
+         CStr(CharacterList2(index).item(listPos).serverPort) & " ( " & _
+         CharacterList2(index).item(listPos).ServerName & " ) #"
+       sckServerGame(index).Close
+       sckServerGame(index).RemoteHost = _
+         buildIPstring(CInt(CharacterList2(index).item(listPos).serverIP1), _
+         CInt(CharacterList2(index).item(listPos).serverIP2), _
+         CInt(CharacterList2(index).item(listPos).serverIP3), _
+         CInt(CharacterList2(index).item(listPos).serverIP4))
+       sckServerGame(index).RemotePort = CLng(CharacterList2(index).item(listPos).serverPort)
        
 
        
-       sckServerGame(Index).Connect
+       sckServerGame(index).Connect
      End If
      
      End If
@@ -7175,57 +7622,76 @@ workAroundForRareError:
   'End If
   ' apply hardcore cheats
   If (processIt = True) Then
-  If frmHardcoreCheats.chkApplyCheats.Value = 1 Then
-     res = ApplyHardcoreCheats(packet, Index)
+  If frmHardcoreCheats.chkApplyCheats.value = 1 Then
+     res = ApplyHardcoreCheats(packet, index)
      If res = 1 Then ' Hardcore cheats require skiping this packet
         Exit Sub
      End If
   End If
   End If
   timeOut = GetTickCount() + 30000
-  While ((GameConnected(Index) = True) And (sckServerGame(Index).State <> sckConnected))
+  While ((GameConnected(index) = True) And (sckServerGame(index).State <> sckConnected))
       If GetTickCount() >= timeOut Then
           'frmMain.DoCloseActions index
           'frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "TIMEOUT(at gameclient) for ID " & CStr(index)
           Exit Sub
         End If
-    If sckClientGame(Index).State = sckClosed Then
-      GameConnected(Index) = False
+    If sckClientGame(index).State = sckClosed Then
+      GameConnected(index) = False
     End If
     DoEvents 'wait
   Wend
-  If GameConnected(Index) = True And sckServerGame(Index).State = sckConnected Then
+  If GameConnected(index) = True And sckServerGame(index).State = sckConnected Then
       If (processIt = True) Then
-        UnifiedSendToServerGame Index, packet, True
+        UnifiedSendToServerGame index, packet, True
       Else
-        If chkLogPackets.Value = 1 Then
-          LogLine "GAMECLIENT" & Index & ":"
+        If chkLogPackets.value = 1 Then
+          LogLine "GAMECLIENT" & index & ":"
           LogPacket packet
-          txtPackets.Text = txtPackets.Text & vbCrLf & "GAMECLIENT" & Index & ">" & showAsStr2(packet, 0)
+          txtPackets.Text = txtPackets.Text & vbCrLf & "GAMECLIENT" & index & ">" & showAsStr2(packet, 0)
           txtPackets.SelStart = Len(txtPackets.Text)
         End If
-        sckServerGame(Index).SendData packet
+        sckServerGame(index).SendData packet
       End If
   End If
   End If
   
   Exit Sub
 errclose:
-  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "# ID" & Index & " lost connection at HandleSckClientGame_Data #"
-  frmMain.DoCloseActions Index
+  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "# ID" & index & " lost connection at HandleSckClientGame_Data #"
+  frmMain.DoCloseActions index
   DoEvents
 End Sub
 
-Private Sub SckClientGame_DataArrival(Index As Integer, ByVal bytesTotal As Long)
+Private Sub SckClientGame_DataArrival(index As Integer, ByVal bytesTotal As Long)
     Dim FullPacket() As Byte
     Dim SubPacket() As Byte
-    Dim offset As Long
+    Dim Offset As Long
     Dim SubPacketLen As Long
-
-    sckClientGame(Index).GetData FullPacket, vbArray + vbByte
-    offset = 0
-    While offset < bytesTotal    '
-        If UBound(FullPacket) < offset + 2 Then    'should never happen. means coding error
+   ' Dim genPacket() As Byte
+    Dim strText As String
+    Dim i As Integer
+    Dim li As Integer
+    Dim headerVal As Long
+    sckClientGame(index).GetData FullPacket, vbArray + vbByte
+    If (TibiaVersionLong = 1099) And (subTibiaVersionLong > 0) Or (TibiaVersionLong > 1102) Then
+            headerVal = GetTheLong(FullPacket(0), FullPacket(1))
+            If headerVal > bytesTotal Then
+                ' Debug.Print "headerVal=" & CStr(headerVal) & " bytesTotal=" & CStr(bytesTotal)
+                ' strText = ConvSToAscii(FullPacket)
+                ' Debug.Print "selecting server: " & strText
+                 li = bytesTotal - 1
+                 ReDim mustSendFirstWhenConnected(index).packet(li)
+                 For i = 0 To li
+                    mustSendFirstWhenConnected(index).packet(i) = FullPacket(i)
+                 Next i
+                 mustSendFirstWhenConnected(index).mustSend = True
+                 Exit Sub
+            End If
+    End If
+    Offset = 0
+    While Offset < bytesTotal    '
+        If UBound(FullPacket) < Offset + 2 Then    'should never happen. means coding error
             Err.Raise _
                     Number:=errIndexOutOfRange, _
                     Description:="Failed to read all packets in SckClientGame_DataArrival (after reading 'all' packets, offset was not equal to bytesTotal)", _
@@ -7233,9 +7699,9 @@ Private Sub SckClientGame_DataArrival(Index As Integer, ByVal bytesTotal As Long
 
         End If
 
-        SubPacketLen = GetTheLong(FullPacket(offset), FullPacket(offset + 1)) + 2
+        SubPacketLen = GetTheLong(FullPacket(Offset), FullPacket(Offset + 1)) + 2
         ReDim SubPacket(SubPacketLen - 1)
-        RtlMoveMemory SubPacket(0), FullPacket(offset), SubPacketLen
+        RtlMoveMemory SubPacket(0), FullPacket(Offset), SubPacketLen
         'If (UBound(SubPacket) <> UBound(FullPacket)) Or SubPacketLen <> bytesTotal Then
         '    Err.Raise _
              '        Number:=1, _
@@ -7244,15 +7710,18 @@ Private Sub SckClientGame_DataArrival(Index As Integer, ByVal bytesTotal As Long
         '
         'End If
 
-        HandleSckClientGame_Data Index, SubPacket, SubPacketLen
-        offset = offset + SubPacketLen
+        HandleSckClientGame_Data index, SubPacket, SubPacketLen
+        Offset = Offset + SubPacketLen
     Wend
 
-    If offset <> bytesTotal Then    'this should never happen.. means coding error
-        Err.Raise _
-                Number:=errIndexOutOfRange, _
-                Description:="Failed to read all packets in SckClientGame_DataArrival (after reading 'all' packets, offset was not equal to bytesTotal)", _
-                Source:="SckClientGame_DataArrival"
+    If Offset <> bytesTotal Then    'this should never happen.. means coding error
+       Debug.Print CStr(Offset) & " vs " & CStr(bytesTotal)
+       ' Err.Raise _
+               ' Number:=errIndexOutOfRange, _
+              '  Description:="Failed to read all packets in SckClientGame_DataArrival (after reading 'all' packets, offset was not equal to bytesTotal)", _
+              '  Source:="SckClientGame_DataArrival"
+                MsgBox "Critical error when trying to read initial packets.  This might mean 2 things: You are not running Blackd Proxy as admin -OR- You are running a non standard Tibia client.", vbOKOnly + vbCritical, "Critical error"
+    End
     End If
 
 
@@ -7262,7 +7731,7 @@ End Sub
 
 
 
-Public Sub UnifiedSendToClientGame(ByVal Index As Integer, ByRef packet() As Byte, Optional forceOldMode As Boolean = False)
+Public Sub UnifiedSendToClientGame(ByVal index As Integer, ByRef packet() As Byte, Optional forceOldMode As Boolean = False)
   Dim extrab As Long
   Dim i As Long
   Dim rnumber As Byte
@@ -7281,7 +7750,7 @@ Public Sub UnifiedSendToClientGame(ByVal Index As Integer, ByRef packet() As Byt
   Dim dbact As Boolean
   dbact = False
   
-  If GameConnected(Index) = True Or ((TibiaVersionLong >= 841) And (forceOldMode = True)) Then
+  If GameConnected(index) = True Or ((TibiaVersionLong >= 841) And (forceOldMode = True)) Then
   If ((UseCrackd = True) And (forceOldMode = False)) Then
     If TibiaVersionLong < 830 Then
         totalLong = GetTheLong(packet(0), packet(1))
@@ -7295,7 +7764,7 @@ Public Sub UnifiedSendToClientGame(ByVal Index As Integer, ByRef packet() As Byt
         RtlMoveMemory goodPacket(2), packet(0), (totalLong)
         goodPacket(0) = LowByteOfLong(totalLong)
         goodPacket(1) = HighByteOfLong(totalLong)
-        pres = EncipherTibiaProtected(goodPacket(0), packetKey(Index).key(0), UBound(goodPacket), UBound(packetKey(Index).key))
+        pres = EncipherTibiaProtected(goodPacket(0), packetKey(index).Key(0), UBound(goodPacket), UBound(packetKey(index).Key))
     Else
 
         totalLong = GetTheLong(packet(0), packet(1))
@@ -7314,8 +7783,7 @@ Public Sub UnifiedSendToClientGame(ByVal Index As Integer, ByRef packet() As Byt
         RtlMoveMemory goodPacket(6), packet(0), (onlygood)
         goodPacket(0) = LowByteOfLong(UBound(goodPacket) - 1)
         goodPacket(1) = HighByteOfLong(UBound(goodPacket) - 1)
-        pres = EncipherTibiaProtectedSP(goodPacket(0), packetKey(Index).key(0), UBound(goodPacket), UBound(packetKey(Index).key))
-        ' tests !!!!!!!!!!!!!!!!!!
+        pres = EncipherTibiaProtectedSP(goodPacket(0), packetKey(index).Key(0), UBound(goodPacket), UBound(packetKey(index).Key))
         thedamnCRC = GetTibiaCRC(goodPacket(6), UBound(goodPacket) - 5) ' (number of bytes - 6)
         longToBytes fourBytesCRC, thedamnCRC
         'Debug.Print "t1:" & GoodHex(fourBytesCRC(0)) & " " & GoodHex(fourBytesCRC(1)) & " " & GoodHex(fourBytesCRC(2)) & " " & GoodHex(fourBytesCRC(3))
@@ -7323,7 +7791,7 @@ Public Sub UnifiedSendToClientGame(ByVal Index As Integer, ByRef packet() As Byt
 '        thedamnCRC2 = GetTibiaCRC2(goodPacket(6), UBound(goodPacket) - 5) ' (number of bytes - 6)
 '        longToBytes fourBytesCRC2, thedamnCRC2
 '        If Not (((fourBytesCRC(0) = fourBytesCRC2(0)) And (fourBytesCRC(1) = fourBytesCRC2(1)) And (fourBytesCRC(2) = fourBytesCRC2(2)) And (fourBytesCRC(3) = fourBytesCRC2(3)))) Then
-'          Debug.Print "no match!!!"
+'          Debug.Print "no match!"
 '          Debug.Print "res1:" & GoodHex(fourBytesCRC(0)) & " " & GoodHex(fourBytesCRC(1)) & " " & GoodHex(fourBytesCRC(2)) & " " & GoodHex(fourBytesCRC(3))
 '          Debug.Print "res2:" & GoodHex(fourBytesCRC2(0)) & " " & GoodHex(fourBytesCRC2(1)) & " " & GoodHex(fourBytesCRC2(2)) & " " & GoodHex(fourBytesCRC2(3))
 '        End If
@@ -7344,31 +7812,31 @@ Public Sub UnifiedSendToClientGame(ByVal Index As Integer, ByRef packet() As Byt
     End If
     
     If (pres < 0) Then
-        GiveCrackdDllErrorMessage pres, goodPacket, packetKey(Index).key, UBound(goodPacket), UBound(packetKey(Index).key), 201
+        GiveCrackdDllErrorMessage pres, goodPacket, packetKey(index).Key, UBound(goodPacket), UBound(packetKey(index).Key), 201
         Exit Sub
     End If
-    lngwsck = sckClientGame(Index).State
+    lngwsck = sckClientGame(index).State
     If lngwsck = sckConnected Then
-        sckClientGame(Index).SendData goodPacket
+        sckClientGame(index).SendData goodPacket
     Else
-        frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "GAMECLIENT #" & CStr(Index) & " (" & CharacterName(Index) & ") closed because winsock state was not connected (" & CStr(lngwsck) & ")"
-        frmMain.DoCloseActions Index
+        frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "GAMECLIENT #" & CStr(index) & " (" & CharacterName(index) & ") closed because winsock state was not connected (" & CStr(lngwsck) & ")"
+        frmMain.DoCloseActions index
         DoEvents
     End If
   Else
-    lngwsck = sckClientGame(Index).State
+    lngwsck = sckClientGame(index).State
     If lngwsck = sckConnected Then
-        sckClientGame(Index).SendData packet
+        sckClientGame(index).SendData packet
     Else
-        frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "GAMECLIENT #" & CStr(Index) & " (" & CharacterName(Index) & ") closed because winsock state was not connected (" & CStr(lngwsck) & ")"
-        frmMain.DoCloseActions Index
+        frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "GAMECLIENT #" & CStr(index) & " (" & CharacterName(index) & ") closed because winsock state was not connected (" & CStr(lngwsck) & ")"
+        frmMain.DoCloseActions index
         DoEvents
     End If
   End If
   End If
 End Sub
 
-Public Sub UnifiedSendToClient(ByVal Index As Integer, ByRef packet() As Byte, Optional forceOldMode As Boolean = False, _
+Public Sub UnifiedSendToClient(ByVal index As Integer, ByRef packet() As Byte, Optional forceOldMode As Boolean = False, _
  Optional packetHaveStrangeBytes As Boolean = False)
   Dim extrab As Long
   Dim i As Long
@@ -7380,7 +7848,7 @@ Public Sub UnifiedSendToClient(ByVal Index As Integer, ByRef packet() As Byte, O
   Dim pres As Long
   Dim thedamnCRC As Long
   Dim fourBytesCRC(3) As Byte
-  If Connected(Index) = True Then
+  If Connected(index) = True Then
   If ((UseCrackd = True) And (forceOldMode = False)) Then
     If packetHaveStrangeBytes = False Then
         totalLong = GetTheLong(packet(0), packet(1))
@@ -7394,20 +7862,20 @@ Public Sub UnifiedSendToClient(ByVal Index As Integer, ByRef packet() As Byte, O
         RtlMoveMemory goodPacket(2), packet(0), (totalLong)
         goodPacket(0) = LowByteOfLong(totalLong)
         goodPacket(1) = HighByteOfLong(totalLong)
-        pres = EncipherTibiaProtected(goodPacket(0), loginPacketKey(Index).key(0), UBound(goodPacket), UBound(loginPacketKey(Index).key))
+        pres = EncipherTibiaProtected(goodPacket(0), loginPacketKey(index).Key(0), UBound(goodPacket), UBound(loginPacketKey(index).Key))
         If (pres < 0) Then
-            GiveCrackdDllErrorMessage pres, goodPacket, loginPacketKey(Index).key, UBound(goodPacket), UBound(loginPacketKey(Index).key), 202
+            GiveCrackdDllErrorMessage pres, goodPacket, loginPacketKey(index).Key, UBound(goodPacket), UBound(loginPacketKey(index).Key), 202
             Exit Sub
         End If
     
-        SckClient(Index).SendData goodPacket
+        SckClient(index).SendData goodPacket
     Else ' new since 8.3 , 4 CRC bytes
         totalLong = UBound(packet) + 1
         ReDim goodPacket(totalLong - 1)
         RtlMoveMemory goodPacket(0), packet(0), (totalLong)
         
 
-        pres = EncipherTibiaProtectedSP(goodPacket(0), loginPacketKey(Index).key(0), UBound(goodPacket), UBound(loginPacketKey(Index).key))
+        pres = EncipherTibiaProtectedSP(goodPacket(0), loginPacketKey(index).Key(0), UBound(goodPacket), UBound(loginPacketKey(index).Key))
         
         ' fix CRC
         
@@ -7420,18 +7888,18 @@ Public Sub UnifiedSendToClient(ByVal Index As Integer, ByRef packet() As Byte, O
         
         
         If (pres < 0) Then
-            GiveCrackdDllErrorMessage pres, goodPacket, loginPacketKey(Index).key, UBound(goodPacket), UBound(loginPacketKey(Index).key), 203
+            GiveCrackdDllErrorMessage pres, goodPacket, loginPacketKey(index).Key, UBound(goodPacket), UBound(loginPacketKey(index).Key), 203
             Exit Sub
         End If
-        SckClient(Index).SendData goodPacket
+        SckClient(index).SendData goodPacket
     End If
   Else
-    SckClient(Index).SendData packet
+    SckClient(index).SendData packet
   End If
   End If
 End Sub
 
-Public Sub UnifiedSendToServerGame(ByVal Index As Integer, ByRef packet() As Byte, logIt As Boolean)
+Public Sub UnifiedSendToServerGame(ByVal index As Integer, ByRef packet() As Byte, logIt As Boolean)
   Dim extrab As Long
   Dim i As Long
   Dim rnumber As Byte
@@ -7443,33 +7911,33 @@ Public Sub UnifiedSendToServerGame(ByVal Index As Integer, ByRef packet() As Byt
   Dim fourBytesCRC(3) As Byte
   Dim onlygood As Long
   
-  If sckServerGame(Index).State <> sckConnected Then
-    If frmHardcoreCheats.chkAutorelog.Value = 1 Then
-      If ReconnectionStage(Index) = 0 Then
-        pres = GiveGMmessage(Index, "The connection with the server was lost, doing reconnection now", "Warning")
+  If sckServerGame(index).State <> sckConnected Then
+    If frmHardcoreCheats.chkAutorelog.value = 1 Then
+      If ReconnectionStage(index) = 0 Then
+        pres = GiveGMmessage(index, "The connection with the server was lost, doing reconnection now", "Warning")
         DoEvents
-        frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "The connection with the server have been lost on client #" & CStr(Index)
-        StartReconnection Index
+        frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "The connection with the server have been lost on client #" & CStr(index)
+        StartReconnection index
       Else
         Exit Sub
       End If
     Else
       If (PlayTheDangerSound = False) Then
         ChangePlayTheDangerSound True
-        pres = GiveGMmessage(Index, "The connection with the server was lost, use exiva close or exiva relog", "BlackdProxy")
+        pres = GiveGMmessage(index, "The connection with the server was lost, use exiva close or exiva relog", "BlackdProxy")
         DoEvents
-        frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "The connection with the server have been lost on client #" & CStr(Index)
+        frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "The connection with the server have been lost on client #" & CStr(index)
       End If
     End If
     Exit Sub
   End If
-  If GameConnected(Index) = True Then
+  If GameConnected(index) = True Then
   If (UseCrackd = True) Then
-    If chkLogPackets.Value = 1 Then
+    If chkLogPackets.value = 1 Then
       If logIt = True Then
-        LogLine "GAMECLIENT" & Index & ":"
+        LogLine "GAMECLIENT" & index & ":"
         LogPacket packet
-        txtPackets.Text = txtPackets.Text & vbCrLf & "GAMECLIENT" & Index & ">" & showAsStr2(packet, 0)
+        txtPackets.Text = txtPackets.Text & vbCrLf & "GAMECLIENT" & index & ">" & showAsStr2(packet, 0)
         txtPackets.SelStart = Len(txtPackets.Text)
       End If
     End If
@@ -7487,7 +7955,7 @@ Public Sub UnifiedSendToServerGame(ByVal Index As Integer, ByRef packet() As Byt
         RtlMoveMemory goodPacket(2), packet(0), (totalLong)
         goodPacket(0) = LowByteOfLong(totalLong)
         goodPacket(1) = HighByteOfLong(totalLong)
-        pres = EncipherTibiaProtected(goodPacket(0), packetKey(Index).key(0), UBound(goodPacket), UBound(packetKey(Index).key))
+        pres = EncipherTibiaProtected(goodPacket(0), packetKey(index).Key(0), UBound(goodPacket), UBound(packetKey(index).Key))
     
     Else
         'Debug.Print "1>> " & frmMain.showAsStr(packet, True) ' DEBUGGGGGGGGGGGGGGGGGGGGGGGGGG
@@ -7503,7 +7971,7 @@ Public Sub UnifiedSendToServerGame(ByVal Index As Integer, ByRef packet() As Byt
         RtlMoveMemory goodPacket(6), packet(0), (onlygood)
         goodPacket(0) = LowByteOfLong(UBound(goodPacket) - 1)
         goodPacket(1) = HighByteOfLong(UBound(goodPacket) - 1)
-        pres = EncipherTibiaProtectedSP(goodPacket(0), packetKey(Index).key(0), UBound(goodPacket), UBound(packetKey(Index).key))
+        pres = EncipherTibiaProtectedSP(goodPacket(0), packetKey(index).Key(0), UBound(goodPacket), UBound(packetKey(index).Key))
         thedamnCRC = GetTibiaCRC(goodPacket(6), UBound(goodPacket) - 5) ' (number of bytes - 6)
         longToBytes fourBytesCRC, thedamnCRC
         goodPacket(2) = fourBytesCRC(0)
@@ -7515,28 +7983,28 @@ Public Sub UnifiedSendToServerGame(ByVal Index As Integer, ByRef packet() As Byt
     
     
     If (pres < 0) Then
-        GiveCrackdDllErrorMessage pres, goodPacket, packetKey(Index).key, UBound(goodPacket), UBound(packetKey(Index).key), 3
+        GiveCrackdDllErrorMessage pres, goodPacket, packetKey(index).Key, UBound(goodPacket), UBound(packetKey(index).Key), 3
         Exit Sub
     End If
-    If (sckServerGame(Index).State = sckConnected) Then
-        sckServerGame(Index).SendData goodPacket
+    If (sckServerGame(index).State = sckConnected) Then
+        sckServerGame(index).SendData goodPacket
     Else
-       If Index > 0 Then
-        DoCloseActions Index
+       If index > 0 Then
+        DoCloseActions index
         DoEvents
        Exit Sub
        End If
     End If
   Else
-    If chkLogPackets.Value = 1 Then
+    If chkLogPackets.value = 1 Then
       If logIt = True Then
-        LogLine "GAMECLIENT" & Index & ":"
+        LogLine "GAMECLIENT" & index & ":"
         LogPacket packet
-        txtPackets.Text = txtPackets.Text & vbCrLf & "GAMECLIENT" & Index & ">" & showAsStr2(packet, 0)
+        txtPackets.Text = txtPackets.Text & vbCrLf & "GAMECLIENT" & index & ">" & showAsStr2(packet, 0)
         txtPackets.SelStart = Len(txtPackets.Text)
       End If
     End If
-    sckServerGame(Index).SendData packet
+    sckServerGame(index).SendData packet
   End If
   End If
 End Sub
@@ -7551,46 +8019,46 @@ End Sub
 
 
 
-Private Sub SckServer_Close(Index As Integer)
+Private Sub SckServer_Close(index As Integer)
   ' server closes
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
-  sckServer(Index).Close
+  sckServer(index).Close
   DoEvents
-  SckClient(Index).Close 'close his brother client ??
+  SckClient(index).Close 'close his brother client ??
   
-  If ((Connected(Index) = True) Or (DoingMainLoopLogin(Index) = True)) Then
-    txtPackets.Text = txtPackets.Text & vbCrLf & "#server" & Index & " closed (by server) #"
-    Connected(Index) = False
-    DoingMainLoopLogin(Index) = False
+  If ((Connected(index) = True) Or (DoingMainLoopLogin(index) = True)) Then
+    txtPackets.Text = txtPackets.Text & vbCrLf & "#server" & index & " closed (by server) #"
+    Connected(index) = False
+    DoingMainLoopLogin(index) = False
   End If
   Exit Sub
-gotErr:
-  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckServer_Close(" & Index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
+goterr:
+  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckServer_Close(" & index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
 End Sub
 
-Private Sub SckServer_Connect(Index As Integer)
+Private Sub SckServer_Connect(index As Integer)
   ' server connects
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
-  setsockopt sckServer(Index).SocketHandle, IPPROTO_TCP, TCP_NODELAY, 1, 4
-  If Index > 0 Then
-    ConnectionSignal(Index) = True
+  setsockopt sckServer(index).SocketHandle, IPPROTO_TCP, TCP_NODELAY, 1, 4
+  If index > 0 Then
+    ConnectionSignal(index) = True
   End If
-  ReDim ConnectionBufferLogin(Index).packet(0)
-  ConnectionBufferLogin(Index).numbytes = 0
-  DoingMainLoopLogin(Index) = False
-  txtPackets.Text = txtPackets.Text & vbCrLf & "#server" & Index & " connected#"
+  ReDim ConnectionBufferLogin(index).packet(0)
+  ConnectionBufferLogin(index).numbytes = 0
+  DoingMainLoopLogin(index) = False
+  txtPackets.Text = txtPackets.Text & vbCrLf & "#server" & index & " connected#"
   Exit Sub
-gotErr:
- frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckServer_Connect(" & Index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
+goterr:
+ frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckServer_Connect(" & index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
 End Sub
 
 
 
-Private Function LearnFromServerLogin(ByRef packet() As Byte, ByVal Index As Integer, ByVal strIP As String, Optional bstart As Long = 2) As Long
+Private Function LearnFromServerLogin(ByRef packet() As Byte, ByVal index As Integer, ByVal strIP As String, Optional bstart As Long = 2) As Long
     Dim c As Byte
     Dim res As Long
 Dim tmpLong As Long
@@ -7602,16 +8070,16 @@ Dim tmpLong As Long
     c = packet(bstart)
     Select Case c
     Case &H28
-       Debug.Print "LOGIN TYPE " & GoodHex(c)
+       'Debug.Print "LOGIN TYPE " & GoodHex(c)
        If TibiaVersionLong >= 1091 Then
-          res = PacketIPchange6(packet, Index, strIP, bstart)
+          res = PacketIPchange6(packet, index, strIP, bstart)
       
             If res = 1 Then
           
               If CloseLoginServerAfterCharList = True Then
                  Debug.Print "Closing login connection"
-                 If Index > 0 Then
-                    sckServer(Index).Close
+                 If index > 0 Then
+                    sckServer(index).Close
                  End If
               End If
               LearnFromServerLogin = 1
@@ -7619,14 +8087,14 @@ Dim tmpLong As Long
             End If
        
        ElseIf TibiaVersionLong >= 1074 Then
-         res = PacketIPchange5(packet, Index, strIP, bstart)
+         res = PacketIPchange5(packet, index, strIP, bstart)
       
             If res <> 1 Then
               txtPackets.Text = txtPackets.Text & vbCrLf & "ERROR: FAILED TO MODIFY LOGIN PACKET!"
             Else
               If CloseLoginServerAfterCharList = True Then
-                 If Index > 0 Then
-                    sckServer(Index).Close
+                 If index > 0 Then
+                    sckServer(index).Close
                  End If
               End If
               LearnFromServerLogin = 1
@@ -7634,14 +8102,14 @@ Dim tmpLong As Long
             End If
        End If
     Case &H14
-      Debug.Print "LOGIN TYPE " & GoodHex(c)
+     ' Debug.Print "LOGIN TYPE " & GoodHex(c)
       If TibiaVersionLong >= 1091 Then
-        res = PacketIPchange6(packet, Index, strIP, bstart)
+        res = PacketIPchange6(packet, index, strIP, bstart)
         If res = 1 Then
               If CloseLoginServerAfterCharList = True Then
-                 If Index > 0 Then
+                 If index > 0 Then
                     Debug.Print "Closing login connection"
-                    sckServer(Index).Close
+                    sckServer(index).Close
                  End If
               End If
               LearnFromServerLogin = 1
@@ -7651,20 +8119,20 @@ Dim tmpLong As Long
           Exit Function
         End If
       ElseIf TibiaVersionLong >= 1074 Then
-        res = PacketIPchange5b(packet, Index, strIP, bstart)
+        res = PacketIPchange5b(packet, index, strIP, bstart)
       ElseIf TibiaVersionLong >= 1012 Then
-        res = PacketIPchange4(packet, Index, strIP, bstart)
+        res = PacketIPchange4(packet, index, strIP, bstart)
       ElseIf TibiaVersionLong >= 1011 Then
-        res = PacketIPchange3(packet, Index, strIP, bstart)
+        res = PacketIPchange3(packet, index, strIP, bstart)
       Else
-        res = PacketIPchange2(packet, Index, strIP, bstart)
+        res = PacketIPchange2(packet, index, strIP, bstart)
       End If
       If res <> 1 Then
          txtPackets.Text = txtPackets.Text & vbCrLf & "ERROR: FAILED TO MODIFY LOGIN PACKET!"
       Else
          If CloseLoginServerAfterCharList = True Then
-          If Index > 0 Then
-             sckServer(Index).Close
+          If index > 0 Then
+             sckServer(index).Close
           End If
          End If
          If TibiaVersionLong >= 1012 Then
@@ -7682,7 +8150,7 @@ End Function
 
 
 
-Private Sub SckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
+Private Sub SckServer_DataArrival(index As Integer, ByVal bytesTotal As Long)
   ' data arrives from game server
   Dim rawpacket() As Byte
   Dim newSizeBuffer As Long
@@ -7695,19 +8163,19 @@ Private Sub SckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
   On Error GoTo errclose
   #End If
   ' Get it
-  sckServer(Index).GetData rawpacket, vbArray + vbByte
+  sckServer(index).GetData rawpacket, vbArray + vbByte
   
 
-  If Index > 0 Then
+  If index > 0 Then
   #If BufferDebug Then
     LogOnFile "bufferLogLogin.txt", "NEW RAWPACKET:"
     LogOnFile "bufferLogLogin.txt", showAsStr2(rawpacket, 0)
   #End If
-  iniB = ConnectionBufferLogin(Index).numbytes ' save initial bytes of buffer
+  iniB = ConnectionBufferLogin(index).numbytes ' save initial bytes of buffer
   ' enlarge buffer if needed
-  If (UBound(rawpacket) + 1) > ((UBound(ConnectionBufferLogin(Index).packet) + 1) - ConnectionBufferLogin(Index).numbytes) Then
-    newSizeBuffer = ConnectionBufferLogin(Index).numbytes + UBound(rawpacket)
-    ReDim Preserve ConnectionBufferLogin(Index).packet(newSizeBuffer)
+  If (UBound(rawpacket) + 1) > ((UBound(ConnectionBufferLogin(index).packet) + 1) - ConnectionBufferLogin(index).numbytes) Then
+    newSizeBuffer = ConnectionBufferLogin(index).numbytes + UBound(rawpacket)
+    ReDim Preserve ConnectionBufferLogin(index).packet(newSizeBuffer)
     
     #If BufferDebug Then
     LogOnFile "bufferLogLogin.txt", "BUFFER WAS RESIZED TO " & CStr(newSizeBuffer)
@@ -7715,27 +8183,27 @@ Private Sub SckServer_DataArrival(Index As Integer, ByVal bytesTotal As Long)
   End If
   startB = iniB
   endB = startB + UBound(rawpacket)
-  ConnectionBufferLogin(Index).numbytes = iniB + 1 + UBound(rawpacket)
+  ConnectionBufferLogin(index).numbytes = iniB + 1 + UBound(rawpacket)
 
-  RtlMoveMemory ConnectionBufferLogin(Index).packet(startB), rawpacket(0), (OptCte4 * (endB - startB + 1))
+  RtlMoveMemory ConnectionBufferLogin(index).packet(startB), rawpacket(0), (OptCte4 * (endB - startB + 1))
   'j = 0
   'For i = startB To endB
   '  ConnectionBuffer(index).packet(i) = rawpacket(j)
   '  j = j + 1
   'Next i
   #If BufferDebug Then
-  LogOnFile "bufferLogLogin.txt", "USEFULL BUFFER ARE FIRST " & CStr(ConnectionBufferLogin(Index).numbytes) & " BYTES OF THIS :"
-  LogOnFile "bufferLogLogin.txt", showAsStr2(ConnectionBufferLogin(Index).packet, 0)
+  LogOnFile "bufferLogLogin.txt", "USEFULL BUFFER ARE FIRST " & CStr(ConnectionBufferLogin(index).numbytes) & " BYTES OF THIS :"
+  LogOnFile "bufferLogLogin.txt", showAsStr2(ConnectionBufferLogin(index).packet, 0)
   #End If
-  If DoingMainLoopLogin(Index) = False Then ' if not doing main loop right now, then start it
-    DoMainLoopLogin Index
+  If DoingMainLoopLogin(index) = False Then ' if not doing main loop right now, then start it
+    DoMainLoopLogin index
   End If
   End If
   Exit Sub
 errclose:
-  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "# internal ID" & Index & " lost connection at SckServer_DataArrival #"
+  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "# internal ID" & index & " lost connection at SckServer_DataArrival #"
   'frmMain.DoCloseActions Index
-  Connected(Index) = False
+  Connected(index) = False
   DoEvents
 End Sub
 
@@ -7834,9 +8302,9 @@ debugloginline = 14
         'longToBytes fourBytesCRC, theDamnCRC
         'debug.Print frmmain.showAsStr(rawpacket,True)
         
-        pres = DecipherTibiaProtectedSP(rawpacket(0), loginPacketKey(idConnection).key(0), UBound(rawpacket), UBound(loginPacketKey(idConnection).key))
+        pres = DecipherTibiaProtectedSP(rawpacket(0), loginPacketKey(idConnection).Key(0), UBound(rawpacket), UBound(loginPacketKey(idConnection).Key))
     Else
-        pres = DecipherTibiaProtected(rawpacket(0), loginPacketKey(idConnection).key(0), UBound(rawpacket), UBound(loginPacketKey(idConnection).key))
+        pres = DecipherTibiaProtected(rawpacket(0), loginPacketKey(idConnection).Key(0), UBound(rawpacket), UBound(loginPacketKey(idConnection).Key))
     End If
     debugloginline = 24
     ' LETS REPAIRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR THIS!
@@ -7847,7 +8315,7 @@ debugloginline = 14
         debugloginline = 26
         If (pres < 0) Then
             debugloginline = 27
-            GiveCrackdDllErrorMessage pres, rawpacket, loginPacketKey(idConnection).key, UBound(rawpacket), UBound(loginPacketKey(idConnection).key), 6
+            GiveCrackdDllErrorMessage pres, rawpacket, loginPacketKey(idConnection).Key, UBound(rawpacket), UBound(loginPacketKey(idConnection).Key), 6
             Exit Sub
         End If
         debugloginline = 28
@@ -7886,7 +8354,7 @@ debugloginline = 14
   End If
   
     debugloginline = 34
-      If chkLogPackets.Value = 1 Then
+      If chkLogPackets.value = 1 Then
         debugloginline = 35
         LogLine "SERVER" & idConnection & ":"
         debugloginline = 36
@@ -7947,7 +8415,7 @@ debugloginline = 14
             UnifiedSendToClient idConnection, packet, specialMessage, True
         End If
 debugloginline = 55
-    If chkLogPackets.Value = 1 Then
+    If chkLogPackets.value = 1 Then
         debugloginline = 56
         LogLine "SERVER" & idConnection & ":"
         debugloginline = 57
@@ -8070,87 +8538,97 @@ errclose:
   DoEvents
 End Sub
 
-Private Sub SckServerGame_Close(Index As Integer)
+Private Sub SckServerGame_Close(index As Integer)
   ' game server closes
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim rwait As Long
   If TibiaVersionLong >= 841 Then
-  GameConnected(Index) = False
+  GameConnected(index) = False
   End If
 
-    If ReconnectionStage(Index) = 0 Then
-        If frmHardcoreCheats.chkAutorelog.Value = 1 Then
-            If logoutAllowed(Index) < GetTickCount() Then ' not allowed by player
-                sckServerGame(Index).Close
-                StartReconnection Index
+    If ReconnectionStage(index) = 0 Then
+        If frmHardcoreCheats.chkAutorelog.value = 1 Then
+            If logoutAllowed(index) < GetTickCount() Then ' not allowed by player
+                sckServerGame(index).Close
+                StartReconnection index
                 Exit Sub
             End If
         End If
 
-        sckServerGame(Index).Close
+        sckServerGame(index).Close
         If TibiaVersionLong >= 841 Then
             DoEvents
             rwait = randomNumberBetween(500, 700)
             wait (rwait)
         End If
-        If frmRunemaker.chkCloseSound.Value = 1 Then
+        If frmRunemaker.chkCloseSound.value = 1 Then
             ChangePlayTheDangerSound True
         End If
-        If logoutAllowed(Index) >= GetTickCount() Then ' allowed by player
-            txtPackets.Text = txtPackets.Text & vbCrLf & "#gameserver" & Index & " closed (disconnected by user logout)#"
-            DoCloseActions Index
+        If logoutAllowed(index) >= GetTickCount() Then ' allowed by player
+            txtPackets.Text = txtPackets.Text & vbCrLf & "#gameserver" & index & " closed (disconnected by user logout)#"
+            DoCloseActions index
             txtPackets.Text = txtPackets.Text & vbCrLf & "(disabling the alarm because it was a desired logout)"
             ChangePlayTheDangerSound False
         Else
-            txtPackets.Text = txtPackets.Text & vbCrLf & "#gameserver" & Index & " closed (disconnected by server)#"
-            DoCloseActions Index
+            txtPackets.Text = txtPackets.Text & vbCrLf & "#gameserver" & index & " closed (disconnected by server)#"
+            DoCloseActions index
         End If
 '      wait (500) ' avoid fast change of gameserver
-        sckClientGame(Index).Close 'close his brother client
+        sckClientGame(index).Close 'close his brother client
         If TibiaVersionLong >= 841 Then
             DoEvents
         End If
     Else
-        sckServerGame(Index).Close
+        sckServerGame(index).Close
     End If
     Exit Sub
-gotErr:
-  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckServerGame_Close(" & Index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
-  DoCloseActions Index
+goterr:
+  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckServerGame_Close(" & index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
+  DoCloseActions index
 End Sub
 
 
-Private Sub SckServerGame_Connect(Index As Integer)
+Private Sub SckServerGame_Connect(index As Integer)
   ' game server connects
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
-  setsockopt sckServerGame(Index).SocketHandle, IPPROTO_TCP, TCP_NODELAY, 1, 4
+
+  setsockopt sckServerGame(index).SocketHandle, IPPROTO_TCP, TCP_NODELAY, 1, 4
 '  If TibiaVersionLong >= 841 Then
     'Debug.Print "servergame (" & Index & ") connected to " & sckServerGame(Index).RemoteHostIP & ":" & sckServerGame(Index).RemotePort
 '  End If
   'Debug.Print sckServerGame(Index).LocalPort
-  lastPing(Index) = GetTickCount()
-  If ReconnectionStage(Index) = 0 Then
-    txtPackets.Text = txtPackets.Text & vbCrLf & "#gameserver" & Index & " connected#"
+  lastPing(index) = GetTickCount()
+  If ReconnectionStage(index) = 0 Then
+    txtPackets.Text = txtPackets.Text & vbCrLf & "#gameserver" & index & " connected#"
   Else
-    ReconnectionStage(Index) = 2
-    sentFirstPacket(Index) = False
-    sentWelcome(Index) = False
-    GameConnected(Index) = True
-    frmMain.sckServerGame(Index).SendData ReconnectionPacket(Index).packet
+    ReconnectionStage(index) = 2
+    sentFirstPacket(index) = False
+    sentWelcome(index) = False
+    GameConnected(index) = True
+    frmMain.sckServerGame(index).SendData ReconnectionPacket(index).packet
     DoEvents
   End If
+  If mustSendFirstWhenConnected(index).mustSend = True Then
+           ' GenerateSelectionPacket genPacket, lastServerName
+           ' Debug.Print "sending special first packet for " & ConvSToAscii(mustSendFirstWhenConnected(Index).packet)
+                'GenerateSelectionPacket genPacket, lastServerName
+                 mustSendFirstWhenConnected(index).mustSend = False
+                 frmMain.sckServerGame(index).SendData mustSendFirstWhenConnected(index).packet
+                DoEvents
+              
+  End If
   Exit Sub
-gotErr:
-  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckServerGame_Connect(" & Index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
+goterr:
+  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error during SckServerGame_Connect(" & index & ") Number: " & Err.Number & " Description: " & Err.Description & " Source: " & Err.Source
 End Sub
 
 
 
-Private Sub SckServerGame_DataArrival(Index As Integer, ByVal bytesTotal As Long)
+Private Sub SckServerGame_DataArrival(index As Integer, ByVal bytesTotal As Long)
   ' data arrives from game server
   Dim rawpacket() As Byte
   Dim newSizeBuffer As Long
@@ -8165,7 +8643,7 @@ Private Sub SckServerGame_DataArrival(Index As Integer, ByVal bytesTotal As Long
   
 
   ' Get it
-  sckServerGame(Index).GetData rawpacket, vbArray + vbByte
+  sckServerGame(index).GetData rawpacket, vbArray + vbByte
   If UBound(rawpacket) < 0 Then
     Debug.Print "Warning: Connection probably lost"
     Exit Sub
@@ -8173,25 +8651,25 @@ Private Sub SckServerGame_DataArrival(Index As Integer, ByVal bytesTotal As Long
   
   'LogOnFile "weird.txt", showAsStr2(rawpacket, 0)
   'MsgBox "continue2"
-  If IgnoreServer(Index) = True Then
+  If IgnoreServer(index) = True Then
     Exit Sub
   End If
   
   'Exit Sub ' Uncomment to debug login packets
   
-  lastPing(Index) = GetTickCount()
+  lastPing(index) = GetTickCount()
   ' Store in buffer
-  If Index > 0 Then
+  If index > 0 Then
   #If BufferDebug Then
-    LogOnFile "bufferLog.txt", "(" & CStr(Index) & ") NEW RAWPACKET:"
+    LogOnFile "bufferLog.txt", "(" & CStr(index) & ") NEW RAWPACKET:"
     LogOnFile "bufferLog.txt", showAsStr2(rawpacket, 0)
   #End If
   'Debug.Print "0<< " & frmMain.showAsStr(rawpacket, True)
-  iniB = ConnectionBuffer(Index).numbytes ' save initial bytes of buffer
+  iniB = ConnectionBuffer(index).numbytes ' save initial bytes of buffer
   ' enlarge buffer if needed
-  If (UBound(rawpacket) + 1) > ((UBound(ConnectionBuffer(Index).packet) + 1) - ConnectionBuffer(Index).numbytes) Then
-    newSizeBuffer = ConnectionBuffer(Index).numbytes + UBound(rawpacket)
-    ReDim Preserve ConnectionBuffer(Index).packet(newSizeBuffer)
+  If (UBound(rawpacket) + 1) > ((UBound(ConnectionBuffer(index).packet) + 1) - ConnectionBuffer(index).numbytes) Then
+    newSizeBuffer = ConnectionBuffer(index).numbytes + UBound(rawpacket)
+    ReDim Preserve ConnectionBuffer(index).packet(newSizeBuffer)
     
     #If BufferDebug Then
     LogOnFile "bufferLog.txt", "BUFFER WAS RESIZED TO " & CStr(newSizeBuffer)
@@ -8199,26 +8677,26 @@ Private Sub SckServerGame_DataArrival(Index As Integer, ByVal bytesTotal As Long
   End If
   startB = iniB
   endB = startB + UBound(rawpacket)
-  ConnectionBuffer(Index).numbytes = iniB + 1 + UBound(rawpacket)
+  ConnectionBuffer(index).numbytes = iniB + 1 + UBound(rawpacket)
 
-  RtlMoveMemory ConnectionBuffer(Index).packet(startB), rawpacket(0), (OptCte4 * (endB - startB + 1))
+  RtlMoveMemory ConnectionBuffer(index).packet(startB), rawpacket(0), (OptCte4 * (endB - startB + 1))
   'j = 0
   'For i = startB To endB
   '  ConnectionBuffer(index).packet(i) = rawpacket(j)
   '  j = j + 1
   'Next i
   #If BufferDebug Then
-  LogOnFile "bufferLog.txt", "(" & CStr(Index) & ") USEFULL BUFFER ARE FIRST " & CStr(ConnectionBuffer(Index).numbytes) & " BYTES OF THIS :"
-  LogOnFile "bufferLog.txt", showAsStr2(ConnectionBuffer(Index).packet, 0)
+  LogOnFile "bufferLog.txt", "(" & CStr(index) & ") USEFULL BUFFER ARE FIRST " & CStr(ConnectionBuffer(index).numbytes) & " BYTES OF THIS :"
+  LogOnFile "bufferLog.txt", showAsStr2(ConnectionBuffer(index).packet, 0)
   #End If
-  If DoingMainLoop(Index) = False Then ' if not doing main loop right now, then start it
-    DoMainLoop Index
+  If DoingMainLoop(index) = False Then ' if not doing main loop right now, then start it
+    DoMainLoop index
   End If
   End If
   Exit Sub
 errclose:
-  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "# ID" & Index & " lost connection at SckServerGame_DataArrival #"
-  frmMain.DoCloseActions Index
+  frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "# ID" & index & " lost connection at SckServerGame_DataArrival #"
+  frmMain.DoCloseActions index
   DoEvents
 End Sub
 
@@ -8285,12 +8763,12 @@ nextLoop:
     #End If
 
      If TibiaVersionLong < 830 Then
-        pres = DecipherTibiaProtected(rawpacket(0), packetKey(idConnection).key(0), UBound(rawpacket), UBound(packetKey(idConnection).key))
+        pres = DecipherTibiaProtected(rawpacket(0), packetKey(idConnection).Key(0), UBound(rawpacket), UBound(packetKey(idConnection).Key))
     Else
-        pres = DecipherTibiaProtectedSP(rawpacket(0), packetKey(idConnection).key(0), UBound(rawpacket), UBound(packetKey(idConnection).key))
+        pres = DecipherTibiaProtectedSP(rawpacket(0), packetKey(idConnection).Key(0), UBound(rawpacket), UBound(packetKey(idConnection).Key))
     End If
     If (pres < 0) Then
-        GiveCrackdDllErrorMessage pres, rawpacket, packetKey(idConnection).key, UBound(rawpacket), UBound(packetKey(idConnection).key), 6
+        GiveCrackdDllErrorMessage pres, rawpacket, packetKey(idConnection).Key, UBound(rawpacket), UBound(packetKey(idConnection).Key), 6
         Exit Sub
     End If
     If TibiaVersionLong < 830 Then
@@ -8309,14 +8787,42 @@ nextLoop:
     
   ElseIf (NeedToIgnoreFirstGamePacket(idConnection) = True) Then
     NeedToIgnoreFirstGamePacket(idConnection) = False
+    If cteDebugConEvents = True Then
+         LogConEvent "N = False"
+    End If
+   
+    
     ReDim packet(withHeaderL)
     RtlMoveMemory packet(0), ConnectionBuffer(idConnection).packet(withHeaderS), (OptCte4 * nBytes)
-    
+    If cteDebugConEvents = True Then
+         LogConEvent "Initial packet from gameserver: " & frmMain.showAsStr2(packet, 0)
+    End If
+    If TibiaVersionLong >= 1099 Then
+        If (UBound(packet) > 8) Then
+            If packet(8) = &H1F Then
+              If cteDebugConEvents = True Then
+                LogConEvent "OK: Good initial packet"
+              End If
+            Else
+              If cteDebugConEvents = True Then
+                LogConEvent "WARNING: Unexpected initial packet format. Trying experimental solution"
+                LogConEvent "N = True"
+              End If
+              NeedToIgnoreFirstGamePacket(idConnection) = True
+            End If
+        Else
+           If cteDebugConEvents = True Then
+              LogConEvent "WARNING: Too short packet!! Ubound = " & CStr(UBound(packet))
+              LogConEvent "N = True"
+           End If
+           NeedToIgnoreFirstGamePacket(idConnection) = True
+        End If
+    End If
     #If BufferDebug Then
     LogOnFile "bufferLog.txt", "(" & CStr(idConnection) & ") EXTRACTING 1 COMPLETE PACKET (FIRST):"
     LogOnFile "bufferLog.txt", showAsStr2(packet, 0)
     #End If
-      If chkLogPackets.Value = 1 Then
+      If chkLogPackets.value = 1 Then
         LogLine "GAMESERVER" & idConnection & ":"
         LogPacket packet
         txtPackets.Text = txtPackets.Text & vbCrLf & "GAMESERVER" & idConnection & "<(1st packet)" & showAsStr2(packet, 0)
@@ -8336,13 +8842,13 @@ nextLoop:
   End If
   
 
-      If chkLogPackets.Value = 1 Then
+      If chkLogPackets.value = 1 Then
         LogLine "GAMESERVER" & idConnection & ":"
         LogPacket packet
         txtPackets.Text = txtPackets.Text & vbCrLf & "GAMESERVER" & idConnection & "<" & showAsStr2(packet, 0)
         txtPackets.SelStart = Len(txtPackets.Text)
       End If
-      If frmHardcoreCheats.chkApplyCheats.Value = 1 Then
+      If frmHardcoreCheats.chkApplyCheats.value = 1 Then
         lRes = LearnFromServer(packet, idConnection)
         If lRes = 1 Then ' Hardcore cheats require skiping this packet
            GoTo nextP
@@ -8479,25 +8985,36 @@ Private Sub Timer1_Timer()
 '        If VarProtection7 <> 7 Then
 '            End
 '        End If
-  gtc = GetTickCount()
-  numWindows = CountTibiaWindows()
-  If numWindows > LastNumTibiaClients Then
-    If frmMain.chckMemoryIP.Value = 1 Then
-      ' modify IPs in all tibia windows so they connect to this program at localhost
-      ' and port
-      ModifyTibiaIPs
-      If frmMain.TrueServer3.Value = True Then
-        ModifyTibiaRSAs
+
+  If (TibiaVersionLong >= 1100) Then
+    Exit Sub
+  Else
+    gtc = GetTickCount()
+    numWindows = CountTibiaWindows()
+    If numWindows > LastNumTibiaClients Then
+      If frmMain.chckMemoryIP.value = 1 Then
+        ' modify IPs in all tibia windows so they connect to this program at localhost
+        ' and port
+        ModifyTibiaIPs
+        If frmMain.TrueServer3.value = True Then
+          ModifyTibiaRSAs
+        End If
       End If
+      ' modify CPU priority of tibia
+      pok = UpdateTibiaPriority()
     End If
-    ' modify CPU priority of tibia
-    pok = UpdateTibiaPriority()
+    LastNumTibiaClients = numWindows
   End If
-  LastNumTibiaClients = numWindows
 endST:
 End Sub
 
 
+
+Private Sub TimerTibiaQ_Timer()
+  If (TibiaVersionLong >= 1100) Then
+    RedirectAllServersHere
+  End If
+End Sub
 
 Private Sub timeToSpam_Timer()
   Dim i As Integer
@@ -8505,7 +9022,7 @@ Private Sub timeToSpam_Timer()
   Dim gtc As Long
   Dim conds As Boolean
   #If FinalMode Then
-    On Error GoTo gotErr
+    On Error GoTo goterr
   #End If
   i = 0
   gtc = GetTickCount()
@@ -8536,13 +9053,13 @@ Private Sub timeToSpam_Timer()
     End If
   Next i
   Exit Sub
-gotErr:
+goterr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Error while trying to send position client " & CStr(i) & " : " & Err.Description
 End Sub
 
 Private Sub TrueServer1_Click()
   ' click in option True server
-  If TrueServer1.Value = True Then
+  If TrueServer1.value = True Then
     lblEnterOtherComputerIP.enabled = False
     lblLoginPort.enabled = False
     lblGamePort.enabled = False
@@ -8563,7 +9080,7 @@ End Sub
 
 Private Sub TrueServer2_Click()
   ' click in option other proxy
-  If TrueServer2.Value = True Then
+  If TrueServer2.value = True Then
     lblEnterOtherComputerIP.enabled = True
     lblLoginPort.enabled = True
     lblGamePort.Visible = True
@@ -8581,7 +9098,7 @@ End Sub
 
 Private Sub TrueServer3_Click()
   ' click in option OT server
-  If TrueServer3.Value = True Then
+  If TrueServer3.value = True Then
     lblEnterOtherComputerIP.enabled = True
     lblLoginPort.enabled = True
     lblGamePort.Visible = False
@@ -8607,7 +9124,7 @@ Private Sub txtClientGameP_Validate(Cancel As Boolean)
     sckClientGame(0).Close
     sckClientGame(0).LocalPort = newP
     sckClientGame(0).Listen
-    If chckMemoryIP.Value = 1 Then
+    If chckMemoryIP.value = 1 Then
       LastNumTibiaClients = 0 ' this will force change IPs now
     End If
   End If
@@ -8615,7 +9132,7 @@ Private Sub txtClientGameP_Validate(Cancel As Boolean)
 End Sub
 
 Private Sub txtClientLoginP_Validate(Cancel As Boolean)
-  On Error GoTo gotErr
+  On Error GoTo goterr
   ' change in login port
   Dim newP As Long
   Dim failedline As String
@@ -8639,7 +9156,7 @@ Private Sub txtClientLoginP_Validate(Cancel As Boolean)
     failedline = failedline & vbCrLf & "Connected"
   End If
   Exit Sub
-gotErr:
+goterr:
   MsgBox "Sorry, Blackd Proxy was not able to initialize..." & vbCrLf & "Possible reasons:" & vbCrLf & _
   " - Blackd Proxy already open" & vbCrLf & _
   " - Bugged Tibia client blocking connections (try closing all Tibia clients first)" & vbCrLf & _
@@ -8655,9 +9172,9 @@ End Sub
 Private Sub txtPackets_Change()
   ' change in txtPackets
   While Len(txtPackets.Text) > CLng(txtMaxChar.Text)
-    If frmMain.LogFull1.Value = True Then
+    If frmMain.LogFull1.value = True Then
       txtPackets.Text = ""
-    ElseIf frmMain.LogFull2.Value = True Then
+    ElseIf frmMain.LogFull2.value = True Then
       DeleteFirstLine
     Else
       LogOnFile txtLogFile.Text, txtPackets.Text
@@ -8722,7 +9239,7 @@ Private Sub LogPacket(ByRef packet() As Byte)
   bytesLeft = UBound(packet) + 1
   Do
     If gridLog.Rows = MaxLogLines Then
-      If frmMain.LogFull1.Value = True Or frmMain.LogFull3.Value = True Then
+      If frmMain.LogFull1.value = True Or frmMain.LogFull3.value = True Then
         InitGridLog
         gridLog.Rows = 2
         useRow = 1
@@ -8776,7 +9293,7 @@ Private Sub LogLine(strLine As String)
   MaxLogLines = CLng(txtMaxLines.Text)
   Do
     If gridLog.Rows = MaxLogLines Then
-       If frmMain.LogFull1.Value = True Or frmMain.LogFull3.Value = True Then
+       If frmMain.LogFull1.value = True Or frmMain.LogFull3.value = True Then
         InitGridLog
         gridLog.Rows = 2
         useRow = 1
@@ -8883,13 +9400,18 @@ Private Function GetWITHTIBIADATtrivial() As String
     Else
        res = TibiaExePath & "\Tibia.dat"
     End If
+    If (TibiaVersionLong >= 1100) Then
+       res = res & "packages\Tibia\assets\"
+    Else
+       res = res & "Tibia.dat"
+    End If
     GetWITHTIBIADATtrivial = res
 End Function
 Private Function GetWITHTIBIADAT() As String
     'On Error GoTo goterr
-    Dim fso As New scripting.FileSystemObject
-    Dim fol As scripting.Folder
-    Dim fil As scripting.File
+    Dim fso As New Scripting.FileSystemObject
+    Dim fol As Scripting.Folder
+    Dim fil As Scripting.File
     Dim thename As String
     Dim usethisfolder As String
     Dim res As String
@@ -8902,7 +9424,16 @@ Private Function GetWITHTIBIADAT() As String
     Else
        usethisfolder = TibiaExePath & "\"
     End If
-    Set fso = New scripting.FileSystemObject
+    If (TibiaVersionLong >= 1100) Then
+       ' For ots still using old tibia.dat you only need to place your old tibia.dat in the main Tibia folder.
+       ' Then Blackd Proxy will read it instead, using old parser.
+       If fso.FileExists(usethisfolder & "tibia.dat") = True Then
+          GetWITHTIBIADAT = usethisfolder & "tibia.dat"
+          Exit Function
+       End If
+       usethisfolder = usethisfolder & "packages\Tibia\assets\"
+    End If
+    Set fso = New Scripting.FileSystemObject
     If fso.FolderExists(usethisfolder) = False Then
         MsgBox "The Tibia folder you selected does not exist:" & vbCrLf & _
         usethisfolder & vbCrLf & _
@@ -8922,6 +9453,10 @@ Private Function GetWITHTIBIADAT() As String
                     If LCase(thename) = "tibia.dat" Then
                         Exit For
                     End If
+                    If (TibiaVersionLong >= 1100) Then
+                        GetWITHTIBIADAT = usethisfolder
+                        Exit Function
+                    End If
                 End If
             End If
         End If
@@ -8935,7 +9470,7 @@ Private Function GetWITHTIBIADAT() As String
     res = usethisfolder & lastDatFound
     GetWITHTIBIADAT = res
     Exit Function
-gotErr:
+goterr:
     GetWITHTIBIADAT = GetWITHTIBIADATtrivial()
 End Function
 
@@ -8943,7 +9478,7 @@ End Function
 
 
 Public Function HTTPGet(uri As String) As String
-Dim parsedURL As URL
+Dim parsedURL As url
 Dim strHeaders As String
 Dim strMethod As String
 Dim strHTTP As String
@@ -8966,8 +9501,8 @@ End If
     
     parsedURL.Scheme = "http" 'bleh. supporting anything else would be a lot of work.
     If parsedURL.Scheme = "http" Then
-        If parsedURL.Port > 0 Then
-            SckHttpGet(0).RemotePort = parsedURL.Port
+        If parsedURL.port > 0 Then
+            SckHttpGet(0).RemotePort = parsedURL.port
         Else
             SckHttpGet(0).RemotePort = 80
         End If
@@ -9011,28 +9546,28 @@ End Function
 
 
 
-Private Sub SckHttpGet_Error(Index As Integer, ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
+Private Sub SckHttpGet_Error(index As Integer, ByVal Number As Integer, Description As String, ByVal Scode As Long, ByVal Source As String, ByVal HelpFile As String, ByVal HelpContext As Long, CancelDisplay As Boolean)
 '??? now what?
 Err.Raise Number, "SckHttpGet", Description & " source: " & Source
-HTTPGetConnected(Index) = Not HTTPGetConnected(Index) 'flip it.
+HTTPGetConnected(index) = Not HTTPGetConnected(index) 'flip it.
 End Sub
 
-Private Sub SckHttpGet_Connect(Index As Integer)
-    HTTPGetConnected(Index) = True
+Private Sub SckHttpGet_Connect(index As Integer)
+    HTTPGetConnected(index) = True
 End Sub
 
-Private Sub SckHttpGet_DataArrival(Index As Integer, ByVal bytesTotal As Long)
+Private Sub SckHttpGet_DataArrival(index As Integer, ByVal bytesTotal As Long)
     Dim strResponse As String
-    SckHttpGet(Index).GetData strResponse, vbString, bytesTotal
+    SckHttpGet(index).GetData strResponse, vbString, bytesTotal
     
 '    strResponse = FormatLineEndings(strResponse)
     
     ' we append this to the string becuase data arrives
     ' in multiple packets
-    HTTPGetResponseBuffer(Index) = HTTPGetResponseBuffer(Index) & strResponse
+    HTTPGetResponseBuffer(index) = HTTPGetResponseBuffer(index) & strResponse
 End Sub
-Private Sub SckHttpGet_Close(Index As Integer)
-    HTTPGetConnected(Index) = False
-    SckHttpGet(Index).Close 'DO NOT REMOVE THIS (seemingly useless) LINE. SHIT WILL BREAK AFTER 2 REQUESTS WITHOUT THIS LINE!!
+Private Sub SckHttpGet_Close(index As Integer)
+    HTTPGetConnected(index) = False
+    SckHttpGet(index).Close 'DO NOT REMOVE THIS (seemingly useless) LINE. SHIT WILL BREAK AFTER 2 REQUESTS WITHOUT THIS LINE!!
 End Sub
 

@@ -440,7 +440,7 @@ Public Sub UpdateValues()
     For i = 1 To numofEv
       With gridEvents
       .TextMatrix(i, 0) = CustomCondEvents(condEventsIDselected).ev(i).thing1
-      .TextMatrix(i, 1) = CustomCondEvents(condEventsIDselected).ev(i).operator
+      .TextMatrix(i, 1) = CustomCondEvents(condEventsIDselected).ev(i).Operator
       .TextMatrix(i, 2) = CustomCondEvents(condEventsIDselected).ev(i).thing2
       .TextMatrix(i, 3) = CustomCondEvents(condEventsIDselected).ev(i).delay
       .TextMatrix(i, 4) = CustomCondEvents(condEventsIDselected).ev(i).lock
@@ -496,7 +496,7 @@ End Sub
 
 Private Sub cmdAddEvent_Click()
   Dim aRes As Long
-  aRes = AddCondEvent(CInt(condEventsIDselected), txtThing1.Text, cmbOperator.Text, txtThing2.Text, txtDelay.Text, txtLock.Text, CStr(chkKeep.Value), txtAction.Text)
+  aRes = AddCondEvent(CInt(condEventsIDselected), txtThing1.Text, cmbOperator.Text, txtThing2.Text, txtDelay.Text, txtLock.Text, CStr(chkKeep.value), txtAction.Text)
   If aRes = 0 Then
     UpdateValues
     lblInfo.Caption = "New cond added OK"
@@ -520,12 +520,12 @@ Private Sub cmdDeleteSel_Click()
   Dim firstrow As Long
   Dim lastrow As Long
   Dim firstI As Long
-  Dim lasti As Long
+  Dim lastI As Long
   Dim i As Long
   Dim difR As Long
   Dim numofEv As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   If (condEventsIDselected > 0) Then
   vrow = gridEvents.Row
@@ -546,15 +546,15 @@ Private Sub cmdDeleteSel_Click()
   Else
   ' lblDebug.Caption = "First = " & firstRow & " ; Last = " & lastRow
    firstI = firstrow
-   lasti = lastrow
-   difR = lasti - firstI + 1
+   lastI = lastrow
+   difR = lastI - firstI + 1
    For i = firstI To numofEv
      If i + difR <= MAXCONDS Then
        CustomCondEvents(condEventsIDselected).ev(i).action = CustomCondEvents(condEventsIDselected).ev(i + difR).action
        CustomCondEvents(condEventsIDselected).ev(i).delay = CustomCondEvents(condEventsIDselected).ev(i + difR).delay
        CustomCondEvents(condEventsIDselected).ev(i).keep = CustomCondEvents(condEventsIDselected).ev(i + difR).keep
        CustomCondEvents(condEventsIDselected).ev(i).lock = CustomCondEvents(condEventsIDselected).ev(i + difR).lock
-       CustomCondEvents(condEventsIDselected).ev(i).operator = CustomCondEvents(condEventsIDselected).ev(i + difR).operator
+       CustomCondEvents(condEventsIDselected).ev(i).Operator = CustomCondEvents(condEventsIDselected).ev(i + difR).Operator
        CustomCondEvents(condEventsIDselected).ev(i).thing1 = CustomCondEvents(condEventsIDselected).ev(i + difR).thing1
        CustomCondEvents(condEventsIDselected).ev(i).thing2 = CustomCondEvents(condEventsIDselected).ev(i + difR).thing2
        CustomCondEvents(condEventsIDselected).ev(i).nextunlock = CustomCondEvents(condEventsIDselected).ev(i + difR).nextunlock
@@ -565,32 +565,32 @@ Private Sub cmdDeleteSel_Click()
   UpdateValues
   End If
   Exit Sub
-gotErr:
+goterr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Function cmdDeleteSel_Click() - cond - failed : " & Err.Description
   LogOnFile "errors.txt", "Function cmdDeleteSel_Click() - cond - failed : " & Err.Description
 End Sub
 
 Private Sub cmdLoadEv_Click()
-  Dim fso As scripting.FileSystemObject
+  Dim fso As Scripting.FileSystemObject
   Dim fn As Integer
   Dim strLine(1 To 7) As String
-  Dim filename As String
+  Dim Filename As String
   Dim p As Long
   Dim seguir As Boolean
   Dim completed As Boolean
   Dim aRes As Long
   Dim thelo As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
-  Set fso = New scripting.FileSystemObject
+  Set fso = New Scripting.FileSystemObject
   If condEventsIDselected > 0 Then
     lblInfo.Caption = "Load OK"
     DeleteAllCondEvents condEventsIDselected
-    filename = App.path & "\conds\" & txtFile.Text
-    If fso.FileExists(filename) = True Then
+    Filename = App.Path & "\conds\" & txtFile.Text
+    If fso.FileExists(Filename) = True Then
       fn = FreeFile
-      Open filename For Input As #fn
+      Open Filename For Input As #fn
       While Not EOF(fn)
         completed = True
         For p = 1 To 7
@@ -610,7 +610,7 @@ Private Sub cmdLoadEv_Click()
   End If
   UpdateValues
   Exit Sub
-gotErr:
+goterr:
   lblInfo.Caption = "Load ERROR (" & Err.Number & "):" & Err.Description
 End Sub
 
@@ -620,9 +620,9 @@ Private Sub cmdModify_Click()
     vrow = gridEvents.Row
     If vrow > 0 Then
       CustomCondEvents(condEventsIDselected).ev(vrow).thing1 = txtThing1.Text
-      CustomCondEvents(condEventsIDselected).ev(vrow).operator = cmbOperator.Text
+      CustomCondEvents(condEventsIDselected).ev(vrow).Operator = cmbOperator.Text
       CustomCondEvents(condEventsIDselected).ev(vrow).thing2 = txtThing2.Text
-      If chkKeep.Value = 1 Then
+      If chkKeep.value = 1 Then
         CustomCondEvents(condEventsIDselected).ev(vrow).keep = "1"
       Else
         CustomCondEvents(condEventsIDselected).ev(vrow).keep = "0"
@@ -650,16 +650,16 @@ End Sub
 
 Private Sub cmdSaveEv_Click()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim fn As Integer
   Dim i As Long
   If condEventsIDselected > 0 Then
     fn = FreeFile
-    Open App.path & "\conds\" & txtFile.Text For Output As #fn
+    Open App.Path & "\conds\" & txtFile.Text For Output As #fn
     For i = 1 To CustomCondEvents(condEventsIDselected).Number
       Print #fn, CustomCondEvents(condEventsIDselected).ev(i).thing1
-      Print #fn, CustomCondEvents(condEventsIDselected).ev(i).operator
+      Print #fn, CustomCondEvents(condEventsIDselected).ev(i).Operator
       Print #fn, CustomCondEvents(condEventsIDselected).ev(i).thing2
       Print #fn, CustomCondEvents(condEventsIDselected).ev(i).delay
       Print #fn, CustomCondEvents(condEventsIDselected).ev(i).lock
@@ -670,14 +670,14 @@ Private Sub cmdSaveEv_Click()
     lblInfo.Caption = "Save OK"
   End If
   Exit Sub
-gotErr:
+goterr:
   lblInfo.Caption = "Save ERROR (" & Err.Number & "):" & Err.Description
 End Sub
 
 
 
 Private Sub Form_Load()
- On Error GoTo gotErr
+ On Error GoTo goterr
  With cmbOperator
  .Clear
  .AddItem "#number=#"
@@ -724,7 +724,7 @@ Private Sub Form_Load()
   End With
   ReloadFiles
  Exit Sub
-gotErr:
+goterr:
   LogOnFile "errors.txt", "Could not load cavebot module. Err number " & CStr(Err.Number) & " ; Err description " & Err.Description
 End Sub
 
@@ -748,7 +748,7 @@ Public Sub ProcessClientConditions(idConnection As Integer, condid As Long)
   a = 0
   part1 = parseVars(idConnection, CustomCondEvents(idConnection).ev(condid).thing1)
   part2 = parseVars(idConnection, CustomCondEvents(idConnection).ev(condid).thing2)
-  op = parseVars(idConnection, CustomCondEvents(idConnection).ev(condid).operator)
+  op = parseVars(idConnection, CustomCondEvents(idConnection).ev(condid).Operator)
   Select Case op
     Case "#number=#"
       If safeDouble(part1) = safeDouble(part2) Then
@@ -820,12 +820,12 @@ Private Sub gridEvents_Click()
     vrow = gridEvents.Row
     If vrow > 0 Then
       txtThing1.Text = CustomCondEvents(condEventsIDselected).ev(vrow).thing1
-      cmbOperator.Text = CustomCondEvents(condEventsIDselected).ev(vrow).operator
+      cmbOperator.Text = CustomCondEvents(condEventsIDselected).ev(vrow).Operator
       txtThing2.Text = CustomCondEvents(condEventsIDselected).ev(vrow).thing2
       If CustomCondEvents(condEventsIDselected).ev(vrow).keep = "1" Then
-        chkKeep.Value = 1
+        chkKeep.value = 1
       Else
-        chkKeep.Value = 0
+        chkKeep.value = 0
       End If
       txtAction.Text = CustomCondEvents(condEventsIDselected).ev(vrow).action
       txtDelay.Text = CustomCondEvents(condEventsIDselected).ev(vrow).delay
@@ -853,7 +853,7 @@ Private Sub timerCheck_Timer()
 End Sub
 
 Private Sub txtMs_Change()
-  On Error GoTo gotErr
+  On Error GoTo goterr
   Dim lngTick As Long
   lngTick = CLng(txtMs.Text)
   If lngTick < 20 Then
@@ -862,7 +862,7 @@ Private Sub txtMs_Change()
   TimerConditionTick = lngTick
   timerCheck.Interval = lngTick
   Exit Sub
-gotErr:
+goterr:
   txtMs.Text = "300"
   TimerConditionTick = 300
   timerCheck.Interval = 300
@@ -870,14 +870,14 @@ End Sub
 
 Public Sub ReloadFiles()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim strPath As String
-  Dim fs As scripting.FileSystemObject
-  Dim f As scripting.Folder
-  Dim f1 As scripting.File
-  Set fs = New scripting.FileSystemObject
-  strPath = App.path & "\conds"
+  Dim fs As Scripting.FileSystemObject
+  Dim f As Scripting.Folder
+  Dim f1 As Scripting.File
+  Set fs = New Scripting.FileSystemObject
+  strPath = App.Path & "\conds"
   Set f = fs.GetFolder(strPath)
   txtFile.Clear
   For Each f1 In f.Files
@@ -887,7 +887,7 @@ Public Sub ReloadFiles()
   Next
   txtFile.Text = "c_example.txt"
   Exit Sub
-gotErr:
+goterr:
   LogOnFile "errors.txt", "ERROR WITH FILESYSTEM OBJECT at ReloadFiles (" & Err.Number & ") : " & Err.Description & " (at cond events - path : " & strPath & ")"
 End Sub
 
@@ -903,7 +903,7 @@ Public Function AddCondEvent(idConnection As Integer, t1 As String, op As String
  t2 As String, de As String, lo As String, ke As String, ac As String) As Long
   Dim curr As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   If (idConnection <= 0) Then
     AddCondEvent = -2
@@ -916,7 +916,7 @@ Public Function AddCondEvent(idConnection As Integer, t1 As String, op As String
   curr = (CustomCondEvents(idConnection).Number) + 1
   CustomCondEvents(idConnection).Number = curr
   CustomCondEvents(idConnection).ev(curr).thing1 = t1
-  CustomCondEvents(idConnection).ev(curr).operator = op
+  CustomCondEvents(idConnection).ev(curr).Operator = op
   CustomCondEvents(idConnection).ev(curr).thing2 = t2
   CustomCondEvents(idConnection).ev(curr).delay = de
   CustomCondEvents(idConnection).ev(curr).lock = lo
@@ -925,12 +925,12 @@ Public Function AddCondEvent(idConnection As Integer, t1 As String, op As String
   CustomCondEvents(idConnection).ev(curr).nextunlock = 0
   AddCondEvent = 0
   Exit Function
-gotErr:
+goterr:
   AddCondEvent = -1
 End Function
 
 Private Sub txtMs2_Change()
-  On Error GoTo gotErr
+  On Error GoTo goterr
   Dim lngTick2 As Long
   lngTick2 = CLng(txtMs2.Text)
   If lngTick2 < (TimerConditionTick + 300) Then
@@ -938,7 +938,7 @@ Private Sub txtMs2_Change()
   End If
   TimerConditionTick2 = lngTick2
   Exit Sub
-gotErr:
+goterr:
   txtMs2.Text = CStr(TimerConditionTick + 300)
   TimerConditionTick2 = TimerConditionTick + 300
 End Sub

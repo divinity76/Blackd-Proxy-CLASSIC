@@ -87,15 +87,15 @@ Private Const PROCESS_QUERY_INFORMATION = (&H400)
 Private Const PROCESS_READ_WRITE_QUERY = PROCESS_VM_READ + PROCESS_VM_WRITE + PROCESS_VM_OPERATION + PROCESS_QUERY_INFORMATION
 
 Private Declare Function GetCurrentProcess _
-                                                    Lib "kernel32" () As Long
-Private Declare Function GetCurrentProcessId Lib "kernel32" () As Long
-Private Declare Function GetCurrentThread Lib "kernel32" () As Long
-Private Declare Function GetCurrentThreadId Lib "kernel32" () As Long
-Private Declare Function SetThreadPriority Lib "kernel32" _
+                                                    Lib "Kernel32" () As Long
+Private Declare Function GetCurrentProcessId Lib "Kernel32" () As Long
+Private Declare Function GetCurrentThread Lib "Kernel32" () As Long
+Private Declare Function GetCurrentThreadId Lib "Kernel32" () As Long
+Private Declare Function SetThreadPriority Lib "Kernel32" _
                                                        (ByVal hThread As Long, ByVal nPriority As Long) As Long
-Private Declare Function GetThreadPriority Lib "kernel32" (ByVal hThread As Long) As Long
+Private Declare Function GetThreadPriority Lib "Kernel32" (ByVal hThread As Long) As Long
 
-Private Declare Sub GetStartupInfo Lib "kernel32" Alias "GetStartupInfoA" (lpStartupInfo As STARTUPINFO)
+Private Declare Sub GetStartupInfo Lib "Kernel32" Alias "GetStartupInfoA" (lpStartupInfo As STARTUPINFO)
 
 Private Const THREAD_BASE_PRIORITY_LOWRT As Long = 15 ' value that gets a thread to LowRealtime-1
 Private Const THREAD_BASE_PRIORITY_MAX As Long = 2 ' maximum thread base priority boost
@@ -113,10 +113,10 @@ Private Enum ThreadPriority
 End Enum
 
 
-Private Declare Function TerminateProcess Lib "kernel32" Alias "Terminate Process" ( _
+Private Declare Function TerminateProcess Lib "Kernel32" Alias "Terminate Process" ( _
  ByVal hProcess As Long, ByVal uExitCode As Long) As Long
 
-Private Declare Function CreateProcess Lib "kernel32" _
+Private Declare Function CreateProcess Lib "Kernel32" _
          Alias "CreateProcessA" _
          (ByVal lpApplicationName As String, _
          ByVal lpCommandLine As String, _
@@ -139,8 +139,8 @@ Private Declare Function CreateProcess Lib "kernel32" _
 Public Function LaunchTibia(ByVal strTibiaPath, withMC As Boolean) As String
       Dim prev As String
       Dim loc1 As String
-      Dim fs As scripting.FileSystemObject
-      Set fs = New scripting.FileSystemObject
+      Dim fs As Scripting.FileSystemObject
+      Set fs = New Scripting.FileSystemObject
       If strTibiaPath = "" Then
         loc1 = ""
       Else
@@ -166,7 +166,7 @@ Public Function LaunchTibia(ByVal strTibiaPath, withMC As Boolean) As String
 End Function
 
 Public Function autoGetTibiaFolder(Optional ByVal ParTibiaFolder As String = "") As String
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim tpath As String
     If ParTibiaFolder = "" Then
         If DefaultTibiaFolder = "" Then
@@ -176,24 +176,28 @@ Public Function autoGetTibiaFolder(Optional ByVal ParTibiaFolder As String = "")
         End If
     End If
     tpath = ""
-    Dim fs As scripting.FileSystemObject
-    Set fs = New scripting.FileSystemObject
-    tpath = GetProgFolder()
+    Dim fs As Scripting.FileSystemObject
+    Set fs = New Scripting.FileSystemObject
+    If (TibiaVersionLong >= 1100) Then
+       tpath = GetLocalApplicationDataFolder()
+    Else
+       tpath = GetProgFolder()
+    End If
     If Right$(tpath, 1) <> "\" Then
         tpath = tpath & "\"
     End If
     tpath = tpath & ParTibiaFolder & "\"
     autoGetTibiaFolder = tpath
     Exit Function
-gotErr:
+goterr:
     autoGetTibiaFolder = ""
 End Function
 
 Public Function autoGetMagebotFolder() As String
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim tpath As String
-    Dim fs As scripting.FileSystemObject
-    Set fs = New scripting.FileSystemObject
+    Dim fs As Scripting.FileSystemObject
+    Set fs = New Scripting.FileSystemObject
     tpath = GetProgFolder()
     If Right$(tpath, 1) <> "\" Then
         tpath = tpath & "\"
@@ -201,7 +205,7 @@ Public Function autoGetMagebotFolder() As String
     tpath = tpath & "Magebot\"
     autoGetMagebotFolder = tpath
     Exit Function
-gotErr:
+goterr:
     autoGetMagebotFolder = ""
 End Function
 
@@ -214,14 +218,14 @@ End Function
 'End Function
 
 Public Function autoGetFileContaining(strPath As String, strCriteria) As String
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim tpath As String
     Dim sName As String
     Dim lPos As Long
-    Dim fs As scripting.FileSystemObject
-    Dim fol As scripting.Folder
-    Dim fil As scripting.File
-    Set fs = New scripting.FileSystemObject
+    Dim fs As Scripting.FileSystemObject
+    Dim fol As Scripting.Folder
+    Dim fil As Scripting.File
+    Set fs = New Scripting.FileSystemObject
     Set fol = fs.GetFolder(strPath)
     For Each fil In fol.Files
         sName = fil.name
@@ -233,7 +237,7 @@ Public Function autoGetFileContaining(strPath As String, strCriteria) As String
     Next fil
     autoGetFileContaining = ""
     Exit Function
-gotErr:
+goterr:
     autoGetFileContaining = ""
 End Function
 

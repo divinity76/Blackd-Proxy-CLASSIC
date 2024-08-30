@@ -588,25 +588,25 @@ End Sub
 
 
 Private Sub AutoHealOption1_Click()
-  If AutoHealOption1.Value = True Then
+  If AutoHealOption1.value = True Then
     GLOBAL_AUTOFRIENDHEAL_MODE = 1
   End If
 End Sub
 
 Private Sub AutoHealOption2_Click()
-  If AutoHealOption2.Value = True Then
+  If AutoHealOption2.value = True Then
     GLOBAL_AUTOFRIENDHEAL_MODE = 2
   End If
 End Sub
 
 Private Sub AutoHealOption3_Click()
-  If AutoHealOption3.Value = True Then
+  If AutoHealOption3.value = True Then
     GLOBAL_AUTOFRIENDHEAL_MODE = 3
   End If
 End Sub
 
 Public Sub chkAutoHealFriendEnabled_Click()
-If chkAutoHealFriendEnabled.Value = 1 Then
+If chkAutoHealFriendEnabled.value = 1 Then
   frmWarbot.timerFriendHealer.enabled = True
 Else
   frmWarbot.timerFriendHealer.enabled = False
@@ -622,7 +622,7 @@ Public Sub cmdChangeOutfit_Click()
   Dim b3 As Byte
   Dim b4 As Byte
   Dim b5 As Byte
-  Dim filename As String
+  Dim Filename As String
   b0 = CByte(CLng(txtOutfit(0).Text))
   If ((b0 = 0) And (TibiaVersionLong > 760)) Then
     b0 = firstValidOutfit
@@ -633,9 +633,9 @@ Public Sub cmdChangeOutfit_Click()
   b4 = CByte(CLng(txtOutfit(4).Text))
   b5 = CByte(CLng(txtOutfit(5).Text))
   If (lstGroups.ListIndex >= 0) Then
-    filename = lstGroups.List(lstGroups.ListIndex)
-    filename = Left$(filename, Len(filename) - 3) & "out"
-    SaveOutfit filename, b0, b1, b2, b3, b4, b5
+    Filename = lstGroups.List(lstGroups.ListIndex)
+    Filename = Left$(Filename, Len(Filename) - 3) & "out"
+    SaveOutfit Filename, b0, b1, b2, b3, b4, b5
     ReLoadAllCharOutfits
   End If
 End Sub
@@ -802,7 +802,7 @@ End Sub
 
 Private Sub Form_Load()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   
   allowRename = False
@@ -824,24 +824,24 @@ Private Sub Form_Load()
   txtOutfit(4) = lastValid(4)
   txtOutfit(5) = lastValid(5)
   
-  Set OutfitOfName(0) = New scripting.Dictionary
-  Set OutfitOfName(1) = New scripting.Dictionary
-  Set OutfitOfName(2) = New scripting.Dictionary
-  Set OutfitOfName(3) = New scripting.Dictionary
-  Set OutfitOfName(4) = New scripting.Dictionary
-  Set OutfitOfName(5) = New scripting.Dictionary
-  Set OutfitOfChar(0) = New scripting.Dictionary
-  Set OutfitOfChar(1) = New scripting.Dictionary
-  Set OutfitOfChar(2) = New scripting.Dictionary
-  Set OutfitOfChar(3) = New scripting.Dictionary
-  Set OutfitOfChar(4) = New scripting.Dictionary
-  Set OutfitOfChar(5) = New scripting.Dictionary
+  Set OutfitOfName(0) = New Scripting.Dictionary
+  Set OutfitOfName(1) = New Scripting.Dictionary
+  Set OutfitOfName(2) = New Scripting.Dictionary
+  Set OutfitOfName(3) = New Scripting.Dictionary
+  Set OutfitOfName(4) = New Scripting.Dictionary
+  Set OutfitOfName(5) = New Scripting.Dictionary
+  Set OutfitOfChar(0) = New Scripting.Dictionary
+  Set OutfitOfChar(1) = New Scripting.Dictionary
+  Set OutfitOfChar(2) = New Scripting.Dictionary
+  Set OutfitOfChar(3) = New Scripting.Dictionary
+  Set OutfitOfChar(4) = New Scripting.Dictionary
+  Set OutfitOfChar(5) = New Scripting.Dictionary
   LoadWarbotFiles
   lastClient = -1
   Me.cmdStart.Caption = "DEACTIVATED - press to run changer"
   Me.Timer1.enabled = False
   Exit Sub
-gotErr:
+goterr:
   gotDictErr = 1
 End Sub
 
@@ -853,10 +853,10 @@ End Sub
 
 
 Private Sub lstGroups_Click()
-  Dim filename As String
+  Dim Filename As String
   If lstGroups.ListIndex >= 0 Then
-    filename = lstGroups.List(lstGroups.ListIndex)
-    LoadGroupOutfit filename
+    Filename = lstGroups.List(lstGroups.ListIndex)
+    LoadGroupOutfit Filename
   End If
 End Sub
 
@@ -866,11 +866,11 @@ End Sub
 
 
 Private Sub scrollFriendsHP_Change()
-  ChangeGLOBAL_FRIENDSLOWLIMIT_HP scrollFriendsHP.Value
+  ChangeGLOBAL_FRIENDSLOWLIMIT_HP scrollFriendsHP.value
 End Sub
 
 Private Sub scrollSafeToHealHP_Change()
-  ChangeGLOBAL_MYSAFELIMIT_HP scrollSafeToHealHP.Value
+  ChangeGLOBAL_MYSAFELIMIT_HP scrollSafeToHealHP.value
 End Sub
 
 
@@ -881,7 +881,7 @@ Private Sub Timer1_Timer()
 End Sub
 
 Private Sub timerFriendHealer_Timer()
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim v1 As Long
     Dim v2 As Long
     v1 = 300
@@ -895,7 +895,7 @@ Private Sub timerFriendHealer_Timer()
     timerFriendHealer.Interval = randomNumberBetween(v1, v2)
   ProcessAllFriendHeals
   Exit Sub
-gotErr:
+goterr:
   txtAutohealDelay.Text = "300"
   txtAutohealDelay2.Text = "700"
 End Sub
@@ -904,72 +904,72 @@ End Sub
 
 
 
-Private Sub txtOutfit_Validate(Index As Integer, Cancel As Boolean)
+Private Sub txtOutfit_Validate(index As Integer, Cancel As Boolean)
 Dim byteValue As Byte
 Dim longValue As Long
-On Error GoTo gotErr
+On Error GoTo goterr
   If TibiaVersionLong >= 773 Then
 
-  longValue = CLng(txtOutfit(Index).Text)
-  If Index = 0 Then
+  longValue = CLng(txtOutfit(index).Text)
+  If index = 0 Then
     If longValue > lastValidOutfit Then
-      txtOutfit(Index).Text = firstValidOutfit
+      txtOutfit(index).Text = firstValidOutfit
       Cancel = True
       Exit Sub
     End If
     If longValue < firstValidOutfit Then
-      txtOutfit(Index).Text = lastValidOutfit
+      txtOutfit(index).Text = lastValidOutfit
       Cancel = True
       Exit Sub
     End If
     Select Case longValue
     Case 135
-      txtOutfit(Index).Text = lastValid(Index)
+      txtOutfit(index).Text = lastValid(index)
       Cancel = True
       Exit Sub
     End Select
   End If
   If longValue >= 0 And longValue <= 255 Then
     byteValue = CByte(longValue)
-    lastValid(Index) = CStr(longValue)
+    lastValid(index) = CStr(longValue)
   Else
-    txtOutfit(Index).Text = lastValid(Index)
+    txtOutfit(index).Text = lastValid(index)
     Cancel = True
   End If
   Exit Sub
   Else
-  longValue = CLng(txtOutfit(Index).Text)
-  If Index = 0 Then
+  longValue = CLng(txtOutfit(index).Text)
+  If index = 0 Then
     If longValue < firstValidOutfit Then
-      txtOutfit(Index).Text = lastValidOutfit
+      txtOutfit(index).Text = lastValidOutfit
       Cancel = True
       Exit Sub
     End If
     If longValue > lastValidOutfit Then
-      txtOutfit(Index).Text = firstValidOutfit
+      txtOutfit(index).Text = firstValidOutfit
       Cancel = True
       Exit Sub
     End If
     Select Case longValue
     Case 1, 10, 11, 12, 20, 46, 47, 72, 77, 93, 96, 97, 98, 135
-      txtOutfit(Index).Text = lastValid(Index)
+      txtOutfit(index).Text = lastValid(index)
       Cancel = True
       Exit Sub
     End Select
   End If
   If longValue >= 0 And longValue <= 255 Then
     byteValue = CByte(longValue)
-    lastValid(Index) = CStr(longValue)
+    lastValid(index) = CStr(longValue)
   Else
-    txtOutfit(Index).Text = lastValid(Index)
+    txtOutfit(index).Text = lastValid(index)
     Cancel = True
   End If
   Exit Sub
   
   
   End If
-gotErr:
-  txtOutfit(Index).Text = lastValid(Index)
+goterr:
+  txtOutfit(index).Text = lastValid(index)
   Cancel = True
 End Sub
 
@@ -980,18 +980,18 @@ End Sub
 
 Public Sub ReloadAutohealFile()
   #If FinalMode = 1 Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
-  Dim fso As scripting.FileSystemObject
+  Dim fso As Scripting.FileSystemObject
   Dim fn As Integer
   Dim strLine As String
-  Dim filename As String
-  Set fso = New scripting.FileSystemObject
+  Dim Filename As String
+  Set fso = New Scripting.FileSystemObject
     lstAutoheal.Clear
-    filename = App.path & "\" & txtFileName.Text
-    If fso.FileExists(filename) = True Then
+    Filename = App.Path & "\" & txtFileName.Text
+    If fso.FileExists(Filename) = True Then
       fn = FreeFile
-      Open filename For Input As #fn
+      Open Filename For Input As #fn
       While Not EOF(fn)
         Line Input #fn, strLine
         If strLine <> "" Then
@@ -1003,7 +1003,7 @@ Public Sub ReloadAutohealFile()
       Close #fn
     End If
   Exit Sub
-gotErr:
+goterr:
   lstAutoheal.Clear
 End Sub
 
@@ -1015,19 +1015,19 @@ End Sub
 Public Sub SaveAutoHealList()
   Dim i As Long
   #If FinalMode = 1 Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim fn As Integer
   Dim limI As Long
   limI = lstAutoheal.ListCount - 1
   fn = FreeFile
-  Open App.path & "\" & txtFileName.Text For Output As #fn
+  Open App.Path & "\" & txtFileName.Text For Output As #fn
     For i = 0 To limI
       Print #fn, lstAutoheal.List(i)
     Next i
   Close #fn
   Exit Sub
-gotErr:
+goterr:
   i = -1
 End Sub
 

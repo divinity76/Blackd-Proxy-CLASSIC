@@ -624,8 +624,8 @@ Public Sub UpdateValues()
     gridEvents.Rows = numofEv + 1
     For i = 1 To numofEv
       With gridEvents
-      .TextMatrix(i, 0) = CStr(CustomEvents(eventsIDselected).ev(i).id)
-      .TextMatrix(i, 1) = CustomEvents(eventsIDselected).ev(i).flags
+      .TextMatrix(i, 0) = CStr(CustomEvents(eventsIDselected).ev(i).Id)
+      .TextMatrix(i, 1) = CustomEvents(eventsIDselected).ev(i).Flags
       .TextMatrix(i, 2) = CustomEvents(eventsIDselected).ev(i).trigger
       .TextMatrix(i, 3) = CustomEvents(eventsIDselected).ev(i).action
       .Row = i
@@ -683,11 +683,11 @@ End Sub
 
 
 
-Public Function AddEvent(idConnection As Integer, id As Integer, fl As String, _
- tr As String, ac As String) As Long
+Public Function AddEvent(idConnection As Integer, Id As Integer, fl As String, _
+ tR As String, ac As String) As Long
   Dim curr As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   If (idConnection <= 0) Then
     AddEvent = -1
@@ -699,13 +699,13 @@ Public Function AddEvent(idConnection As Integer, id As Integer, fl As String, _
   End If
   curr = (CustomEvents(idConnection).Number) + 1
   CustomEvents(idConnection).Number = curr
-  CustomEvents(idConnection).ev(curr).id = id
-  CustomEvents(idConnection).ev(curr).flags = fl
-  CustomEvents(idConnection).ev(curr).trigger = tr
+  CustomEvents(idConnection).ev(curr).Id = Id
+  CustomEvents(idConnection).ev(curr).Flags = fl
+  CustomEvents(idConnection).ev(curr).trigger = tR
   CustomEvents(idConnection).ev(curr).action = ac
   AddEvent = 0
   Exit Function
-gotErr:
+goterr:
   AddEvent = -1
 End Function
 
@@ -714,16 +714,16 @@ Private Sub cmdAddEvent_Click()
   Dim aRes As Long
   Dim theFlags As String
   Dim i As Long
-  Dim id As Integer
+  Dim Id As Integer
   If eventsIDselected > 0 Then
     theFlags = ""
     For i = 0 To 18
-      theFlags = theFlags & CStr(CLng(chkParameter(i).Value))
+      theFlags = theFlags & CStr(CLng(chkParameter(i).value))
     Next i
     If cmbEventType.ListIndex < 0 Then
-      id = 0
+      Id = 0
     Else
-      id = CInt(cmbEventType.ListIndex)
+      Id = CInt(cmbEventType.ListIndex)
     End If
     theFlags = theFlags & ":" & CStr(txtDelay.Text)
     If Left$(theFlags, 18) = "000000000000000000" Then
@@ -731,7 +731,7 @@ Private Sub cmdAddEvent_Click()
     ElseIf txtAction.Text = "" Then
       lblInfo.Caption = "ERROR: No action selected!"
     Else
-    aRes = AddEvent(CInt(eventsIDselected), id, theFlags, _
+    aRes = AddEvent(CInt(eventsIDselected), Id, theFlags, _
      txtTrigger.Text, txtAction.Text)
     UpdateValues
     lblInfo.Caption = "New event added OK"
@@ -752,12 +752,12 @@ Private Sub cmdDeleteSel_Click()
   Dim firstrow As Long
   Dim lastrow As Long
   Dim firstI As Long
-  Dim lasti As Long
+  Dim lastI As Long
   Dim i As Long
   Dim difR As Long
   Dim numofEv As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   If (eventsIDselected > 0) Then
   vrow = gridEvents.Row
@@ -778,12 +778,12 @@ Private Sub cmdDeleteSel_Click()
   Else
   ' lblDebug.Caption = "First = " & firstRow & " ; Last = " & lastRow
    firstI = firstrow
-   lasti = lastrow
-   difR = lasti - firstI + 1
+   lastI = lastrow
+   difR = lastI - firstI + 1
    For i = firstI To numofEv
      If i + difR <= MAXEVENTS Then
-       CustomEvents(eventsIDselected).ev(i).id = CustomEvents(eventsIDselected).ev(i + difR).id
-       CustomEvents(eventsIDselected).ev(i).flags = CustomEvents(eventsIDselected).ev(i + difR).flags
+       CustomEvents(eventsIDselected).ev(i).Id = CustomEvents(eventsIDselected).ev(i + difR).Id
+       CustomEvents(eventsIDselected).ev(i).Flags = CustomEvents(eventsIDselected).ev(i + difR).Flags
        CustomEvents(eventsIDselected).ev(i).trigger = CustomEvents(eventsIDselected).ev(i + difR).trigger
        CustomEvents(eventsIDselected).ev(i).action = CustomEvents(eventsIDselected).ev(i + difR).action
       End If
@@ -793,32 +793,32 @@ Private Sub cmdDeleteSel_Click()
   UpdateValues
   End If
   Exit Sub
-gotErr:
+goterr:
   frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Function cmdDeleteSel_Click() failed : " & Err.Description
   LogOnFile "errors.txt", "Function cmdDeleteSel_Click() failed : " & Err.Description
 End Sub
 
 Private Sub cmdLoadEv_Click()
-  Dim fso As scripting.FileSystemObject
+  Dim fso As Scripting.FileSystemObject
   Dim fn As Integer
   Dim strLine(1 To 4) As String
-  Dim filename As String
+  Dim Filename As String
   Dim i As Long
   Dim p As Long
   Dim completed As Boolean
   Dim aRes As Long
   Dim thelo As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
-  Set fso = New scripting.FileSystemObject
+  Set fso = New Scripting.FileSystemObject
   If eventsIDselected > 0 Then
     lblInfo.Caption = "Load OK"
     DeleteAllEvents eventsIDselected
-    filename = App.path & "\events\" & txtFile.Text
-    If fso.FileExists(filename) = True Then
+    Filename = App.Path & "\events\" & txtFile.Text
+    If fso.FileExists(Filename) = True Then
       fn = FreeFile
-      Open filename For Input As #fn
+      Open Filename For Input As #fn
       i = 0
       While Not EOF(fn)
         completed = True
@@ -849,7 +849,7 @@ Private Sub cmdLoadEv_Click()
   End If
   UpdateValues
   Exit Sub
-gotErr:
+goterr:
   lblInfo.Caption = "Load ERROR (" & Err.Number & "):" & Err.Description
 End Sub
 
@@ -861,16 +861,16 @@ End Sub
 
 Private Sub cmdSaveEv_Click()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim fn As Integer
   Dim i As Long
   If eventsIDselected > 0 Then
     fn = FreeFile
-    Open App.path & "\events\" & txtFile.Text For Output As #fn
+    Open App.Path & "\events\" & txtFile.Text For Output As #fn
     For i = 1 To CustomEvents(eventsIDselected).Number
-      Print #fn, CStr(CustomEvents(eventsIDselected).ev(i).id)
-      Print #fn, CustomEvents(eventsIDselected).ev(i).flags
+      Print #fn, CStr(CustomEvents(eventsIDselected).ev(i).Id)
+      Print #fn, CustomEvents(eventsIDselected).ev(i).Flags
       Print #fn, CustomEvents(eventsIDselected).ev(i).trigger
       Print #fn, CustomEvents(eventsIDselected).ev(i).action
     Next i
@@ -878,7 +878,7 @@ Private Sub cmdSaveEv_Click()
     lblInfo.Caption = "Save OK"
   End If
   Exit Sub
-gotErr:
+goterr:
   lblInfo.Caption = "Save ERROR (" & Err.Number & "):" & Err.Description
 End Sub
 
@@ -1009,14 +1009,14 @@ End Sub
 
 Public Sub ReloadFiles()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim strPath As String
-  Dim fs As scripting.FileSystemObject
-  Dim f As scripting.Folder
-  Dim f1 As scripting.File
-  Set fs = New scripting.FileSystemObject
-  strPath = App.path & "\events"
+  Dim fs As Scripting.FileSystemObject
+  Dim f As Scripting.Folder
+  Dim f1 As Scripting.File
+  Set fs = New Scripting.FileSystemObject
+  strPath = App.Path & "\events"
   Set f = fs.GetFolder(strPath)
   txtFile.Clear
   For Each f1 In f.Files
@@ -1026,7 +1026,7 @@ Public Sub ReloadFiles()
   Next
   txtFile.Text = "ev_example.txt"
   Exit Sub
-gotErr:
+goterr:
   LogOnFile "errors.txt", "ERROR WITH FILESYSTEM OBJECT at ReloadFiles (" & Err.Number & ") : " & Err.Description & " (path : " & strPath & ")"
 End Sub
 
@@ -1041,7 +1041,7 @@ End Sub
 
 Private Sub timerScheduledActions_Timer()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim i As Long
   Dim ci As Long
@@ -1060,7 +1060,7 @@ Private Sub timerScheduledActions_Timer()
     End If
   Next i
   Exit Sub
-gotErr:
+goterr:
   iRes = -1
 End Sub
 

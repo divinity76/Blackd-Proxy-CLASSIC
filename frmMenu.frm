@@ -839,13 +839,13 @@ Private Sub ccmdPersistent_Click()
   frmPersistent.WindowState = vbNormal
   frmPersistent.Show
   frmPersistent.SetFocus
-  SetWindowPos frmPersistent.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmPersistent.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdAd_Click()
 Dim a
 
-  a = ShellExecute(Me.hwnd, "Open", "https://blackdtools.com/worldtrade.php", &O0, &O0, SW_NORMAL)
+  a = ShellExecute(Me.hWnd, "Open", "https://blackdtools.com/worldtrade.php", &O0, &O0, SW_NORMAL)
 
 End Sub
 
@@ -861,21 +861,21 @@ Private Sub cmdAdvancedNG_Click()
   frmAdvanced.WindowState = vbNormal
   frmAdvanced.Show
   frmAdvanced.SetFocus
-  SetWindowPos frmAdvanced.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmAdvanced.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdAimbot_Click()
   frmAimbot.WindowState = vbNormal
   frmAimbot.Show
   frmAimbot.SetFocus
-  SetWindowPos frmAimbot.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmAimbot.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdBoradcastNG_Click()
   frmBroadcast.WindowState = vbNormal
   frmBroadcast.Show
   frmBroadcast.SetFocus
-  SetWindowPos frmBroadcast.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmBroadcast.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdBroadcast_Click()
@@ -903,7 +903,7 @@ Private Sub cmdCavebotNG_Click()
   frmCavebot.WindowState = vbNormal
   frmCavebot.Show
   frmCavebot.SetFocus
-  SetWindowPos frmCavebot.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmCavebot.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdChangeStyle_Click()
@@ -911,7 +911,7 @@ Private Sub cmdChangeStyle_Click()
   frmOld.WindowState = vbNormal
   frmOld.Show
   frmOld.SetFocus
-  SetWindowPos frmOld.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmOld.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
   Me.Hide
 End Sub
 
@@ -933,7 +933,7 @@ Private Sub cmdExtrasNG_Click()
   frmExtras.WindowState = vbNormal
   frmExtras.Show
   frmExtras.SetFocus
-  SetWindowPos frmExtras.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmExtras.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdHardcoreCheats_Click()
@@ -948,7 +948,7 @@ Private Sub cmdHealingNG_Click()
   frmHealing.WindowState = vbNormal
   frmHealing.Show
   frmHealing.SetFocus
-  SetWindowPos frmHealing.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmHealing.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdHotkeys_Click()
@@ -963,7 +963,7 @@ Private Sub cmdHotkeysNG_Click()
   frmHotkeys.WindowState = vbNormal
   frmHotkeys.Show
   frmHotkeys.SetFocus
-  SetWindowPos frmHotkeys.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmHotkeys.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdHPmana_Click()
@@ -978,8 +978,8 @@ End Sub
 
 Private Sub cmdLaunchTibia_Click()
   ' open Shoot Fruits in default web navigator
-  Dim X
-  X = ShellExecute(Me.hwnd, "Open", "http://shootfruits.com", &O0, &O0, SW_NORMAL)
+  Dim x
+  x = ShellExecute(Me.hWnd, "Open", "http://shootfruits.com", &O0, &O0, SW_NORMAL)
   
 '    Dim res As String
 '    Dim tpath As String
@@ -1051,14 +1051,14 @@ Private Sub cmdLogsNG_Click()
   frmMain.WindowState = vbNormal
   frmMain.Show
   frmMain.SetFocus
-  SetWindowPos frmMain.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmMain.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdMagebomb_Click()
   frmMagebomb.WindowState = vbNormal
   frmMagebomb.Show
   frmMagebomb.SetFocus
-  SetWindowPos frmMagebomb.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmMagebomb.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 'Private Sub cmdMagebot_Click()
@@ -1088,7 +1088,7 @@ Private Sub cmdNewsNG_Click()
   frmNews.WindowState = vbNormal
   frmNews.Show
   frmNews.SetFocus
-  SetWindowPos frmNews.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmNews.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdRunemaker_Click()
@@ -1148,15 +1148,31 @@ Private Sub cmdStopAlarmNG_Click()
     'custom ng
     'DangerPK(idConnection) = False
     'extrasOptions(extrasIDselected).chkPM = False
-    frmRunemaker.chkCloseSound.Value = 0
-    frmHardcoreCheats.chkRuneAlarm.Value = 0
-    frmRunemaker.ChkDangerSound.Value = 0
-    frmEvents.chkReconnectionAlarm.Value = 0
-    frmCavebot.chkChangePkHeal.Value = 0
+    frmRunemaker.chkCloseSound.value = 0
+    frmHardcoreCheats.chkRuneAlarm.value = 0
+    frmRunemaker.ChkDangerSound.value = 0
+    frmEvents.chkReconnectionAlarm.value = 0
+    frmCavebot.chkChangePkHeal.value = 0
     
   Next mcid
   ChangePlayTheDangerSound False
 End Sub
+
+
+
+'Private Sub cmdTest_Click()
+'    Dim itemAdr As Long
+'    Dim keyToFind As Long
+'    Dim tibia_pids() As Long
+'    Dim totalPids As Long
+'    keyToFind = CLng(Text1.Text)
+'    totalPids = GetTibiaPIDs(tibiamainname, tibiaclassname, tibia_pids)
+'    If (totalPids > 0) Then
+'
+'        itemAdr = FindCollectionItemByKey(tibia_pids(0), adrServerList_CollectionStart, keyToFind)
+'        Debug.Print "key " & CStr(keyToFind) & " found at " & CStr(Hex(itemAdr))
+'    End If
+'End Sub
 
 Private Sub cmdTrainer_Click()
   frmTrainer.WindowState = vbNormal
@@ -1168,13 +1184,13 @@ Private Sub cmdTrainerNG_Click()
   frmTrainer.WindowState = vbNormal
   frmTrainer.Show
   frmTrainer.SetFocus
-  SetWindowPos frmTrainer.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmTrainer.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdTutorial_Click()
   ' open tutorial in default web navigator
-  Dim X
-  X = ShellExecute(Me.hwnd, "Open", "http://www.blackdtools.com/forum/showthread.php?t=221", &O0, &O0, SW_NORMAL)
+  Dim x
+  x = ShellExecute(Me.hWnd, "Open", "http://www.blackdtools.com/forum/showthread.php?t=221", &O0, &O0, SW_NORMAL)
 End Sub
 
 
@@ -1190,13 +1206,13 @@ Private Sub cmdUnknownFeatureNG_Click()
   frmCondEvents.WindowState = vbNormal
   frmCondEvents.Show
   frmCondEvents.SetFocus
-  SetWindowPos frmCondEvents.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmCondEvents.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub cmdVIPsupport_Click()
  ' open tutorial in default web navigator
-  Dim X
-  X = ShellExecute(Me.hwnd, "Open", "https://blackdtools.com/vip.php", &O0, &O0, SW_NORMAL)
+  Dim x
+  x = ShellExecute(Me.hWnd, "Open", "https://blackdtools.com/vip.php", &O0, &O0, SW_NORMAL)
 
 End Sub
 
@@ -1214,23 +1230,27 @@ Private Sub cmdWarbotNG_Click()
   frmWarbot.WindowState = vbNormal
   frmWarbot.Show
   frmWarbot.SetFocus
-  SetWindowPos frmWarbot.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmWarbot.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
+
+
 'Private Sub Command1_Click()
-'  Dim tibiaclient As Long
-'  Dim res As Long
-'  tibiaclient = 0
-'  Do
-'        tibiaclient = FindWindowEx(0, tibiaclient, tibiaclassname, vbNullString)
-'        If tibiaclient = 0 Then
-'            Exit Do
-'        Else
-'            res = ReadCurrentAddress(tibiaclient, adrSelectedCharIndex, -1, True)
-'            MsgBox ("SEL CHAR=" & CStr(res))
-'        End If
-'  Loop
+'    Dim tibia_pids() As Long
+ '   Dim totalPids As Long
+ '   totalPids = GetTibiaPIDs(tibiamainname, tibiaclassname, tibia_pids)
+ '   LastNumTibiaClients = totalPids
+  '  If totalPids = 0 Then
+  '    Debug.Print "Tibia 11 clients not found (0)"
+  '      Exit Sub
+  '  End If
+ 
+  ' SafeMemoryMoveXYZ 1, myX(1) + 1, myY(1) + 1, myZ(1)
 'End Sub
+
+
+
+
 
 Private Sub Form_Load()
   Dim pok As Boolean
@@ -1261,7 +1281,7 @@ Private Sub Form_Load()
   Me.Refresh
   With nid
     .cbSize = Len(nid)
-    .hwnd = Me.hwnd
+    .hWnd = Me.hWnd
     .uId = vbNull
     .uFlags = NIF_ICON Or NIF_TIP Or NIF_MESSAGE
     .uCallBackMessage = WM_MOUSEMOVE
@@ -1292,30 +1312,30 @@ End Sub
 
 
 
-Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As _
+Private Sub Form_MouseMove(Button As Integer, Shift As Integer, x As _
          Single, y As Single)
   'this procedure receives the callbacks from the System Tray icon.
   Dim result As Long
   Dim msg As Long
   'the value of X will vary depending upon the scalemode setting
   If Me.ScaleMode = vbPixels Then
-    msg = X
+    msg = x
   Else
-    msg = X / Screen.TwipsPerPixelX
+    msg = x / Screen.TwipsPerPixelX
   End If
   
   Select Case msg
   Case WM_LBUTTONUP        '514 restore form window
     Me.WindowState = vbNormal
-    result = SetForegroundWindow(Me.hwnd)
+    result = SetForegroundWindow(Me.hWnd)
     Me.Hide
     Me.Show
   Case WM_LBUTTONDBLCLK    '515 restore form window
     Me.WindowState = vbNormal
-    result = SetForegroundWindow(Me.hwnd)
+    result = SetForegroundWindow(Me.hWnd)
     Me.Show
   Case WM_RBUTTONUP        '517 display popup menu
-    result = SetForegroundWindow(Me.hwnd)
+    result = SetForegroundWindow(Me.hWnd)
     Me.PopupMenu Me.mPopupSys
   End Select
 End Sub
@@ -1333,33 +1353,33 @@ End Sub
 
 
 
-Private Sub lblAltSite_MouseDown(Button As Integer, Shift As Integer, X As Single, y As Single)
+Private Sub lblAltSite_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
 Dim a
 If Button = 1 Then
- a = ShellExecute(Me.hwnd, "Open", "http://www.blackdtools.es/index.php", &O0, &O0, SW_NORMAL)
+ a = ShellExecute(Me.hWnd, "Open", "http://www.blackdtools.es/index.php", &O0, &O0, SW_NORMAL)
 End If
 End Sub
 
-Private Sub lblForum_MouseDown(Button As Integer, Shift As Integer, X As Single, y As Single)
+Private Sub lblForum_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
 Dim a
 If Button = 1 Then
-  a = ShellExecute(Me.hwnd, "Open", "http://www.blackdtools.com/forum/index.php", &O0, &O0, SW_NORMAL)
+  a = ShellExecute(Me.hWnd, "Open", "http://www.blackdtools.com/forum/index.php", &O0, &O0, SW_NORMAL)
 End If
 End Sub
 
-Private Sub lblMainSite_MouseDown(Button As Integer, Shift As Integer, X As Single, y As Single)
+Private Sub lblMainSite_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
 Dim a
 If Button = 1 Then
- a = ShellExecute(Me.hwnd, "Open", "http://www.blackdtools.com/index.php", &O0, &O0, SW_NORMAL)
+ a = ShellExecute(Me.hWnd, "Open", "http://www.blackdtools.com/index.php", &O0, &O0, SW_NORMAL)
 End If
 End Sub
 
 
 
-Private Sub lblUpdates_MouseDown(Button As Integer, Shift As Integer, X As Single, y As Single)
+Private Sub lblUpdates_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
 Dim a
 If Button = 1 Then
-  a = ShellExecute(Me.hwnd, "Open", "http://www.blackdtools.com/freedownloads.php", &O0, &O0, SW_NORMAL)
+  a = ShellExecute(Me.hWnd, "Open", "http://www.blackdtools.com/freedownloads.php", &O0, &O0, SW_NORMAL)
 End If
 End Sub
 
@@ -1371,7 +1391,7 @@ Private Sub mPopExit_Click()
     frmConfirm.Show
     frmConfirm.SetFocus
     'custom ng
-    SetWindowPos frmConfirm.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+    SetWindowPos frmConfirm.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
     Exit Sub
   End If
   'called when user clicks the popup menu Exit command
@@ -1381,7 +1401,7 @@ Private Sub mPopRestore_Click()
   'called when the user clicks the popup menu Restore command
   Dim result As Long
   Me.WindowState = vbNormal
-  result = SetForegroundWindow(Me.hwnd)
+  result = SetForegroundWindow(Me.hWnd)
   Me.Show
 End Sub
 
@@ -1421,10 +1441,10 @@ With frmRunemaker
 .txtAddFriend.enabled = False
 .cmdAddFriend.enabled = False
 .cmdRemoveFriend.enabled = False
-.ChkDangerSound.Value = 0
+.ChkDangerSound.value = 0
 .ChkDangerSound.enabled = False
-.chkCloseSound.Value = 0
-.chkOnDangerSS.Value = 0
+.chkCloseSound.value = 0
+.chkOnDangerSS.value = 0
 .chkCloseSound.enabled = False
 .cmdStopAlarm.enabled = False
 .cmdApply.enabled = False
@@ -1435,32 +1455,32 @@ frmMenu.cmdRunemaker.enabled = False
 #If BlockRunemaker Then
 With frmCavebot
 .chkEnabled.enabled = False
-.chkChangePkHeal.Value = 0
+.chkChangePkHeal.value = 0
 .chkChangePkHeal.enabled = False
 End With
 frmMenu.cmdCavebot.enabled = False
 #End If
 #If BlockTools Then
-frmCheats.chkInspectTileID.Value = 0
+frmCheats.chkInspectTileID.value = 0
 frmCheats.chkInspectTileID.enabled = False
 #End If
-save1 = frmHardcoreCheats.chkAcceptSDorder.Value
+save1 = frmHardcoreCheats.chkAcceptSDorder.value
 #If BlockAllCheats Then
 With frmHardcoreCheats
 .txtRemoteLeader.Text = LimitedLeader
-.chkLogoutIfDanger.Value = 0
+.chkLogoutIfDanger.value = 0
 .chkLogoutIfDanger.enabled = False
-.chkReveal.Value = 0
+.chkReveal.value = 0
 .chkReveal.enabled = False
-.chkLight.Value = 0
+.chkLight.value = 0
 .chkLight.enabled = False
-.chkAutoHeal.Value = 0
+.chkAutoHeal.value = 0
 .chkAutoHeal.enabled = False
-.chkAutoVita.Value = 0
+.chkAutoVita.value = 0
 .chkAutoVita.enabled = False
-.chkAcceptSDorder.Value = 0
+.chkAcceptSDorder.value = 0
 .chkAcceptSDorder.enabled = False
-.chkColorEffects.Value = 0
+.chkColorEffects.value = 0
 .chkColorEffects.enabled = False
 .cmdOpenTrueRadar.enabled = False
 .cmdUpdateMap.enabled = False
@@ -1516,7 +1536,7 @@ With frmHardcoreCheats
 .ActionNothing.Visible = False
 .ActionPath.Visible = False
 .Frame1.Visible = False
-.chkRuneAlarm.Value = 0
+.chkRuneAlarm.value = 0
 .chkRuneAlarm.enabled = False
 .chkRuneAlarm.Visible = False
 .txtAlarmUHs.Text = -1
@@ -1529,7 +1549,7 @@ frmMenu.cmdHardcoreCheats.enabled = False
 With frmHardcoreCheats
 .Caption = "Cheats (limited to accept remote orders)"
 .lblLeader.Caption = "Only accept order from this leader (locked in this version) :"
-.chkAcceptSDorder.Value = save1
+.chkAcceptSDorder.value = save1
 .chkAcceptSDorder.enabled = True
 .txtRemoteLeader.enabled = False
 .chkAcceptSDorder.Visible = True

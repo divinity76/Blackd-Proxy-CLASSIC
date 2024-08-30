@@ -3,14 +3,14 @@ Attribute VB_Name = "modMapReader"
 #Const ShowMapLoading = 0
 Option Explicit
 Public Type TypeBMSquare
-  color As Long
+  Color As Long
   walkable As Long
 End Type
 Public Type TypeBMnameInfo
-  X As Long
+  x As Long
   y As Long
   z As Long
-  color As Long
+  Color As Long
 End Type
 Const ColorCaveWall = &H72
 Const ColorCaveWalkable = &H79
@@ -24,7 +24,12 @@ Const ColorWater = &H28
 Const ColorGreenWalkable = &H18
 Const ColorSnowWalkable = &HB3
 Const ColorSwampWall = &H1E
+' Tibia 11 water color
+Const ColorWater2 = &H33
 
+' Before Tibia 11.00, we read 131072 bytes.
+' first 65536 bytes = map color bytes
+' next 65536 bytes = path info bytes
 Const cteBytesPerMap = 131072
 Const cteBytesPerMap1 = 131071
 Public Const MINX = -63
@@ -36,12 +41,12 @@ Public currMapX As Long
 Public currMapY As Long
 Public currMapZ As Long
 
-Public BigMapNamesX As scripting.Dictionary
-Public BigMapNamesY As scripting.Dictionary
-Public BigMapNamesZ As scripting.Dictionary
-Public BigMapNamesC As scripting.Dictionary
+Public BigMapNamesX As Scripting.Dictionary
+Public BigMapNamesY As Scripting.Dictionary
+Public BigMapNamesZ As Scripting.Dictionary
+Public BigMapNamesC As Scripting.Dictionary
 
-Public MapIDTranslator As scripting.Dictionary
+Public MapIDTranslator As Scripting.Dictionary
 Public TheVeryBigMap() As Byte
 
 Public TibiaPath As String
@@ -80,9 +85,9 @@ Public Function ExistBigMapName(str As String) As Boolean
   ExistBigMapName = BigMapNamesX.Exists(str)
 End Function
 
-Public Sub AddBigMapName(str As String, X As Long, y As Long, z As Long, c As Long)
+Public Sub AddBigMapName(str As String, x As Long, y As Long, z As Long, c As Long)
   ' add item to dictionary
-  BigMapNamesX.item(str) = X
+  BigMapNamesX.item(str) = x
   BigMapNamesY.item(str) = y
   BigMapNamesZ.item(str) = z
   BigMapNamesC.item(str) = c
@@ -100,25 +105,40 @@ Public Function GetBigMapNameInfo(str As String) As TypeBMnameInfo
   ' get x,y,z,c from an name
   Dim res As TypeBMnameInfo
   If BigMapNamesX.Exists(str) = True Then
-    res.X = BigMapNamesX.item(str)
+    res.x = BigMapNamesX.item(str)
     res.y = BigMapNamesY.item(str)
     res.z = BigMapNamesZ.item(str)
-    res.color = BigMapNamesC.item(str)
+    res.Color = BigMapNamesC.item(str)
   Else
-    res.X = 0
+    res.x = 0
     res.y = 0
     res.z = 0
-    res.color = vbBlack
+    res.Color = vbBlack
   End If
   GetBigMapNameInfo = res
 End Function
 
-Public Function CalcMapID(X As Long, y As Long, z As Long) As Long
+Public Function GetOldMapName(x As Long, y As Long, z As Long) As String
   Dim xp As String
   Dim yp As String
   Dim zp As String
   Dim res As String
-  xp = CStr(X \ 256)
+  xp = CStr(x \ 256)
+  yp = CStr(y \ 256)
+  If z < 10 Then
+    zp = "0" & CStr(z)
+  Else
+   zp = CStr(z)
+  End If
+  res = xp & yp & zp
+  GetOldMapName = res
+End Function
+Public Function CalcMapID(x As Long, y As Long, z As Long) As Long
+  Dim xp As String
+  Dim yp As String
+  Dim zp As String
+  Dim res As String
+  xp = CStr(x \ 256)
   yp = CStr(y \ 256)
   If z < 10 Then
     zp = "0" & CStr(z)
@@ -129,7 +149,7 @@ Public Function CalcMapID(X As Long, y As Long, z As Long) As Long
   CalcMapID = GetMapTranslation(res)
 End Function
 
-Public Sub GetBigMapSquareB(ByRef res As Boolean, X As Long, y As Long, z As Long)
+Public Sub GetBigMapSquareB(ByRef res As Boolean, x As Long, y As Long, z As Long)
   Dim bx As Long
   Dim by As Long
   Dim xp As String
@@ -140,10 +160,10 @@ Public Sub GetBigMapSquareB(ByRef res As Boolean, X As Long, y As Long, z As Lon
   Dim squares As Long
   Dim mapbyte As Byte
   Dim theMapID As Long
-  bx = X \ 256
+  bx = x \ 256
   by = y \ 256
-  theMapID = CalcMapID(X, y, z)
-  xdif = X - (bx * 256)
+  theMapID = CalcMapID(x, y, z)
+  xdif = x - (bx * 256)
   ydif = y - (by * 256)
   squares = (xdif * 256) + ydif '+0 instead +1 now
   If theMapID >= 0 Then
@@ -169,6 +189,8 @@ Public Sub GetBigMapSquareB(ByRef res As Boolean, X As Long, y As Long, z As Lon
             res = False
           Case ColorWater
             res = False
+          Case ColorWater2
+            res = False
           Case ColorGreenWalkable
             res = True
           Case ColorSnowWalkable
@@ -178,12 +200,12 @@ Public Sub GetBigMapSquareB(ByRef res As Boolean, X As Long, y As Long, z As Lon
           Case Else
             res = False
         End Select
-  Else
+  Else ' map info not loaded for this point
     res = False
   End If
 End Sub
 
-Public Sub GetBigMapSquare(ByRef res As TypeBMSquare, X As Long, y As Long, z As Long)
+Public Sub GetBigMapSquare(ByRef res As TypeBMSquare, x As Long, y As Long, z As Long)
   Dim bx As Long
   Dim by As Long
   Dim xp As String
@@ -194,66 +216,69 @@ Public Sub GetBigMapSquare(ByRef res As TypeBMSquare, X As Long, y As Long, z As
   Dim squares As Long
   Dim mapbyte As Byte
   Dim theMapID As Long
-  bx = X \ 256
+  bx = x \ 256
   by = y \ 256
-  theMapID = CalcMapID(X, y, z)
-  xdif = X - (bx * 256)
+  theMapID = CalcMapID(x, y, z)
+  xdif = x - (bx * 256)
   ydif = y - (by * 256)
   squares = (xdif * 256) + ydif '+0 instead +1 now
   If theMapID >= 0 Then
     mapbyte = TheVeryBigMap(squares, theMapID)
       Select Case mapbyte
           Case &H0
-            res.color = &H0&
+            res.Color = &H0&
             res.walkable = False
           Case ColorCaveWall
-            res.color = &H4080&
+            res.Color = &H4080&
             res.walkable = False
           Case ColorCaveWalkable
-            res.color = &H80FF&
+            res.Color = &H80FF&
             res.walkable = True
           Case ColorRedWall
-            res.color = &HFF&
+            res.Color = &HFF&
             res.walkable = False
           Case ColorGrayWalkable
-            res.color = &HC0C0C0
+            res.Color = &HC0C0C0
             res.walkable = True
           Case ColorFloorChange
-            res.color = &HFFFF&
+            res.Color = &HFFFF&
             res.walkable = False
           Case ColorGrayWall
-            res.color = &H808080
+            res.Color = &H808080
             res.walkable = False
           Case ColorDesertWalkable
-            res.color = &HC0FFFF
+            res.Color = &HC0FFFF
             res.walkable = True
           Case ColorGreenWall
-            res.color = &H8000&
+            res.Color = &H8000&
             res.walkable = False
           Case ColorWater
-            res.color = &HFF0000
+            res.Color = &HFF0000
+            res.walkable = False
+          Case ColorWater2
+            res.Color = &HFF0000
             res.walkable = False
           Case ColorGreenWalkable
-            res.color = &HFF00&
+            res.Color = &HFF00&
             res.walkable = True
           Case ColorSnowWalkable
-            res.color = &HFFFFC0
+            res.Color = &HFFFFC0
             res.walkable = True
           Case ColorSwampWall
-            res.color = &H80FF80
+            res.Color = &H80FF80
             res.walkable = False
           Case Else
-            res.color = &HFFFFFF
+            res.Color = &HFFFFFF
             res.walkable = False
         End Select
   Else
-    res.color = &H0&
+    res.Color = &H0&
     res.walkable = False
   End If
 End Sub
 
 Public Sub LoadBigMap(ByRef map() As TypeBMSquare)
-  Dim X As Long
+  Dim x As Long
   Dim y As Long
   Dim z As Long
   Dim firstX As Long
@@ -285,67 +310,70 @@ Public Sub LoadBigMap(ByRef map() As TypeBMSquare)
   firstY = currMapY + MINY
   endY = currMapY + MAXY
   Px = MINX
-  For X = firstX To endX
+  For x = firstX To endX
     Py = MINY
     For y = firstY To endY
         z = currMapZ
-        bx = X \ 256
+        bx = x \ 256
         by = y \ 256
-        theMapID = CalcMapID(X, y, z)
-        xdif = X - (bx * 256)
+        theMapID = CalcMapID(x, y, z)
+        xdif = x - (bx * 256)
         ydif = y - (by * 256)
         squares = (xdif * 256) + ydif
         If theMapID >= 0 Then
             mapbyte = TheVeryBigMap(squares, theMapID)
             Select Case mapbyte
             Case &H0
-                res.color = &H0&
+                res.Color = &H0&
                 res.walkable = False
             Case ColorCaveWall
-                res.color = &H4080&
+                res.Color = &H4080&
                 res.walkable = False
             Case ColorCaveWalkable
-                res.color = &H80FF&
+                res.Color = &H80FF&
                 res.walkable = True
             Case ColorRedWall
-                res.color = &HFF&
+                res.Color = &HFF&
                 res.walkable = False
             Case ColorGrayWalkable
-                res.color = &HC0C0C0
+                res.Color = &HC0C0C0
                 res.walkable = True
             Case ColorFloorChange
-                res.color = &HFFFF&
+                res.Color = &HFFFF&
                 res.walkable = False
             Case ColorGrayWall
-                res.color = &H808080
+                res.Color = &H808080
                 res.walkable = False
             Case ColorDesertWalkable
-                res.color = &HC0FFFF
+                res.Color = &HC0FFFF
                 res.walkable = True
             Case ColorGreenWall
-                res.color = &H8000&
+                res.Color = &H8000&
                 res.walkable = False
             Case ColorWater
-                res.color = &HFF0000
+                res.Color = &HFF0000
+                res.walkable = False
+            Case ColorWater2
+                res.Color = &HFF0000
                 res.walkable = False
             Case ColorGreenWalkable
-                res.color = &HFF00&
+                res.Color = &HFF00&
                 res.walkable = True
             Case ColorSnowWalkable
-                res.color = &HFFFFC0
+                res.Color = &HFFFFC0
                 res.walkable = True
             Case ColorSwampWall
-                res.color = &H80FF80
+                res.Color = &H80FF80
                 res.walkable = False
             Case Else
-                res.color = &HFFFFFF
+                res.Color = &HFFFFFF
                 res.walkable = False
             End Select
         Else
-            res.color = &H0&
+            res.Color = &H0&
             res.walkable = False
         End If
-        map(Px, Py).color = res.color
+        map(Px, Py).Color = res.Color
         map(Px, Py).walkable = res.walkable
         Py = Py + 1
     Next y
@@ -353,14 +381,14 @@ Public Sub LoadBigMap(ByRef map() As TypeBMSquare)
     #If ShowMapLoading = 1 Then
         DoEvents
     #End If
-  Next X
+  Next x
   #If ShowMapLoading = 1 Then
     LoadingAmap = False
   #End If
 End Sub
 
 Public Sub DrawMap()
-  Dim X As Long
+  Dim x As Long
   Dim y As Long
   Dim ix As Long
   Dim iy As Long
@@ -382,9 +410,9 @@ Public Sub DrawMap()
   'frmMapReader.picMap.AutoRedraw = True
   For iy = MINX To MAXX
     For ix = MINY To MAXY
-      X = ix - MINX
+      x = ix - MINX
       y = iy - MINY
-      frmMapReader.picMap.Line (X * 2, y * 2)-((X * 2) + 1, (y * 2) + 1), map(ix, iy).color, BF
+      frmMapReader.picMap.Line (x * 2, y * 2)-((x * 2) + 1, (y * 2) + 1), map(ix, iy).Color, BF
     Next ix
   Next iy
   #If ShowMapLoading = 1 Then
@@ -400,7 +428,7 @@ Public Sub DrawMap()
   #End If
   frmMapReader.RedrawAllMarks
 End Sub
-Public Sub DrawLine(x1 As Long, y1 As Long, z1 As Long, x2 As Long, y2 As Long, z2 As Long, color As Long)
+Public Sub DrawLine(x1 As Long, y1 As Long, z1 As Long, x2 As Long, y2 As Long, z2 As Long, Color As Long)
   Dim px1 As Long
   Dim py1 As Long
   Dim xBase1 As Long
@@ -421,65 +449,65 @@ Public Sub DrawLine(x1 As Long, y1 As Long, z1 As Long, x2 As Long, y2 As Long, 
     py2 = 1 + ((yBase2 - MINY) * 2)
     frmMapReader.picMap.AutoRedraw = False
     frmMapReader.picMap.DrawWidth = 2
-    frmMapReader.picMap.Line (px1, py1)-(px2, py2), color
+    frmMapReader.picMap.Line (px1, py1)-(px2, py2), Color
     frmMapReader.picMap.DrawWidth = 1
     frmMapReader.picMap.AutoRedraw = True
   End If
 End Sub
-Public Sub DrawXYZPixel(X As Long, y As Long, z As Long, color As Long)
+Public Sub DrawXYZPixel(x As Long, y As Long, z As Long, Color As Long)
   Dim Px As Long
   Dim Py As Long
   Dim xBase As Long
   Dim yBase As Long
-  xBase = X - currMapX
+  xBase = x - currMapX
   yBase = y - currMapY
   If (xBase >= MINX) And (xBase <= MAXX) And (yBase >= MINY) And (yBase <= MAXY) And (z = currMapZ) Then
     Px = 1 + ((xBase - MINX) * 2)
     Py = 1 + ((yBase - MINY) * 2)
     frmMapReader.picMap.AutoRedraw = False
     frmMapReader.picMap.FillStyle = 0
-    frmMapReader.picMap.FillColor = color
-    frmMapReader.picMap.Circle (Px, Py), 1, color
+    frmMapReader.picMap.FillColor = Color
+    frmMapReader.picMap.Circle (Px, Py), 1, Color
     frmMapReader.picMap.AutoRedraw = True
   End If
 End Sub
-Public Sub DrawXYZPixel2(X As Long, y As Long, z As Long, color As Long)
+Public Sub DrawXYZPixel2(x As Long, y As Long, z As Long, Color As Long)
   Dim Px As Long
   Dim Py As Long
   Dim xBase As Long
   Dim yBase As Long
-  xBase = X - currMapX
+  xBase = x - currMapX
   yBase = y - currMapY
   If (xBase >= MINX) And (xBase <= MAXX) And (yBase >= MINY) And (yBase <= MAXY) And (z = currMapZ) Then
     Px = 1 + ((xBase - MINX) * 2)
     Py = 1 + ((yBase - MINY) * 2)
     frmMapReader.picMap.AutoRedraw = False
     frmMapReader.picMap.FillStyle = 0
-    frmMapReader.picMap.FillColor = color
-    frmMapReader.picMap.Circle (Px, Py), 1, color
+    frmMapReader.picMap.FillColor = Color
+    frmMapReader.picMap.Circle (Px, Py), 1, Color
     frmMapReader.picMap.FillStyle = 1
-    frmMapReader.picMap.Circle (Px, Py), 5, color
+    frmMapReader.picMap.Circle (Px, Py), 5, Color
     frmMapReader.picMap.AutoRedraw = True
   End If
 End Sub
-Public Sub DrawXYZnMap(X As Long, y As Long, z As Long, color As Long)
+Public Sub DrawXYZnMap(x As Long, y As Long, z As Long, Color As Long)
   Dim Px As Long
   Dim Py As Long
   Dim xBase As Long
   Dim yBase As Long
-  xBase = X - currMapX
+  xBase = x - currMapX
   yBase = y - currMapY
   If (xBase >= MINX) And (xBase <= MAXX) And (yBase >= MINY) And (yBase <= MAXY) And (z = currMapZ) Then
     Px = 1 + ((xBase - MINX) * 2)
     Py = 1 + ((yBase - MINY) * 2)
     frmMapReader.picMap.AutoRedraw = False
     frmMapReader.picMap.FillStyle = 0
-    frmMapReader.picMap.FillColor = color
-    frmMapReader.picMap.Circle (Px, Py), 4, color
+    frmMapReader.picMap.FillColor = Color
+    frmMapReader.picMap.Circle (Px, Py), 4, Color
     frmMapReader.picMap.FillStyle = 1
-    frmMapReader.picMap.Circle (Px, Py), 6, color
-    frmMapReader.picMap.Circle (Px, Py), 12, color
-    frmMapReader.picMap.Circle (Px, Py), 30, color
+    frmMapReader.picMap.Circle (Px, Py), 6, Color
+    frmMapReader.picMap.Circle (Px, Py), 12, Color
+    frmMapReader.picMap.Circle (Px, Py), 30, Color
     frmMapReader.picMap.AutoRedraw = True
   End If
 End Sub
@@ -503,17 +531,114 @@ While ct < tl
   DoEvents
 Wend
 End Sub
-Public Function ReadHardiskMaps() As Long
-  Dim res As Long
+
+Public Function ReadHardiskMapsQ() As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
+  Dim res As Long
   Dim Ammount As Long
   Dim readed As Long
   Dim progr As Double
-  Dim fs As scripting.FileSystemObject
-  Dim f As scripting.Folder
-  Dim f1 As scripting.File
+  Dim fs As Scripting.FileSystemObject
+  Dim f As Scripting.Folder
+  Dim f1 As Scripting.File
+  Dim fn As Integer
+  Dim mapFile As String
+  Dim strID As String
+  Dim lngID As Long
+  Dim thersize As Long
+  Dim bigReadB(0 To cteBytesPerMap1) As Byte
+  Dim w As Long
+  Dim h As Long
+  Dim bpp As Long
+  Dim resPNG1 As Boolean
+  Dim resPNG2 As Boolean
+  Dim pathColor As String
+  Dim pathWaypoints As String
+  Dim posX As Long
+  Dim posY As Long
+  Dim posz As Long
+  Dim part4 As String
+  Dim nameParts() As String
+  Dim loadedOK As Long
+  RemoveAllMapTranslation
+  Ammount = 0
+  readed = 0
+  Set fs = New Scripting.FileSystemObject
+  If fs.FolderExists(TibiaPath) = False Then
+    ReadHardiskMapsQ = -1
+    Exit Function
+  End If
+  Set f = fs.GetFolder(TibiaPath)
+  For Each f1 In f.Files
+    If LCase(Right(f1.name, 3)) = "png" Then
+      If Len(f1.name) > 14 Then
+         If (LCase(Left(f1.name, 14))) = "minimap_color_" Then
+            Ammount = Ammount + 1
+         End If
+      End If
+    End If
+  Next
+  If Ammount = 0 Then
+    ReadHardiskMapsQ = -1
+    Exit Function
+  End If
+  thersize = Ammount - 1
+  loadedOK = 0
+  ReDim TheVeryBigMap(0 To cteBytesPerMap1, 0 To thersize)
+  For Each f1 In f.Files
+    If LCase(Right(f1.name, 3)) = "png" Then
+      If Len(f1.name) > 13 Then
+        If (LCase(Left(f1.name, 13))) = "minimap_color" Then
+            lngID = readed
+            readed = readed + 1
+            If LoadWasCompleted = False Then
+              progr = (readed / Ammount) * 100
+              frmLoading.NotifyLoadProgress progr, "Loading map file " & CStr(readed) & " / " & CStr(Ammount)
+            End If
+            pathColor = TibiaPath & "\" & f1.name
+            pathWaypoints = TibiaPath & "\Minimap_WaypointCost_" & Right$(f1.name, Len(f1.name) - 14)
+            nameParts = Split(f1.name, "_", , vbTextCompare)
+            posX = CLng(nameParts(2))
+            posY = CLng(nameParts(3))
+            part4 = nameParts(4)
+            nameParts = Split(part4, ".", , vbTextCompare)
+            posz = CLng(nameParts(0))
+            resPNG1 = LoadPNGIntoByteArray(pathColor, bigReadB, w, h, bpp, 0, 90)
+            resPNG2 = LoadPNGIntoByteArray(pathColor, bigReadB, w, h, bpp, cteBytesPerMap / 2, 90)
+            If (resPNG1 And resPNG2) Then
+                strID = GetOldMapName(posX, posY, posz)
+                AddMapTranslation strID, lngID
+                RtlMoveMemory TheVeryBigMap(0, lngID), bigReadB(0), cteBytesPerMap
+                loadedOK = loadedOK + 1
+            End If
+        End If
+      End If
+    End If
+  Next
+  'Debug.Print "Loaded Tibia 11 maps! Total found: " & CStr(loadedOK)
+  ReadHardiskMapsQ = 0
+  Exit Function
+goterr:
+  ReadHardiskMapsQ = -1
+End Function
+
+Public Function ReadHardiskMaps() As Long
+  #If FinalMode Then
+  On Error GoTo goterr
+  #End If
+  If (TibiaVersionLong >= 1100) Then
+    ReadHardiskMaps = ReadHardiskMapsQ()
+    Exit Function
+  End If
+  Dim res As Long
+  Dim Ammount As Long
+  Dim readed As Long
+  Dim progr As Double
+  Dim fs As Scripting.FileSystemObject
+  Dim f As Scripting.Folder
+  Dim f1 As Scripting.File
   Dim fn As Integer
   Dim mapFile As String
   Dim strID As String
@@ -524,7 +649,7 @@ Public Function ReadHardiskMaps() As Long
   RemoveAllMapTranslation
   Ammount = 0
   readed = 0
-  Set fs = New scripting.FileSystemObject
+  Set fs = New Scripting.FileSystemObject
   If fs.FolderExists(TibiaPath) = False Then
     ReadHardiskMaps = -1
     Exit Function
@@ -561,6 +686,94 @@ Public Function ReadHardiskMaps() As Long
   Next
   ReadHardiskMaps = 0
   Exit Function
-gotErr:
+goterr:
   ReadHardiskMaps = -1
 End Function
+
+' Powerfull VB6 Function By Blackd
+' Requires FreeImage (MFreeImage.bas and FreeImage.dll)
+'
+' Purpose: This is a function for copying the deciphered pixels of a PNG image into a raw byte array.
+'
+' Paramaters:
+' Input/Output: arr, the byte array. It can be empty or already filled. Function will resize it if required.
+' Optional Input: atPosition. Function will start writing bytes at atPosition
+' Optional Input: withRotation. Function will rotate the image by this angle (in degrees) in first place.
+' Output: imageWidth,imageHeight,imageBytesPerPixel (ByRef)
+'
+' Returns: False if it detects any error. True in other case.
+Private Function LoadPNGIntoByteArray(ByRef filePath As String, ByRef arr() As Byte, _
+ ByRef imageWidth As Long, _
+ ByRef imageHeight As Long, _
+ ByRef imageBytesPerPixel As Long, _
+ Optional ByVal atPosition As Long = 0, _
+ Optional ByVal withRotation As Double = 0) As Boolean
+    On Error GoTo goterr
+    Dim imageRef As Long
+    Dim pRow As Long
+    Dim currentLine As Long
+    Dim imageBytesPerLine As Long
+    Dim totalBytes As Long
+    Dim currentPos As Long
+    Dim lastLine As Long
+    Dim imageBitsPerPixel As Long
+    Dim imageRef1 As Long
+    ' Ensure our array is not an empty array, else we init it here.
+    ensureMinimumArray arr
+    ' Load the image
+    imageRef = FreeImage_Load(FIF_PNG, filePath, FILO_PNG_DEFAULT)
+    If imageRef = 0 Then
+        ' ERROR: filePath is not PNG, or it does not exist
+        LoadPNGIntoByteArray = False
+        Exit Function
+    End If
+    If Not (withRotation = 0) Then
+        imageRef1 = imageRef
+        imageRef = FreeImage_RotateClassic(imageRef, withRotation)
+        FreeImage_Unload imageRef1
+        If imageRef = 0 Then
+            ' ERROR: unable to rotate this PNG
+            LoadPNGIntoByteArray = False
+            Exit Function
+        End If
+    End If
+    ' Determine some information from the loaded image
+    imageWidth = FreeImage_GetWidth(imageRef)
+    imageHeight = FreeImage_GetHeight(imageRef)
+    imageBitsPerPixel = FreeImage_GetBPP(imageRef)
+    imageBytesPerPixel = imageBitsPerPixel / 8
+    imageBytesPerLine = FreeImage_GetLine(imageRef)
+    totalBytes = imageBytesPerLine * imageHeight
+    ' Is our array ready to hold so many bytes?
+    If ((UBound(arr) - atPosition) < (totalBytes - 1)) Then
+        ' If array is not big enough then we should increase it's size
+        ReDim Preserve arr(atPosition + totalBytes - 1)
+    End If
+    currentPos = atPosition
+    lastLine = imageHeight - 1
+    For currentLine = 0 To lastLine
+        pRow = FreeImage_GetScanline(imageRef, currentLine)
+        If (Not (pRow = 0)) Then
+          RtlMoveMemory arr(currentPos), ByVal pRow, imageBytesPerLine
+        End If
+        currentPos = currentPos + imageBytesPerLine
+    Next currentLine
+    ' Release the image
+    FreeImage_Unload imageRef
+    ' All looks OK. We return True
+    LoadPNGIntoByteArray = True
+    Exit Function
+goterr:
+    '... else, we return False
+    LoadPNGIntoByteArray = False
+End Function
+
+' If array is empty then init it to an array of 1 byte
+Private Sub ensureMinimumArray(ByRef arr() As Byte)
+    On Error GoTo goterr
+    Dim test As Long
+    test = UBound(arr)
+    Exit Sub
+goterr:
+    ReDim arr(0)
+End Sub

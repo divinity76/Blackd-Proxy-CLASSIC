@@ -1540,7 +1540,7 @@ Begin VB.Form frmCavebot
    End
    Begin VB.Label lblChar 
       BackColor       =   &H00000000&
-      Caption         =   "Select your cnaracter:"
+      Caption         =   "Select your character:"
       ForeColor       =   &H00FFFFFF&
       Height          =   255
       Left            =   120
@@ -1562,28 +1562,28 @@ Option Explicit
 
 Public Sub UpdateValues()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim i As Long
   Dim limLines As Long
   lstScript.Clear
   If cavebotIDselected = 0 Then
-     If chkEnabled.Value = 1 Then
+     If chkEnabled.value = 1 Then
        avoidC = True
-       chkEnabled.Value = 0
+       chkEnabled.value = 0
        avoidC = False
      End If
   Else
      If cavebotEnabled(cavebotIDselected) = True Then
-       If chkEnabled.Value = 0 Then
+       If chkEnabled.value = 0 Then
          avoidC = True
-         chkEnabled.Value = 1
+         chkEnabled.value = 1
          avoidC = False
        End If
      Else
-       If chkEnabled.Value = 1 Then
+       If chkEnabled.value = 1 Then
          avoidC = True
-         chkEnabled.Value = 0
+         chkEnabled.value = 0
          avoidC = False
        End If
      End If
@@ -1593,12 +1593,12 @@ Public Sub UpdateValues()
      Next i
   End If
   Exit Sub
-gotErr:
+goterr:
  LogOnFile "errors.txt", "Error at UpdateValues(). Err number " & CStr(Err.Number) & " ; Err description " & Err.Description
 End Sub
 Public Sub LoadCavebotChars()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim i As Long
   Dim firstC As Long
@@ -1620,7 +1620,7 @@ Public Sub LoadCavebotChars()
   cavebotIDselected = firstC
   UpdateValues
   Exit Sub
-gotErr:
+goterr:
  LogOnFile "errors.txt", "Error at LoadCavebotChars(). Err number " & CStr(Err.Number) & " ; Err description " & Err.Description
 End Sub
 
@@ -1690,7 +1690,7 @@ End Sub
 
 Public Sub TurnCavebotState(idConnection As Integer, thisValue As Boolean)
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim shouldValue As Boolean
   Dim aRes As Long
@@ -1715,15 +1715,15 @@ Public Sub TurnCavebotState(idConnection As Integer, thisValue As Boolean)
     End If
     If (idConnection = cavebotIDselected) Then
       If (shouldValue = True) Then
-        If (chkEnabled.Value <> 1) Then
+        If (chkEnabled.value <> 1) Then
           avoidC = True
-          chkEnabled.Value = 1
+          chkEnabled.value = 1
           avoidC = False
         End If
       Else
-        If (chkEnabled.Value <> 0) Then
+        If (chkEnabled.value <> 0) Then
           avoidC = True
-          chkEnabled.Value = 0
+          chkEnabled.value = 0
           avoidC = False
         End If
       End If
@@ -1871,7 +1871,7 @@ Public Sub TurnCavebotState(idConnection As Integer, thisValue As Boolean)
     End If
   End If
   Exit Sub
-gotErr:
+goterr:
   If idConnection > 0 Then
     frmMain.DoCloseActions (idConnection)
     frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Connection lose during TurnCavebotState on ID " & idConnection & " - CLOSING IT!"
@@ -1885,7 +1885,7 @@ End Sub
 Private Sub chkEnabled_Click()
   Dim beforeClickV As Boolean
   If (avoidC = False) Then
-    If chkEnabled.Value = 1 Then
+    If chkEnabled.value = 1 Then
       TurnCavebotState cavebotIDselected, True
     Else
       TurnCavebotState cavebotIDselected, False
@@ -1913,23 +1913,23 @@ End Sub
 
 
 Private Sub cmdChange_Click()
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim lng1 As Long
     Dim lng2 As Long
     lng1 = CLng(txtMs.Text)
     lng2 = CLng(txtMs2.Text)
     If lng2 < lng1 Then
-        GoTo gotErr
+        GoTo goterr
     End If
     If lng1 < 20 Then
-        GoTo gotErr
+        GoTo goterr
     End If
     
     CavebotRECAST = lng1
     CavebotRECAST2 = lng2
     Me.Caption = "Cavebot - New timer = From " & CStr(lng1) & " to " & CStr(lng2) & " ms"
     Exit Sub
-gotErr:
+goterr:
     txtMs.Text = CStr(CavebotRECAST)
     txtMs2.Text = CStr(CavebotRECAST2)
     Me.Caption = "Cavebot - Wrong timer values!"
@@ -1937,11 +1937,11 @@ End Sub
 
 Private Sub cmdChangeTimer_Click()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   MAX_LOCKWAIT = CLng(txtBlockSec)
   Exit Sub
-gotErr:
+goterr:
   MAX_LOCKWAIT = 30000
   txtBlockSec.Text = "30000"
 End Sub
@@ -2011,7 +2011,7 @@ Private Sub cmdIdlist_Click()
   frmIdlist.WindowState = vbNormal
   frmIdlist.Show
   frmIdlist.SetFocus
-  SetWindowPos frmIdlist.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos frmIdlist.hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 
 End Sub
 
@@ -2036,12 +2036,12 @@ Private Sub cmdLabel_Click()
 End Sub
 
 Private Sub cmdLoadCopyPaste_Click()
-    On Error GoTo gotErr
+    On Error GoTo goterr
     Dim i As Long
     Dim ai As Long
     Dim pieces() As String
     Dim strLine As String
-    Dim strtext As String
+    Dim strText As String
     If cavebotIDselected > 0 Then
         lblInfo.Caption = "Waiting for copy/paste..."
         ClosedBoard = False
@@ -2066,9 +2066,9 @@ Private Sub cmdLoadCopyPaste_Click()
         If CanceledBoard = False Then
             cavebotScript(cavebotIDselected).RemoveAll
             cavebotLenght(cavebotIDselected) = 0
-            strtext = "" & frmBigText.txtBoard.Text
-            If strtext <> "" Then
-                pieces = Split(strtext, vbCrLf)
+            strText = "" & frmBigText.txtBoard.Text
+            If strText <> "" Then
+                pieces = Split(strText, vbCrLf)
                 i = 0
                 For ai = 0 To UBound(pieces)
                   strLine = pieces(ai)
@@ -2090,7 +2090,7 @@ Private Sub cmdLoadCopyPaste_Click()
         lblInfo.Caption = "SELECT A CHARACTER FIRST!"
     End If
     Exit Sub
-gotErr:
+goterr:
     lblInfo.Caption = "Load failed, error " & CStr(Err.Number)
 End Sub
 
@@ -2098,26 +2098,26 @@ Private Sub cmdLoadScript_Click()
   #If FinalMode Then
     On Error GoTo gotFerr
   #End If
-  Dim fso As scripting.FileSystemObject
+  Dim fso As Scripting.FileSystemObject
   Dim fn As Integer
   Dim strLine As String
-  Dim filename As String
+  Dim Filename As String
   Dim i As Long
 
   Dim sp As Boolean
   #If FinalMode Then
-    On Error GoTo gotErr
+    On Error GoTo goterr
   #End If
   lblWarning.Caption = ""
-  Set fso = New scripting.FileSystemObject
+  Set fso = New Scripting.FileSystemObject
   If cavebotIDselected > 0 Then
     cavebotScript(cavebotIDselected).RemoveAll
     cavebotLenght(cavebotIDselected) = 0
-    filename = App.path & "\cavebot\" & txtFile.Text
-    If fso.FileExists(filename) = True Then
+    Filename = App.Path & "\cavebot\" & txtFile.Text
+    If fso.FileExists(Filename) = True Then
     
       fn = FreeFile
-      Open filename For Input As #fn
+      Open Filename For Input As #fn
       i = 0
       sp = False
       If EOF(fn) Then
@@ -2149,7 +2149,7 @@ Private Sub cmdLoadScript_Click()
   lblEdit.Caption = "Edit current line ()"
   txtEdit.Text = ""
   Exit Sub
-gotErr:
+goterr:
   lblInfo.Caption = "Load ERROR (" & Err.Number & "):" & Err.Description
   Exit Sub
 gotFerr:
@@ -2226,7 +2226,7 @@ End Sub
 
 Private Sub cmdSaveScript_Click()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   Dim fn As Integer
   Dim limI As Long
@@ -2234,7 +2234,7 @@ Private Sub cmdSaveScript_Click()
   If cavebotIDselected > 0 Then
     limI = cavebotLenght(cavebotIDselected) - 1
     fn = FreeFile
-    Open App.path & "\cavebot\" & txtFile.Text For Output As #fn
+    Open App.Path & "\cavebot\" & txtFile.Text For Output As #fn
     For i = 0 To limI
       Print #fn, GetStringFromIDLine(cavebotIDselected, i)
     Next i
@@ -2242,7 +2242,7 @@ Private Sub cmdSaveScript_Click()
     lblInfo.Caption = "Save OK"
   End If
   Exit Sub
-gotErr:
+goterr:
   lblInfo.Caption = "Save ERROR (" & Err.Number & "):" & Err.Description
 End Sub
 
@@ -2414,13 +2414,13 @@ End Sub
 
 Public Sub ReloadFiles()
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
-  Dim fs As scripting.FileSystemObject
-  Dim f As scripting.Folder
-  Dim f1 As scripting.File
-  Set fs = New scripting.FileSystemObject
-  Set f = fs.GetFolder(App.path & "\cavebot")
+  Dim fs As Scripting.FileSystemObject
+  Dim f As Scripting.Folder
+  Dim f1 As Scripting.File
+  Set fs = New Scripting.FileSystemObject
+  Set f = fs.GetFolder(App.Path & "\cavebot")
   txtFile.Clear
   For Each f1 In f.Files
     If LCase(Right(f1.name, 3)) = "txt" Then
@@ -2431,7 +2431,7 @@ Public Sub ReloadFiles()
   Next
   txtFile.Text = "default.txt"
   Exit Sub
-gotErr:
+goterr:
   Me.Caption = "ERROR WITH FILESYSTEM OBJECT"
 End Sub
 
@@ -2463,7 +2463,7 @@ Private Sub fastExiva_Click()
 End Sub
 
 Private Sub Form_Load()
- On Error GoTo gotErr
+ On Error GoTo goterr
     Me.txtMs.Text = CStr(CavebotRECAST)
     Me.txtMs2.Text = CStr(CavebotRECAST2)
     LoadCavebotChars
@@ -2497,7 +2497,7 @@ Private Sub Form_Load()
  .Text = "LootAll"
  End With
  Exit Sub
-gotErr:
+goterr:
   LogOnFile "errors.txt", "Could not load cavebot module. Err number " & CStr(Err.Number) & " ; Err description " & Err.Description
 End Sub
 
@@ -2523,11 +2523,11 @@ End Sub
 
 
 Public Sub scrollExorivis_Change()
-  lblExorivisValue.Caption = CStr(scrollExorivis.Value) & " %"
+  lblExorivisValue.Caption = CStr(scrollExorivis.value) & " %"
 End Sub
 
 Public Sub scrollPkHeal_Change()
-  lblPKhealValue.Caption = CStr(scrollPkHeal.Value) & " %"
+  lblPKhealValue.Caption = CStr(scrollPkHeal.value) & " %"
 End Sub
 
 Private Sub TimerScript_Timer()
@@ -2535,7 +2535,7 @@ Private Sub TimerScript_Timer()
   Dim aRes As Long
   Dim gtc As Long
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   gtc = GetTickCount()
   For Sid = 1 To HighestConnectionID
@@ -2579,7 +2579,7 @@ Private Sub TimerScript_Timer()
     End If
   Next Sid
   Exit Sub
-gotErr:
+goterr:
   If Sid > 0 Then
     frmMain.DoCloseActions cavebotIDselected
     frmMain.txtPackets.Text = frmMain.txtPackets.Text & vbCrLf & "Connection lose during TimerScript_Timer() on ID " & CStr(Sid) & " - CLOSING IT!"
@@ -2592,11 +2592,11 @@ End Sub
 
 Private Sub txtBlockSec_Validate(Cancel As Boolean)
   #If FinalMode Then
-  On Error GoTo gotErr
+  On Error GoTo goterr
   #End If
   MAX_LOCKWAIT = CLng(txtBlockSec)
   Exit Sub
-gotErr:
+goterr:
   MAX_LOCKWAIT = 30000
   txtBlockSec.Text = "30000"
 End Sub
