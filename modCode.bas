@@ -8738,7 +8738,7 @@ Public Function TranslateDirectionByteToHumanLang(directionID As Byte) As String
     TranslateDirectionByteToHumanLang = res
 End Function
 Public Function DoTurbo(idConnection As Integer) As Long
-  Dim cPacket(3) As Byte
+  Dim cPacket(2) As Byte
   Dim curDirPlayer As Byte
   #If FinalMode Then
   On Error GoTo goterr
